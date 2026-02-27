@@ -8,6 +8,9 @@ export interface ToolState {
   isolatie: string;
   verwarming: string;
 
+  // Allowances
+  tegemoetkomingen: string;
+
   // Expert mode extras
   muurIsolatie: string;
   dakIsolatie: string;
@@ -22,6 +25,7 @@ const DEFAULT_STATE: ToolState = {
   bouwjaar: '1980',
   isolatie: 'matig',
   verwarming: 'gas',
+  tegemoetkomingen: 'onbekend',
   muurIsolatie: 'geen',
   dakIsolatie: 'geen',
   raamType: 'enkel',

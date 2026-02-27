@@ -1,3 +1,4 @@
+import { useToolState } from '../context/ToolStateContext';
 import { CoachPanel } from '../components/CoachPanel';
 
 interface SubsidieItem {
@@ -40,6 +41,9 @@ const SUBSIDIES: SubsidieItem[] = [
 ];
 
 export function SubsidieFinance() {
+  const { toolState } = useToolState();
+  const { tegemoetkomingen } = toolState;
+
   return (
     <div className="space-y-6">
       <div>
@@ -51,6 +55,37 @@ export function SubsidieFinance() {
           Frankrijk.
         </p>
       </div>
+
+      {/* Tegemoetkomingen notice */}
+      {tegemoetkomingen === 'ja' && (
+        <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-800">
+          ✅ <strong>U heeft aangegeven in aanmerking te komen voor tegemoetkomingen.</strong>{' '}
+          Onderstaande subsidies kunnen op u van toepassing zijn. Raadpleeg een adviseur om uw
+          exacte rechten te bevestigen.
+        </div>
+      )}
+      {tegemoetkomingen === 'nee' && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
+          ℹ️ <strong>U heeft aangegeven niet in aanmerking te komen voor tegemoetkomingen.</strong>{' '}
+          Sommige regelingen (zoals Éco-PTZ of TVA réduite) staan ook open voor wie geen
+          inkomensgebonden premie ontvangt.
+        </div>
+      )}
+      {tegemoetkomingen === 'onbekend' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+          💡 <strong>Weet u niet of u recht heeft op tegemoetkomingen?</strong> Ga naar het
+          tabblad "Snel advies" en beantwoord de vraag, of gebruik de{' '}
+          <a
+            href="https://www.maprimerenov.gouv.fr/prweb/PRAuth/app/AIDES/BSd9RQZG8xTF9e1w*/!STANDARD"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline text-amber-900"
+          >
+            online simulator van MaPrimeRénov'
+          </a>
+          .
+        </div>
+      )}
 
       <div className="space-y-4">
         {SUBSIDIES.map((item) => (

@@ -81,6 +81,20 @@ export const snelAdviesFields: FieldDef[] = [
       { value: 'hout', label: 'Hout/Pellet' },
     ],
   },
+  {
+    id: 'tegemoetkomingen',
+    label: 'Heeft u recht op tegemoetkomingen?',
+    type: 'select',
+    required: false,
+    helpText:
+      'Tegemoetkomingen (zoals MaPrimeRénov\' of CEE) kunnen uw renovatiekosten aanzienlijk verlagen. Kies uw situatie.',
+    defaultValue: 'onbekend',
+    options: [
+      { value: 'onbekend', label: 'Weet ik niet' },
+      { value: 'ja', label: 'Ja, ik kom in aanmerking' },
+      { value: 'nee', label: 'Nee, ik kom niet in aanmerking' },
+    ],
+  },
 ];
 
 /** Validate a partial toolState against the field definitions */
