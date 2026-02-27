@@ -8,6 +8,10 @@ EnergiePortaal is een moderne, mobile‑first webportal die drie bestaande tools
 
 ![EnergiePortaal screenshot](https://github.com/user-attachments/assets/542ab8ba-234d-433e-9c20-c561bcfbfca6)
 
+## 🌐 Live demo
+
+**https://antonnoe.github.io/energieportaal/**
+
 ## Ontwikkelen
 
 ```bash
