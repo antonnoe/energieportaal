@@ -21,15 +21,32 @@ export function ResultWidget() {
         oppervlakte: toolState.oppervlakte,
         isolatie: toolState.isolatie,
         verwarming: toolState.verwarming,
+        muurIsolatie: toolState.muurIsolatie,
+        dakIsolatie: toolState.dakIsolatie,
+        raamType: toolState.raamType,
       }),
-    [toolState.oppervlakte, toolState.isolatie, toolState.verwarming]
+    [
+      toolState.oppervlakte,
+      toolState.isolatie,
+      toolState.verwarming,
+      toolState.muurIsolatie,
+      toolState.dakIsolatie,
+      toolState.raamType,
+    ]
   );
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-      <h3 className="font-heading font-semibold text-sm text-gray-500 uppercase tracking-wide mb-3">
-        Live resultaat
-      </h3>
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-heading font-semibold text-sm text-gray-500 uppercase tracking-wide">
+          Live resultaat
+        </h3>
+        {result.isExpertCalc && (
+          <span className="text-xs px-2 py-0.5 rounded-full text-white font-medium" style={{ backgroundColor: '#800000' }}>
+            Expertmodus
+          </span>
+        )}
+      </div>
 
       <div className="flex items-center gap-4 mb-4">
         {/* DPE Badge */}
@@ -46,7 +63,7 @@ export function ResultWidget() {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard
           label="Jaarverbruik"
           value={result.jaarverbruikKwh.toLocaleString('nl')}
@@ -64,6 +81,12 @@ export function ResultWidget() {
           value={`€ ${result.kostenEur.toLocaleString('nl')}`}
           unit="per jaar"
           icon="💶"
+        />
+        <StatCard
+          label="Warmteverlies"
+          value={(result.warmteverliesW / 1000).toFixed(1)}
+          unit="kW"
+          icon="🌡️"
         />
       </div>
 
