@@ -22,9 +22,9 @@ const DEFAULT_STATE: ToolState = {
   bouwjaar: '1980',
   isolatie: 'matig',
   verwarming: 'gas',
-  muurIsolatie: 'geen',
-  dakIsolatie: 'geen',
-  raamType: 'enkel',
+  muurIsolatie: '',
+  dakIsolatie: '',
+  raamType: '',
   activeTab: 'snel',
 };
 
