@@ -8,6 +8,10 @@ EnergiePortaal is een moderne, mobile‑first webportal die drie bestaande tools
 
 ![EnergiePortaal screenshot](https://github.com/user-attachments/assets/542ab8ba-234d-433e-9c20-c561bcfbfca6)
 
+## Live demo
+
+🌐 [antonnoe.github.io/energieportaal/](https://antonnoe.github.io/energieportaal/)
+
 ## Ontwikkelen
 
 ```bash
@@ -15,6 +19,7 @@ npm install
 npm run dev    # start dev server op http://localhost:5173
 npm run build  # productiebuild
 npm run lint   # linting
+npm test       # vitest unit tests
 ```
 
 ## Stack
