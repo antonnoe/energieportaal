@@ -38,7 +38,8 @@ Dit project vervangt 4 losstaande V1 tools die overlap hadden:
 
 ### Doel
 
-Eén tool, één rekenmotor, vier outputfuncties. Niet drie losse tabbladen die elk hun eigen berekening doen.
+Eén tool, één rekenmotor, één doorlopend rapport. Geen losse tabbladen, geen gescheiden tools.
+Invoer links/boven, rapport rechts/onder. Floating € indicator altijd zichtbaar.
 
 ---
 
@@ -61,15 +62,27 @@ REKENMOTOR (engine/)
   │ Inclusief debug-object met ELKE tussenstap
   │
   ▼
-VIER OUTPUTS (views, niet aparte tools)
+ÉÉN DOORLOPEND RAPPORT (geen tabs, geen losse tools)
   │
-  ├─ 1. Energieprofiel — warmteverlies, verbruik, kosten per categorie
-  ├─ 2. DPE-schatting — letter + kWh/m² + uitleg waarom D en niet C/E
-  │     + wat nodig is om één klasse te stijgen
-  ├─ 3. Subsidie/Finance — MaPrimeRénov', CEE, Éco-PTZ, TVA 5.5%, lokaal
-  │     met stoplicht-badges en timing-waarschuwingen
-  └─ 4. Besparingsadvies — concrete maatregelen + terugverdientijden
-      gekoppeld aan subsidie-mogelijkheden
+  │  Het rapport is één scrollbaar document met secties:
+  │
+  ├─ Sectie 1: Woningprofiel — type, locatie, kenmerken
+  ├─ Sectie 2: Energieprofiel — warmteverlies, verbruik, kosten per categorie
+  ├─ Sectie 3: DPE-schatting — letter + kWh/m² + uitleg waarom D en niet C/E
+  │     + wat nodig is om één klasse te stijgen + verhuurverbod-check
+  ├─ Sectie 4: Besparingsadvies — concrete maatregelen + terugverdientijden
+  ├─ Sectie 5: Subsidie/Finance — MaPrimeRénov', CEE, Éco-PTZ, TVA 5.5%
+  │     stoplicht-badges, timing-waarschuwingen, gekoppeld aan maatregelen
+  └─ Sectie 6: Grondslagen — alle tussenstappen, formules, bronnen
+  │
+  │  FLOATING € TOGGLE (altijd zichtbaar, sticky)
+  │  ─────────────────────────────────────────────
+  │  Een zwevende balk/knop die DIRECT de financiële impact toont
+  │  wanneer de gebruiker invoer wijzigt. Bijvoorbeeld:
+  │  - Enkel glas → HR++ : "Besparing: €840/jaar"
+  │  - Elektrisch → warmtepomp: "Besparing: €1.200/jaar"
+  │  - Zwembad aan/uit: direct € effect zichtbaar
+  │  Dit zit al in V1 (FloatingEuroButton) en moet mee naar V2.
 ```
 
 ### Directory structuur
@@ -125,11 +138,14 @@ energieportaal/
     │   ├── Step4Energie.tsx
     │   └── Step5Financieel.tsx
     │
-    └── views/                   ← OUTPUT VIEWS (lezen uit dezelfde state)
+    └── report/                   ← RAPPORT SECTIES (één doorlopend rapport)
+        ├── Woningprofiel.tsx
         ├── Energieprofiel.tsx
         ├── DPESchatting.tsx
+        ├── Besparingsadvies.tsx
         ├── SubsidieCheck.tsx
-        └── Besparingsadvies.tsx
+        ├── Grondslagen.tsx
+        └── FloatingEuro.tsx       ← Sticky floating € impact-indicator
 ```
 
 ---
@@ -414,14 +430,20 @@ test: tests toevoegen/aanpassen
 - Geen PDF-export
 
 ### Gewenste staat
-- Eén stapsgewijze flow (5 stappen)
+- Eén stapsgewijze flow (5 stappen) voor invoer
 - Eén rekenmotor met alle V1 diepte
-- Vier output-views uit dezelfde berekening
+- Eén doorlopend rapport met 6 secties (GEEN tabs)
+- Floating € indicator die direct € effect toont bij elke wijziging
 - DPE met uitleg en verbeteradvies
-- Subsidie met stoplichten en timing
-- Controleerbare grondslagen
+- Subsidie met stoplichten en timing, gekoppeld aan maatregelen
+- Controleerbare grondslagen met bronverwijzingen
 - Werkende PDF-export
 - Coach-tooltips bij invoervelden
+
+### BELANGRIJK: V1 repos zijn ALLEEN bronmateriaal
+De V1 repos (warmteverlies-calculator, energiekompas-frankrijk, energiebesparing-subsidie) 
+worden NIET gewijzigd. Ze dienen uitsluitend als specificatie voor de rekenmotor en logica.
+Alle code wordt NIEUW geschreven in TypeScript/React voor energieportaal.
 
 ### Aanpak
 
@@ -429,7 +451,7 @@ test: tests toevoegen/aanpassen
 **Fase 2: Data** — Huizenmatrix, dept→zone mapping, bronverwijzingen in `src/data/`.
 **Fase 3: State** — ToolStateContext die de volledige invoer + resultaat beheert.
 **Fase 4: Stappen** — De 5 invoerstappen in `src/steps/`.
-**Fase 5: Views** — De 4 output-views in `src/views/`.
-**Fase 6: Extras** — PDF-export, coach-tooltips, grondslagen-paneel.
+**Fase 5: Rapport** — Het doorlopende rapport met 6 secties + FloatingEuro.
+**Fase 6: Extras** — PDF-export, coach-tooltips.
 
 Werk per fase. Commit per fase. Test per fase.
