@@ -8,10 +8,45 @@ export interface ToolState {
   isolatie: string;
   verwarming: string;
 
-  // Expert mode extras
+  // Allowances
+  tegemoetkomingen: string;
+
+  // Expert mode — envelope
   muurIsolatie: string;
   dakIsolatie: string;
+  vloerIsolatie: string;
   raamType: string;
+  muurOppervlak: string;
+  dakOppervlak: string;
+  vloerOppervlak: string;
+  raamOppervlak: string;
+
+  // Expert mode — ventilation
+  ventilatieType: string;
+  hrvEfficientie: string;  // %
+
+  // Expert mode — heating system
+  verwarmingScop: string;
+  stookgrens: string;      // °C
+
+  // Expert mode — climate
+  klimaatzone: string;
+
+  // Expert mode — DHW
+  dhwPersonen: string;
+
+  // Expert mode — electricity
+  basisElektriciteit: string;  // kWh/y
+
+  // Expert mode — EV
+  heeftEV: string;             // 'ja' | 'nee'
+  evKmPerJaar: string;
+
+  // Expert mode — PV
+  heeftPV: string;             // 'ja' | 'nee'
+  pvVermogen: string;          // kWp
+  pvZelfverbruik: string;      // %
+  exportTarief: string;        // €/kWh
 
   // Active tab
   activeTab: 'snel' | 'expert' | 'subsidie';
@@ -22,9 +57,36 @@ const DEFAULT_STATE: ToolState = {
   bouwjaar: '1980',
   isolatie: 'matig',
   verwarming: 'gas',
+  tegemoetkomingen: 'onbekend',
+
   muurIsolatie: 'geen',
   dakIsolatie: 'geen',
+  vloerIsolatie: 'geen',
   raamType: 'enkel',
+  muurOppervlak: '',
+  dakOppervlak: '',
+  vloerOppervlak: '',
+  raamOppervlak: '',
+
+  ventilatieType: 'naturel',
+  hrvEfficientie: '75',
+
+  verwarmingScop: '0',
+  stookgrens: '18',
+
+  klimaatzone: 'H1b',
+
+  dhwPersonen: '2',
+  basisElektriciteit: '2500',
+
+  heeftEV: 'nee',
+  evKmPerJaar: '15000',
+
+  heeftPV: 'nee',
+  pvVermogen: '3',
+  pvZelfverbruik: '30',
+  exportTarief: '0.06',
+
   activeTab: 'snel',
 };
 
