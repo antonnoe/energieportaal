@@ -345,7 +345,7 @@ export function SubsidieFinance() {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
             <strong>💡 Cumulering:</strong> MPR', CEE en Éco-PTZ zijn in principe cumuleerbaar.
             Vraag alle subsidies tegelijk aan vóór aanvang van de werken. Uw{' '}
-            <em>Mon Accompagnateur Rénov'</em> begeleid u hierbij.
+            <em>Mon Accompagnateur Rénov'</em> begeleidt u hierbij.
           </div>
         </>
       )}

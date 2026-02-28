@@ -257,7 +257,7 @@ export function calculateExpert(input: ExpertInput): ExpertResult {
 
   // CO₂ — simplified: split by fuel type
   const co2Verwarming = verwarmingKwh * (CO2_FACTOR[input.verwarming] ?? 0.205);
-  const co2Elektriciteit = (elektriciteitKwh + evKwh + (input.verwarming === 'warmtepomp' ? 0 : 0)) * 0.055;
+  const co2Elektriciteit = (elektriciteitKwh + evKwh) * 0.055;
   const co2Grid = netGridKwh * 0.055;
   const co2Kg = Math.round(
     (input.verwarming === 'warmtepomp' || input.verwarming === 'elektrisch')
