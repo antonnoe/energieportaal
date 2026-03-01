@@ -1,5 +1,22 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
+import { DEFAULT_EFFICIENCY } from '../engine/constants';
+
+const VERWARMING_KNOPPEN = [
+  { value: 'gas', label: 'Gas-ketel', eff: DEFAULT_EFFICIENCY.gas },
+  { value: 'elektrisch', label: 'Elektrisch', eff: DEFAULT_EFFICIENCY.elektrisch },
+  { value: 'stookolie', label: 'Fioul-ketel', eff: DEFAULT_EFFICIENCY.stookolie },
+  { value: 'warmtepomp', label: 'Warmtepomp', eff: DEFAULT_EFFICIENCY.warmtepomp },
+  { value: 'hout', label: 'Hout/pellet', eff: DEFAULT_EFFICIENCY.hout },
+  { value: 'propaan', label: 'Propaan', eff: DEFAULT_EFFICIENCY.propaan },
+];
+
+const DHW_KNOPPEN = [
+  { value: '_same', label: 'Zelfde als verwarming' },
+  { value: 'elektrisch', label: 'Elektrische boiler' },
+  { value: 'warmtepomp', label: 'Warmtepomp-boiler' },
+  { value: 'gas', label: 'Gasboiler' },
+];
 
 const VERWARMING_OPTIES = [
   { value: 'gas', label: 'Gasketel' },
@@ -7,6 +24,7 @@ const VERWARMING_OPTIES = [
   { value: 'warmtepomp', label: 'Warmtepomp' },
   { value: 'elektrisch', label: 'Elektrisch (direct)' },
   { value: 'hout', label: 'Hout / Pellet' },
+  { value: 'propaan', label: 'Propaan' },
 ];
 
 function NumField({ id, label, value, unit, onChange, min, max, step }: {
@@ -72,9 +90,60 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">{children}</h3>;
 }
 
+function ButtonGroup({ options, selected, onSelect }: {
+  options: { value: string; label: string }[];
+  selected: string;
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((o) => (
+        <button
+          key={o.value}
+          type="button"
+          onClick={() => onSelect(o.value)}
+          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+            selected === o.value
+              ? 'bg-primary text-white border-primary'
+              : 'bg-white text-gray-700 border-gray-300 hover:border-primary/50'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Step4Energie() {
   const { toolState, setField } = useToolState();
   const sf = (key: keyof ToolState) => (v: string) => setField(key, v);
+
+  const handleVerwarmingSelect = (value: string) => {
+    setField('mainHeating', value);
+    const knop = VERWARMING_KNOPPEN.find(k => k.value === value);
+    if (knop) {
+      setField('mainEfficiency', '0'); // Use default efficiency
+    }
+  };
+
+  const handleDhwSelect = (value: string) => {
+    if (value === '_same') {
+      setField('dhwSystem', toolState.mainHeating);
+      setField('dhwEfficiency', '0');
+    } else {
+      setField('dhwSystem', value);
+      setField('dhwEfficiency', '0');
+    }
+  };
+
+  const effLabel = (() => {
+    const knop = VERWARMING_KNOPPEN.find(k => k.value === toolState.mainHeating);
+    if (!knop) return '';
+    return toolState.mainHeating === 'warmtepomp'
+      ? `SCOP standaard: ${knop.eff}`
+      : `Rendement standaard: ${knop.eff}`;
+  })();
 
   return (
     <div className="space-y-6">
@@ -83,14 +152,16 @@ export function Step4Energie() {
         <p className="text-sm text-gray-500">Verwarmingssystemen, tapwater, ventilatie en optionele apparaten.</p>
       </div>
 
-      {/* Verwarming */}
+      {/* U1: Verwarming knoppen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Verwarming</SectionTitle>
-        <div className="grid grid-cols-2 gap-3">
-          <SelectField id="mainHeating" label="Hoofdverwarming" value={toolState.mainHeating} options={VERWARMING_OPTIES} onChange={sf('mainHeating')} />
-          <NumField id="mainEfficiency" label="Rendement/SCOP" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} />
-        </div>
-        <p className="text-xs text-gray-400">SCOP: warmtepomp ~3.5 · Gasketel ~0.90 · 0 = standaard gebruiken</p>
+        <SectionTitle>Hoofdverwarming</SectionTitle>
+        <ButtonGroup
+          options={VERWARMING_KNOPPEN.map(k => ({ value: k.value, label: k.label }))}
+          selected={toolState.mainHeating}
+          onSelect={handleVerwarmingSelect}
+        />
+        <p className="text-xs text-gray-400">{effLabel} &mdash; 0 = standaard gebruiken</p>
+        <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} />
 
         <SelectField
           id="auxHeating" label="Bijverwarming"
@@ -112,20 +183,26 @@ export function Step4Energie() {
         )}
       </div>
 
-      {/* Tapwater */}
+      {/* U1: Tapwater knoppen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
         <SectionTitle>Tapwater</SectionTitle>
+        <ButtonGroup
+          options={DHW_KNOPPEN}
+          selected={
+            toolState.dhwSystem === toolState.mainHeating ? '_same' : toolState.dhwSystem
+          }
+          onSelect={handleDhwSelect}
+        />
         <div className="grid grid-cols-3 gap-3">
           <NumField id="personen" label="Personen" value={toolState.personen} onChange={sf('personen')} min={1} max={10} />
           <NumField id="douchesPerDag" label="Douches/dag/pp" value={toolState.douchesPerDag} onChange={sf('douchesPerDag')} min={0} max={3} step={0.5} />
           <NumField id="literPerDouche" label="Liter/douche" value={toolState.literPerDouche} unit="L" onChange={sf('literPerDouche')} min={20} max={100} step={5} />
         </div>
-        <SelectField id="dhwSystem" label="Tapwater-systeem" value={toolState.dhwSystem} options={VERWARMING_OPTIES} onChange={sf('dhwSystem')} />
       </div>
 
       {/* Elektriciteit */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Elektriciteit & apparaten</SectionTitle>
+        <SectionTitle>Elektriciteit &amp; apparaten</SectionTitle>
         <NumField id="basisElektriciteit" label="Basisverbruik" value={toolState.basisElektriciteit} unit="kWh/jaar" onChange={sf('basisElektriciteit')} min={0} max={20000} step={100} />
       </div>
 
@@ -135,14 +212,6 @@ export function Step4Energie() {
         <Toggle id="hasEV" label="Elektrische auto" value={toolState.hasEV} onChange={sf('hasEV')} helpText="Laadt u thuis een EV op?" />
         {toolState.hasEV === 'ja' && (
           <NumField id="evKmPerJaar" label="Kilometers/jaar" value={toolState.evKmPerJaar} unit="km" onChange={sf('evKmPerJaar')} min={0} max={100000} step={1000} />
-        )}
-
-        <Toggle id="hasPV" label="Zonnepanelen" value={toolState.hasPV} onChange={sf('hasPV')} helpText="Heeft u PV-panelen (of plant u ze)?" />
-        {toolState.hasPV === 'ja' && (
-          <div className="grid grid-cols-2 gap-3">
-            <NumField id="pvVermogen" label="Vermogen" value={toolState.pvVermogen} unit="kWp" onChange={sf('pvVermogen')} min={0.5} max={50} step={0.5} />
-            <NumField id="pvZelfverbruik" label="Zelfverbruik" value={toolState.pvZelfverbruik} unit="%" onChange={sf('pvZelfverbruik')} min={0} max={100} step={5} />
-          </div>
         )}
 
         <Toggle id="hasZwembad" label="Zwembad (verwarmd)" value={toolState.hasZwembad} onChange={sf('hasZwembad')} />

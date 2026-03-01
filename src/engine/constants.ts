@@ -28,6 +28,7 @@ export const DEFAULT_EFFICIENCY: Record<VerwarmingType, number> = {
   warmtepomp: 3.5,
   elektrisch: 1.0,
   hout: 0.75,
+  propaan: 0.90,
 };
 
 // ─── CO₂-factoren (kgCO₂/kWh geleverde energie) ─────────────────────────────
@@ -38,19 +39,75 @@ export const CO2_FACTOR: Record<VerwarmingType, number> = {
   warmtepomp: 0.055,
   elektrisch: 0.055,
   hout: 0.030,
+  propaan: 0.235,
 };
 
-// ─── Standaard energieprijzen (€/kWh) ────────────────────────────────────────
+// ─── ENERGIEPRIJZEN — Bron: CRE / DGEC / Markt — februari 2026 ─────────────
+// Alle prijzen in €/kWh (omgerekend via KWH_CONVERSION).
+// Gebruiker kan altijd handmatig aanpassen in Stap 5.
 
 export const DEFAULT_PRIJZEN: Record<VerwarmingType, number> = {
-  gas: 0.12,
-  stookolie: 0.14,
-  warmtepomp: 0.25,
-  elektrisch: 0.25,
-  hout: 0.06,
+  gas: 0.1051,        // CRE Prix Repère chauffage, feb 2026 (≈ €1,05/m³)
+  stookolie: 0.118,   // DGEC wekelijks gemiddelde, feb 2026 (€1,18/L ÷ 10 kWh/L)
+  warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026
+  elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026
+  hout: 0.047,        // marktgemiddelde 2025-2026 (€85/stère ÷ 1800 kWh/stère)
+  propaan: 0.268,     // marktgemiddelde 2026 (€1,90/L ÷ 7,1 kWh/L)
 };
 
-export const DEFAULT_EXPORT_TARIEF = 0.06; // €/kWh PV-export
+export const DEFAULT_EXPORT_TARIEF = 0.04; // €/kWh — S21 surplus ≤9 kWc, Q1 2026
+
+// ─── Prijsbronnen voor weergave in grondslagen ──────────────────────────────
+
+export interface PrijsBron {
+  label: string;
+  prijsPerKwh: string;
+  bron: string;
+}
+
+export const PRIJS_BRONNEN: Record<string, PrijsBron> = {
+  elektriciteit: {
+    label: 'Elektriciteit',
+    prijsPerKwh: '0,1940 €/kWh TTC',
+    bron: 'CRE TRV Base 6kVA, feb 2026',
+  },
+  gas: {
+    label: 'Gas',
+    prijsPerKwh: '0,1051 €/kWh PCI',
+    bron: 'CRE Prix Repère chauffage, feb 2026',
+  },
+  stookolie: {
+    label: 'Fioul (stookolie)',
+    prijsPerKwh: '0,118 €/kWh (1,18 €/L)',
+    bron: 'DGEC wekelijks gemiddelde, feb 2026',
+  },
+  hout: {
+    label: 'Hout',
+    prijsPerKwh: '0,047 €/kWh (85 €/stère)',
+    bron: 'marktgemiddelde 2025-2026',
+  },
+  propaan: {
+    label: 'Propaan',
+    prijsPerKwh: '0,268 €/kWh (1,90 €/L)',
+    bron: 'marktgemiddelde 2026',
+  },
+  pvExport: {
+    label: 'PV-export',
+    prijsPerKwh: '0,04 €/kWh',
+    bron: 'S21 surplus ≤9 kWc, Q1 2026',
+  },
+};
+
+// ─── Conversie naar kWh (PCI) ───────────────────────────────────────────────
+
+export const KWH_CONVERSION: Record<string, number> = {
+  elec: 1,
+  gas: 10,        // 1 m³ ≈ 10 kWh
+  fioul: 10,      // 1 L ≈ 10 kWh
+  pellet: 4.8,    // 1 kg ≈ 4,8 kWh
+  wood: 1800,     // 1 stère ≈ 1800 kWh
+  propaan: 7.1,   // 1 L ≈ 7,1 kWh
+};
 
 // ─── DPE-drempelwaarden en kleuren (officieel Frans schema) ──────────────────
 
@@ -112,3 +169,46 @@ export const DEFAULTS = {
   koelingEER: 3.0,
   auxFraction: 0,
 } as const;
+
+// ─── Isolatieniveaus per bouwdeel ────────────────────────────────────────────
+
+export interface IsolatieNiveau {
+  id: string;
+  label: string;
+  uWaarde: (huisTypeId: string) => number;
+}
+
+export const ISOLATIE_MUUR: IsolatieNiveau[] = [
+  { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => {
+    const oud = ['longere','colombage','pavillon','appartement-oud'];
+    return oud.includes(ht) ? 2.5 : 1.5;
+  }},
+  { id: 'basis', label: 'Basis (5–8 cm)', uWaarde: () => 0.6 },
+  { id: 'goed', label: 'Goed (10–15 cm)', uWaarde: () => 0.3 },
+  { id: 'uitstekend', label: 'Uitstekend (>15 cm)', uWaarde: () => 0.18 },
+];
+
+export const ISOLATIE_DAK: IsolatieNiveau[] = [
+  { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => {
+    const oud = ['longere','pavillon'];
+    return oud.includes(ht) ? 3.0 : 2.0;
+  }},
+  { id: 'basis', label: 'Basis (10 cm)', uWaarde: () => 0.4 },
+  { id: 'goed', label: 'Goed (20 cm)', uWaarde: () => 0.2 },
+  { id: 'uitstekend', label: 'Uitstekend (>25 cm)', uWaarde: () => 0.14 },
+];
+
+export const ISOLATIE_VLOER: IsolatieNiveau[] = [
+  { id: 'geen', label: 'Geen isolatie', uWaarde: () => 1.2 },
+  { id: 'basis', label: 'Basis (5 cm)', uWaarde: () => 0.5 },
+  { id: 'goed', label: 'Goed (10 cm)', uWaarde: () => 0.3 },
+  { id: 'uitstekend', label: 'Uitstekend (>12 cm)', uWaarde: () => 0.2 },
+];
+
+export const ISOLATIE_RAAM: { id: string; label: string; uWaarde: number }[] = [
+  { id: 'enkel', label: 'Enkel glas', uWaarde: 5.8 },
+  { id: 'dubbel', label: 'Dubbel glas', uWaarde: 2.9 },
+  { id: 'hr-plus', label: 'HR+', uWaarde: 1.8 },
+  { id: 'hr-plusplus', label: 'HR++', uWaarde: 1.2 },
+  { id: 'triple', label: 'Triple', uWaarde: 0.7 },
+];
