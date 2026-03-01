@@ -1,9 +1,5 @@
 import './index.css'
 import { ToolStateProvider, useToolState } from './context/ToolStateContext'
-import { Navigation } from './components/Navigation'
-import { SnelAdvies } from './pages/SnelAdvies'
-import { Expertmodus } from './pages/Expertmodus'
-import { SubsidieFinance } from './pages/SubsidieFinance'
 
 import { Step1Locatie } from './steps/Step1Locatie'
 import { Step2Woningtype } from './steps/Step2Woningtype'
@@ -47,7 +43,7 @@ function StepIndicator() {
             }`}
           >
             <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-current">
-              {current > s.nr ? '✓' : s.nr}
+              {current > s.nr ? '\u2713' : s.nr}
             </span>
             <span className="hidden sm:inline">{s.label}</span>
           </button>
@@ -84,7 +80,7 @@ function StepNavButtons() {
         onClick={() => setCurrentStep(current - 1)}
         className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        ← Vorige
+        &larr; Vorige
       </button>
       <button
         type="button"
@@ -92,7 +88,7 @@ function StepNavButtons() {
         onClick={() => setCurrentStep(current + 1)}
         className="px-4 py-2 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-dark disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
       >
-        Volgende →
+        Volgende &rarr;
       </button>
     </div>
   )
@@ -116,11 +112,46 @@ function Rapport() {
   )
 }
 
-function StappenFlow() {
+/** U2: Mobile toggle — twee knoppen onderin voor schermen < 768px */
+function MobileToggle() {
+  const { toolState, setMobilePanel } = useToolState()
   return (
-    <div className="pb-20">
-      {/* Desktop: split layout. Mobile: stacked */}
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-8">
+    <div className="fixed bottom-0 left-0 right-0 z-[60] md:hidden bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
+      <div className="flex">
+        <button
+          type="button"
+          onClick={() => setMobilePanel('invoer')}
+          className={`flex-1 py-3 text-center text-sm font-semibold transition-colors ${
+            toolState.mobilePanel === 'invoer'
+              ? 'text-primary border-t-2 border-primary bg-primary/5'
+              : 'text-gray-500'
+          }`}
+        >
+          Invoer
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobilePanel('rapport')}
+          className={`flex-1 py-3 text-center text-sm font-semibold transition-colors ${
+            toolState.mobilePanel === 'rapport'
+              ? 'text-primary border-t-2 border-primary bg-primary/5'
+              : 'text-gray-500'
+          }`}
+        >
+          Rapport
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function StappenFlow() {
+  const { toolState } = useToolState()
+
+  return (
+    <div className="pb-20 md:pb-20">
+      {/* Desktop: split layout */}
+      <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-8">
         {/* Linker paneel: Invoer */}
         <div>
           <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
@@ -133,7 +164,7 @@ function StappenFlow() {
         </div>
 
         {/* Rechter paneel: Rapport */}
-        <div className="mt-8 lg:mt-0">
+        <div>
           <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
             <h2 className="font-heading text-sm font-bold text-gray-400 uppercase tracking-widest">Rapport</h2>
           </div>
@@ -143,57 +174,49 @@ function StappenFlow() {
         </div>
       </div>
 
+      {/* Mobile: toggle between invoer and rapport */}
+      <div className="md:hidden">
+        {toolState.mobilePanel === 'invoer' ? (
+          <div>
+            <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
+              <StepIndicator />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <CurrentStep />
+              <StepNavButtons />
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
+              <h2 className="font-heading text-sm font-bold text-gray-400 uppercase tracking-widest">Rapport</h2>
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+              <Rapport />
+            </div>
+          </div>
+        )}
+      </div>
+
       <FloatingEuro />
+      <MobileToggle />
     </div>
   )
 }
 
 function AppShell() {
-  const { toolState, setActiveTab } = useToolState()
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Header — tabs verwijderd (C1) */}
       <header className="bg-primary text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-lg font-bold tracking-tight">EnergiePortaal</h1>
-            <p className="text-xs text-white/70">Energieadvies voor Nederlandse huiseigenaren in Frankrijk</p>
-          </div>
-          <div className="flex gap-1">
-            {[
-              { id: 'stappen' as const, label: 'Portaal' },
-              { id: 'snel' as const, label: 'Snel' },
-              { id: 'expert' as const, label: 'Expert' },
-              { id: 'subsidie' as const, label: 'Subsidie' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  toolState.activeTab === tab.id
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/60 hover:text-white/90 hover:bg-white/10'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <h1 className="font-heading text-lg font-bold tracking-tight">EnergiePortaal</h1>
+          <p className="text-xs text-white/70">Energieadvies voor Nederlandse huiseigenaren in Frankrijk</p>
         </div>
       </header>
 
-      {/* Oude navigatie alleen voor oude tabs */}
-      {(toolState.activeTab === 'snel' || toolState.activeTab === 'expert' || toolState.activeTab === 'subsidie') && (
-        <Navigation />
-      )}
-
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {toolState.activeTab === 'stappen' && <StappenFlow />}
-        {toolState.activeTab === 'snel' && <SnelAdvies />}
-        {toolState.activeTab === 'expert' && <Expertmodus />}
-        {toolState.activeTab === 'subsidie' && <SubsidieFinance />}
+        <StappenFlow />
       </main>
     </div>
   )

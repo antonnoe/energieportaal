@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import { getHuisTypeById } from '../data/huizen-matrix';
 import { BRONNEN } from '../data/sources';
+import { PRIJS_BRONNEN } from '../engine/constants';
 
 export function Grondslagen() {
   const [open, setOpen] = useState(false);
@@ -17,7 +18,7 @@ export function Grondslagen() {
         className="w-full flex items-center justify-between py-2 text-left"
       >
         <h2 className="font-heading text-lg font-bold text-primary">Grondslagen</h2>
-        <span className="text-gray-400 text-lg">{open ? '▲' : '▼'}</span>
+        <span className="text-gray-400 text-lg">{open ? '\u25B2' : '\u25BC'}</span>
       </button>
 
       {open && (
@@ -33,10 +34,10 @@ export function Grondslagen() {
           {/* U-waarden */}
           <div>
             <p className="font-bold text-gray-700 mb-1">U-WAARDEN (W/m²·K)</p>
-            <p>Ramen: {toolState.uRaam} ({toolState.raamOppervlak} m²)  → UA = {debug.uaRaam.toFixed(1)} W/K</p>
-            <p>Dak:   {toolState.uDak} ({toolState.dakOppervlak} m²)    → UA = {debug.uaDak.toFixed(1)} W/K</p>
-            <p>Muren: {toolState.uMuur} ({toolState.muurOppervlak} m²)  → UA = {debug.uaMuur.toFixed(1)} W/K</p>
-            <p>Vloer: {toolState.uVloer} ({toolState.vloerOppervlak} m²) → UA = {debug.uaVloer.toFixed(1)} W/K</p>
+            <p>Ramen: {toolState.uRaam} ({toolState.raamOppervlak} m²)  &rarr; UA = {debug.uaRaam.toFixed(1)} W/K</p>
+            <p>Dak:   {toolState.uDak} ({toolState.dakOppervlak} m²)    &rarr; UA = {debug.uaDak.toFixed(1)} W/K</p>
+            <p>Muren: {toolState.uMuur} ({toolState.muurOppervlak} m²)  &rarr; UA = {debug.uaMuur.toFixed(1)} W/K</p>
+            <p>Vloer: {toolState.uVloer} ({toolState.vloerOppervlak} m²) &rarr; UA = {debug.uaVloer.toFixed(1)} W/K</p>
           </div>
 
           {/* Warmteverlies */}
@@ -50,26 +51,72 @@ export function Grondslagen() {
             <p>Htot:  {result.hTotaalWK} W/K</p>
           </div>
 
-          {/* HDD */}
+          {/* HDD — C7: gewogen berekening */}
           <div>
-            <p className="font-bold text-gray-700 mb-1">GRAADDAGEN (HDD)</p>
-            <p>Basis HDD: {debug.hddBasis}</p>
-            <p>Setpoint aanwezig: {debug.setpoint}°C → HDD_corr = {debug.hddCorrPresent.toFixed(0)} ({(debug.fracPresent * 100).toFixed(0)}% van jaar)</p>
-            <p>Setpoint afwezig:  {debug.awaySetpoint}°C → HDD_corr = {debug.hddCorrAway.toFixed(0)} ({(debug.fracAway * 100).toFixed(0)}% van jaar)</p>
+            <p className="font-bold text-gray-700 mb-1">GRAADDAGEN</p>
+            <p>Basis HDD zone: {debug.hddBasis} K·d</p>
+            <p>Setpoint aanwezig: {debug.setpoint}°C ({(debug.fracPresent * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrPresent)}</p>
+            <p>Setpoint afwezig:  {debug.awaySetpoint}°C ({(debug.fracAway * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrAway)}</p>
+            <p className="font-semibold">Gewogen HDD_eff = {Math.round(debug.hddCorrPresent)} × {debug.fracPresent.toFixed(2)} + {Math.round(debug.hddCorrAway)} × {debug.fracAway.toFixed(2)} = {Math.round(debug.hddEffGewogen)} K·d</p>
           </div>
 
-          {/* Energie */}
+          {/* F7: Transparante energieberekening */}
           <div>
-            <p className="font-bold text-gray-700 mb-1">ENERGIE</p>
-            <p>Warmtevraag thermisch: {result.warmtevraagThermisch.toLocaleString('nl-NL')} kWh/jaar</p>
-            <p>Hoofdverwarming ({toolState.mainHeating}, η={debug.mainEff}): {result.verwarmingHoofd.toLocaleString('nl-NL')} kWh ({(debug.mainFrac * 100).toFixed(0)}%)</p>
+            <p className="font-bold text-gray-700 mb-1">ENERGIEVERBRUIK (kWh/jaar)</p>
+            <p>  Warmtevraag thermisch:         {result.warmtevraagThermisch.toLocaleString('nl-NL')} kWh</p>
+            <p>  Hoofdverwarming ({toolState.mainHeating}, &eta;={debug.mainEff}): {result.verwarmingHoofd.toLocaleString('nl-NL')} kWh ({(debug.mainFrac * 100).toFixed(0)}%)</p>
             {result.verwarmingBij > 0 && (
-              <p>Bijverwarming ({toolState.auxHeating}, η={debug.auxEff}): {result.verwarmingBij.toLocaleString('nl-NL')} kWh ({(debug.auxFrac * 100).toFixed(0)}%)</p>
+              <p>  Bijverwarming ({toolState.auxHeating}, &eta;={debug.auxEff}): {result.verwarmingBij.toLocaleString('nl-NL')} kWh ({(debug.auxFrac * 100).toFixed(0)}%)</p>
             )}
-            <p>DHW: {debug.dhwLitersPerDag} L/dag × 365 × ΔT={debug.dhwDeltaT}°C → {result.dhwThermisch.toLocaleString('nl-NL')} kWh therm → {result.dhwInput.toLocaleString('nl-NL')} kWh (η={debug.dhwEff})</p>
-            <p>DPE: {result.totaalVerbruikKwh.toLocaleString('nl-NL')} / {toolState.woonoppervlak} = {Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar → {result.dpe.letter}</p>
+            <p>  Verwarming totaal (final):     {result.verwarmingTotaal.toLocaleString('nl-NL')} kWh</p>
+            <p>  DHW ({debug.dhwLitersPerDag} L/dag, &eta;={debug.dhwEff}): {result.dhwInput.toLocaleString('nl-NL')} kWh (therm: {result.dhwThermisch.toLocaleString('nl-NL')})</p>
+            <p>  Basiselektriciteit:            {result.elektriciteitBasis.toLocaleString('nl-NL')} kWh</p>
+            {result.evKwh > 0 && <p>  EV laden:                      {result.evKwh.toLocaleString('nl-NL')} kWh</p>}
+            {result.zwembadKwh > 0 && <p>  Zwembad:                       {result.zwembadKwh.toLocaleString('nl-NL')} kWh</p>}
+            {result.koelingKwh > 0 && <p>  Koeling:                       {result.koelingKwh.toLocaleString('nl-NL')} kWh</p>}
+            <p className="border-t border-gray-300 pt-1 font-semibold">
+              TOTAAL: {result.verwarmingTotaal.toLocaleString('nl-NL')} + {result.dhwInput.toLocaleString('nl-NL')} + {result.elektriciteitBasis.toLocaleString('nl-NL')}
+              {result.evKwh > 0 ? ` + ${result.evKwh.toLocaleString('nl-NL')}` : ''}
+              {result.zwembadKwh > 0 ? ` + ${result.zwembadKwh.toLocaleString('nl-NL')}` : ''}
+              {result.koelingKwh > 0 ? ` + ${result.koelingKwh.toLocaleString('nl-NL')}` : ''}
+              {' '}= {result.totaalVerbruikKwh.toLocaleString('nl-NL')} kWh
+            </p>
+          </div>
+
+          {/* DPE-indicatie */}
+          <div>
+            <p className="font-bold text-gray-700 mb-1">DPE-INDICATIE</p>
+            <p>DPE-verbruik (zonder EV/zwembad/koeling): {result.dpeVerbruikKwh.toLocaleString('nl-NL')} kWh</p>
+            <p>{result.dpeVerbruikKwh.toLocaleString('nl-NL')} / {toolState.woonoppervlak} m² = {Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar &rarr; {result.dpe.letter}</p>
             {result.dpe.kwhTotVolgendeKlasse > 0 && result.dpe.letter !== 'A' && (
               <p className="text-green-700">  Tot volgende klasse: nog {Math.round(result.dpe.kwhTotVolgendeKlasse)} kWh/m² besparen</p>
+            )}
+            <p className="text-gray-500 mt-1 italic">Indicatieve berekening op basis van finale energie en uw invoer. Geen offici&euml;le DPE.</p>
+          </div>
+
+          {/* F8: Energieprijzen met bronnen */}
+          <div>
+            <p className="font-bold text-gray-700 mb-1">ENERGIEPRIJZEN</p>
+            {Object.entries(PRIJS_BRONNEN).map(([key, pb]) => (
+              <p key={key}>{pb.label}: {pb.prijsPerKwh} &mdash; {pb.bron}</p>
+            ))}
+            <p className="text-gray-500 mt-1 italic">Prijzen per feb 2026. Gebruiker kan handmatig aanpassen in Stap 5.</p>
+          </div>
+
+          {/* Kostenberekening transparant */}
+          <div>
+            <p className="font-bold text-gray-700 mb-1">KOSTEN (&euro;/jaar)</p>
+            <p>  Verwarming:    {result.verwarmingTotaal.toLocaleString('nl-NL')} kWh × prijs = &euro; {result.kostenVerwarming.toLocaleString('nl-NL')}</p>
+            <p>  Tapwater:      {result.dhwInput.toLocaleString('nl-NL')} kWh × prijs = &euro; {result.kostenDhw.toLocaleString('nl-NL')}</p>
+            <p>  Elektriciteit: {(result.elektriciteitBasis + result.evKwh + result.zwembadKwh + result.koelingKwh).toLocaleString('nl-NL')} kWh × {debug.prijzen.elektriciteit} = &euro; {result.kostenElektriciteit.toLocaleString('nl-NL')}</p>
+            <p className="border-t border-gray-300 pt-1 font-semibold">
+              TOTAAL: &euro; {result.kostenVerwarming.toLocaleString('nl-NL')} + &euro; {result.kostenDhw.toLocaleString('nl-NL')} + &euro; {result.kostenElektriciteit.toLocaleString('nl-NL')} = &euro; {result.kostenTotaal.toLocaleString('nl-NL')}/jaar (&euro; {Math.round(result.kostenTotaal / 12).toLocaleString('nl-NL')}/maand)
+            </p>
+            {result.pvBesparing > 0 && (
+              <>
+                <p className="text-green-700">  PV-besparing: -&euro; {result.pvBesparing.toLocaleString('nl-NL')}</p>
+                <p className="font-semibold">  Netto kosten: &euro; {result.nettoKosten.toLocaleString('nl-NL')}/jaar (&euro; {Math.round(result.nettoKosten / 12).toLocaleString('nl-NL')}/maand)</p>
+              </>
             )}
           </div>
 

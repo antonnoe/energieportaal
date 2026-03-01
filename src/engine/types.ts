@@ -42,7 +42,7 @@ export interface HuisType {
 
 // ─── Verwarmingstype ──────────────────────────────────────────────────────────
 
-export type VerwarmingType = 'gas' | 'stookolie' | 'warmtepomp' | 'elektrisch' | 'hout';
+export type VerwarmingType = 'gas' | 'stookolie' | 'warmtepomp' | 'elektrisch' | 'hout' | 'propaan';
 
 // ─── Subsidie types ───────────────────────────────────────────────────────────
 
@@ -168,6 +168,7 @@ export interface PortaalInput {
   prijsStookolie: number;
   prijsElektriciteit: number;
   prijsHout: number;
+  prijsPropaan: number;
   exportTarief: number;         // PV-export €/kWh
 
   // Subsidie
@@ -217,6 +218,7 @@ export interface PortaalResult {
   zwembadKwh: number;
   koelingKwh: number;
   totaalVerbruikKwh: number;
+  dpeVerbruikKwh: number;       // verwarming + DHW + basis elektriciteit (zonder EV/zwembad/koeling)
 
   // PV
   pvProductieKwh: number;
@@ -264,6 +266,7 @@ export interface DebugInfo {
   hddBasis: number;
   hddCorrPresent: number;
   hddCorrAway: number;
+  hddEffGewogen: number;
   fracPresent: number;
   fracAway: number;
 

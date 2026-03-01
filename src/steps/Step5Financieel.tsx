@@ -1,6 +1,14 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
 
+const PV_PRESETS = [
+  { id: 'geen', label: 'Geen', kwp: 0 },
+  { id: 'klein', label: 'Klein (3 kWp)', kwp: 3 },
+  { id: 'middel', label: 'Middel (6 kWp)', kwp: 6 },
+  { id: 'groot', label: 'Groot (9 kWp)', kwp: 9 },
+  { id: 'eigen', label: 'Eigen waarde', kwp: -1 },
+];
+
 function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
   id: string; label: string; value: string; unit?: string;
   onChange: (v: string) => void; min?: number; max?: number; step?: number; helpText?: string;
@@ -47,11 +55,27 @@ export function Step5Financieel() {
   const { toolState, setField } = useToolState();
   const sf = (key: keyof ToolState) => (v: string) => setField(key, v);
 
+  const handlePvPreset = (id: string) => {
+    const preset = PV_PRESETS.find(p => p.id === id);
+    if (!preset) return;
+    setField('pvPreset', id);
+    if (preset.kwp === 0) {
+      setField('hasPV', 'nee');
+      setField('pvVermogen', '0');
+    } else if (preset.kwp > 0) {
+      setField('hasPV', 'ja');
+      setField('pvVermogen', String(preset.kwp));
+    } else {
+      // eigen waarde — maak PV aan maar laat vermogen staan
+      setField('hasPV', 'ja');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 5: Financieel</h2>
-        <p className="text-sm text-gray-500">Stookgedrag, energieprijzen en subsidie-parameters.</p>
+        <p className="text-sm text-gray-500">Stookgedrag, zonnepanelen, energieprijzen en subsidie-parameters.</p>
       </div>
 
       {/* Stookgedrag */}
@@ -65,17 +89,47 @@ export function Step5Financieel() {
         </div>
       </div>
 
+      {/* U1: Zonnepanelen knoppen */}
+      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+        <SectionTitle>Zonnepanelen</SectionTitle>
+        <div className="flex flex-wrap gap-1.5">
+          {PV_PRESETS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => handlePvPreset(p.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
+                toolState.pvPreset === p.id
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-primary/50'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        {toolState.hasPV === 'ja' && (
+          <div className="grid grid-cols-2 gap-3">
+            {toolState.pvPreset === 'eigen' && (
+              <NumField id="pvVermogen" label="Vermogen" value={toolState.pvVermogen} unit="kWp" onChange={sf('pvVermogen')} min={0.5} max={50} step={0.5} />
+            )}
+            <NumField id="pvZelfverbruik" label="Zelfverbruik" value={toolState.pvZelfverbruik} unit="%" onChange={sf('pvZelfverbruik')} min={0} max={100} step={5} />
+          </div>
+        )}
+      </div>
+
       {/* Energieprijzen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
         <SectionTitle>Energieprijzen</SectionTitle>
-        <p className="text-xs text-gray-400">Standaardprijzen voor Frankrijk (2024/2025). Pas aan naar uw eigen tarief.</p>
+        <p className="text-xs text-gray-400">Standaardprijzen februari 2026. Pas aan naar uw eigen tarief.</p>
         <div className="grid grid-cols-2 gap-3">
-          <NumField id="prijsGas" label="Gas" value={toolState.prijsGas} unit="€/kWh" onChange={sf('prijsGas')} min={0.01} max={1} step={0.01} />
-          <NumField id="prijsElektriciteit" label="Elektriciteit" value={toolState.prijsElektriciteit} unit="€/kWh" onChange={sf('prijsElektriciteit')} min={0.01} max={1} step={0.01} />
-          <NumField id="prijsStookolie" label="Stookolie" value={toolState.prijsStookolie} unit="€/kWh" onChange={sf('prijsStookolie')} min={0.01} max={1} step={0.01} />
-          <NumField id="prijsHout" label="Hout/pellet" value={toolState.prijsHout} unit="€/kWh" onChange={sf('prijsHout')} min={0.01} max={0.5} step={0.01} />
+          <NumField id="prijsElektriciteit" label="Elektriciteit" value={toolState.prijsElektriciteit} unit="€/kWh" onChange={sf('prijsElektriciteit')} min={0.01} max={1} step={0.001} helpText="TRV Base 6kVA TTC" />
+          <NumField id="prijsGas" label="Gas" value={toolState.prijsGas} unit="€/kWh" onChange={sf('prijsGas')} min={0.01} max={1} step={0.001} helpText="CRE Prix Repère" />
+          <NumField id="prijsStookolie" label="Fioul (stookolie)" value={toolState.prijsStookolie} unit="€/kWh" onChange={sf('prijsStookolie')} min={0.01} max={1} step={0.001} helpText="DGEC gemiddelde" />
+          <NumField id="prijsHout" label="Hout/pellet" value={toolState.prijsHout} unit="€/kWh" onChange={sf('prijsHout')} min={0.01} max={0.5} step={0.001} helpText="85 €/stère ÷ 1800 kWh" />
+          <NumField id="prijsPropaan" label="Propaan" value={toolState.prijsPropaan} unit="€/kWh" onChange={sf('prijsPropaan')} min={0.01} max={1} step={0.001} helpText="1,90 €/L ÷ 7,1 kWh" />
+          <NumField id="exportTarief" label="PV-export" value={toolState.exportTarief} unit="€/kWh" onChange={sf('exportTarief')} min={0} max={0.5} step={0.001} helpText="S21 surplus ≤9 kWc" />
         </div>
-        <NumField id="exportTarief" label="PV-exporttarief" value={toolState.exportTarief} unit="€/kWh" onChange={sf('exportTarief')} min={0} max={0.5} step={0.01} helpText="Vergoeding voor teruglevering zonnestroom" />
       </div>
 
       {/* Subsidie intake */}

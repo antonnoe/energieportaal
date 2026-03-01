@@ -5,18 +5,21 @@ import { berekenSavings } from '../engine/savings';
 /**
  * FloatingEuro — Sticky zwevende balk die direct de financiële impact toont.
  *
- * Altijd zichtbaar onderaan het scherm. Toont:
- * - Huidige jaarlijkse energiekosten
- * - DPE-klasse
- * - Mogelijke besparing
+ * U3: Pas zichtbaar als er een geldige warmteverliesberekening is (na Stap 3).
+ * Verborgen als heating_kwh === 0 of undefined.
  */
 export function FloatingEuro() {
   const { result, portaalInput } = useToolState();
 
   const savings = useMemo(() => berekenSavings(portaalInput, result), [portaalInput, result]);
 
+  // U3: Verberg als geen geldige warmteverliesberekening
+  if (!result.verwarmingTotaal || result.verwarmingTotaal === 0) {
+    return null;
+  }
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.08)]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.08)] md:bottom-0 bottom-14">
       <div className="max-w-7xl mx-auto px-4 py-2.5">
         <div className="flex items-center justify-between gap-4">
           {/* DPE badge */}
@@ -28,7 +31,7 @@ export function FloatingEuro() {
               {result.dpe.letter}
             </div>
             <div className="hidden sm:block">
-              <p className="text-xs text-gray-500">DPE</p>
+              <p className="text-xs text-gray-500">DPE-indicatie</p>
               <p className="text-xs font-medium">{Math.round(result.dpe.kwhPerM2)} kWh/m²</p>
             </div>
           </div>
@@ -37,7 +40,7 @@ export function FloatingEuro() {
           <div className="text-center">
             <p className="text-xs text-gray-500">Energiekosten</p>
             <p className="text-lg font-bold text-primary">
-              € {result.nettoKosten.toLocaleString('nl-NL')}<span className="text-xs font-normal text-gray-500">/jaar</span>
+              &euro; {result.nettoKosten.toLocaleString('nl-NL')}<span className="text-xs font-normal text-gray-500">/jaar</span>
             </p>
           </div>
 
@@ -46,7 +49,7 @@ export function FloatingEuro() {
             <div className="text-right">
               <p className="text-xs text-gray-500">Mogelijke besparing</p>
               <p className="text-lg font-bold text-green-700">
-                € {savings.totaalBesparingEur.toLocaleString('nl-NL')}<span className="text-xs font-normal text-gray-500">/jaar</span>
+                &euro; {savings.totaalBesparingEur.toLocaleString('nl-NL')}<span className="text-xs font-normal text-gray-500">/jaar</span>
               </p>
             </div>
           )}
