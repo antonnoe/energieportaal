@@ -443,16 +443,19 @@ test: tests toevoegen/aanpassen
 
 ## WAT ER NU IS vs WAT ER MOET KOMEN
 
-### Huidige staat (Fase 1-5 klaar, correcties nodig)
-- Engine, data, state, stappen en rapport zijn gebouwd
-- 125 tests, allemaal groen
-- MAAR: oude tabs staan er nog in (Portaal/Snel/Expert/Subsidie)
-- MAAR: energieprijzen zijn verouderd
-- MAAR: rekenfout in totaalberekening (spookgetal)
-- MAAR: rapport toont data voordat er genoeg invoer is
-- MAAR: geen AI-coach tooltips
-- MAAR: DPE wordt ten onrechte gepresenteerd als officieel
-- Zie CORRECTIES FASE 6 voor alles wat nog moet
+### Huidige staat (C1-C10 uitgevoerd, nieuwe ronde nodig)
+- C1-C10 zijn uitgevoerd en gedeployed
+- MAAR: elektriciteitsprijs staat nog op 0,2516 ipv 0,1940 (C5 niet correct uitgevoerd)
+- MAAR: PV-export staat op 0,13 ipv 0,04 €/kWh
+- MAAR: hout PCI staat op 1500 ipv 1800 kWh/stère
+- MAAR: HDD_eff afrondingsfout (2458 ipv 2456)
+- MAAR: EV wordt meegeteld in DPE-indicatie (mag niet)
+- MAAR: invoer is vrije tekstvelden ipv klikbare opties
+- MAAR: mobile heeft geen toggle tussen Invoer en Rapport
+- MAAR: rapport adviseert niet (geen prioriteitenlijst, geen ROI, geen subsidie-verdict)
+- MAAR: bronnen ontbreken bij waarden
+- MAAR: FloatingEuro toont nog steeds zonder data (C4 niet correct)
+- Zie CORRECTIES FASE 7 voor alles wat nog moet
 
 ### Gewenste staat
 - Eén stapsgewijze flow (5 stappen) voor invoer
@@ -477,7 +480,8 @@ Alle code wordt NIEUW geschreven in TypeScript/React voor energieportaal.
 **Fase 3: State** — ToolStateContext die de volledige invoer + resultaat beheert. ✅ KLAAR
 **Fase 4: Stappen** — De 5 invoerstappen in `src/steps/`. ✅ KLAAR
 **Fase 5: Rapport** — Het doorlopende rapport met 6 secties + FloatingEuro. ✅ KLAAR
-**Fase 6: Correcties + AI-Coach** — Zie CORRECTIES hieronder.
+**Fase 6: Correcties C1-C10** — Tabs weg, progressief rapport, DPE-indicatie, CoachWidget. ✅ KLAAR (deels)
+**Fase 7: Prijsfixes + UX + Adviseur** — Zie CORRECTIES FASE 7 hieronder.
 
 Werk per fase. Commit per fase. Test per fase.
 
@@ -591,3 +595,193 @@ Bouw de CoachWidget component zoals beschreven in de INTEGRATIES sectie hierbove
 - [i] knop bij elke regel in de grondslagen
 - Bij klik: API-call naar Claude met context → korte uitleg in tooltip
 - Geen volledige chatbot, alleen gerichte uitleg per element
+
+---
+
+## CORRECTIES FASE 7 (URGENT — VERVANGT FASE 6 WAAR NODIG)
+
+### Deze correcties moeten ALLEMAAL in één ronde worden uitgevoerd.
+
+---
+
+### BLOK A: PRIJZEN EN REKENFOUTEN (8 fixes)
+
+### F1: Elektriciteitsprijs corrigeren
+In `src/engine/constants.ts`: elec moet **0.1940** zijn (niet 0.2516).
+Label: "TRV Base 6kVA TTC, feb 2026"
+Bron: CRE délibération 14-01-2026, prix-elec.com bevestigt 0,1940 €/kWh TTC.
+Toelichting in grondslagen: "Dit is het TRV Base-tarief. HP/HC en Tempo-tarieven wijken af."
+
+### F2: PV-export tarief corrigeren
+PV-export moet **0.04** €/kWh zijn (niet 0.13).
+Label: "S21 surplus ≤9 kWc, Q1 2026"
+Bron: Arrêté S21, CRE trimestrieel tarief Q1 2026.
+
+### F3: Hout PCI corrigeren
+wood in KWH_CONVERSION moet **1800** kWh/stère zijn (niet 1500).
+Houtprijs per kWh wordt dan: 85 / 1800 = 0,047 €/kWh.
+
+### F4: HDD_eff afrondingsfout
+De berekening 2600 × 0.82 + 1800 × 0.18 = **2456** (niet 2458).
+Fix in compute.ts: gebruik exacte berekening zonder tussentijdse afronding.
+
+### F5: EV uitsluiten uit DPE-indicatie
+De DPE-indicatie berekening mag ALLEEN bevatten:
+- Ruimteverwarming (final)
+- Tapwater DHW (final)
+- Basiselektriciteit huishouden
+NIET: EV, zwembad, koeling. Die horen in de kostentabel maar NIET in kWh/m²/jaar.
+
+### F6: DPE-indicatie methodiek verduidelijken
+In de grondslagen onder DPE-INDICATIE, voeg toe:
+"Let op: een officiële DPE classificeert op dubbele drempels (energie én broeikasgassen),
+gebruikt conventies voor gebruikspatronen, en rekent in kWh primaire energie (EP).
+Deze indicatie is gebaseerd op uw werkelijke invoer en finale energie."
+
+### F7: Optelfout transparantie
+Zorg dat het totaal in de grondslagen EXACT de som is van alle getoonde posten.
+Geen afronding per post en dan weer optellen — eerst optellen, dan afronden.
+Toon ook altijd: "Totaal = [post1] + [post2] + ... = [som]"
+
+### F8: Bronvermelding bij alle prijzen
+Elke prijs in de grondslagen moet een bron en datum hebben:
+```
+Elektriciteit: 0,1940 €/kWh TTC — CRE TRV Base 6kVA, feb 2026
+Gas: 0,1051 €/kWh PCI — CRE Prix Repère chauffage, feb 2026
+Fioul: 1,18 €/L (0,118 €/kWh) — DGEC wekelijks gemiddelde, feb 2026
+Pellets: 0,385 €/kg (0,080 €/kWh) — Propellet/SDES vrac, feb 2026
+Hout: 85 €/stère (0,047 €/kWh) — marktgemiddelde 2025-2026
+Propaan: 1,90 €/L (0,268 €/kWh) — marktgemiddelde 2026
+PV-export: 0,04 €/kWh — S21 surplus ≤9 kWc, Q1 2026
+```
+
+---
+
+### BLOK B: UX-VERBETERINGEN (3 grote wijzigingen)
+
+### U1: Klikbare opties ipv vrije invoer
+
+**Stap 3 (Isolatie) — U-waarden:**
+Vervang de vrije numerieke velden door keuzeknoppen per bouwdeel:
+- Muren: "Geen isolatie" / "Basis (5-8 cm)" / "Goed (10-15 cm)" / "Uitstekend (>15 cm)"
+- Dak: "Geen isolatie" / "Basis" / "Goed" / "Uitstekend"  
+- Vloer: "Geen isolatie" / "Basis" / "Goed" / "Uitstekend"
+- Ramen: "Enkel glas" / "Dubbel glas" / "HR+" / "HR++" / "Triple"
+
+Elke keuze mapt naar een U-waarde die AFHANGT van het woningtype (uit huizenmatrix).
+De resulterende U-waarde wordt klein getoond onder de knop: "→ 0,3 W/m²·K"
+Expert-override: klikbaar linkje "Eigen waarde invoeren" dat een numeriek veld opent.
+
+**Stap 4 (Energie) — Verwarmingstype:**
+Knoppen: Gas-ketel / Elektrisch / Fioul-ketel / Warmtepomp / Hout/pellet / Propaan
+Bij keuze automatisch η of SCOP invullen. Expert-override mogelijk.
+
+**Stap 4 (Energie) — DHW:**
+Knoppen: Zelfde als verwarming / Elektrische boiler / Warmtepomp-boiler / Zonneboiler
+
+**Stap 5 (Financieel) — PV:**
+Knoppen: Geen / Klein (3 kWp) / Middel (6 kWp) / Groot (9 kWp) / Eigen waarde
+
+**Principe:** De tool kiest vóór de gebruiker. Minder fouten, snellere invoer.
+Wie meer weet, klikt "Eigen waarde invoeren".
+
+### U2: Mobile toggle Invoer ↔ Rapport
+
+Op schermen < 768px:
+- Twee sticky knoppen onderin: [📝 Invoer] [📊 Rapport]
+- Default: Invoer actief
+- FloatingEuro blijft ALTIJD zichtbaar boven de toggle, ongeacht welk paneel
+- Bij klik op Rapport: smooth scroll/animatie naar rapportweergave
+- Bij klik op Invoer: terug naar stappenflow
+
+Op desktop (≥ 768px): geen verandering, split layout blijft.
+
+### U3: FloatingEuro pas na Stap 3 (herhaling C4 — NIET correct uitgevoerd)
+
+De FloatingEuro footer mag NIET zichtbaar zijn totdat:
+- Minimaal Stap 3 (Isolatie) is doorlopen
+- Er een geldige warmteverliesberekening is
+Check: als `result.heating_kwh === 0 || result.heating_kwh === undefined`, verberg footer.
+
+---
+
+### BLOK C: VAN CALCULATOR NAAR ADVISEUR
+
+### A1: Prioriteitenlijst met ROI
+
+Nieuwe rapportsectie "WAT KUNT U DOEN?" (na Energieprofiel, vóór Subsidie).
+Bereken voor elke mogelijke maatregel:
+1. **Dakisolatie** → herbereken met U_dak = 0.2 → verschil in kWh en €
+2. **Muurisolatie** → herbereken met U_muur = 0.3 → verschil in kWh en €
+3. **Vloerisolatie** → herbereken met U_vloer = 0.3 → verschil in kWh en €
+4. **Ramen HR++** → herbereken met U_raam = 1.2 → verschil in kWh en €
+5. **Warmtepomp** → herbereken met SCOP 3.5 → verschil in kWh en €
+6. **Zonnepanelen** → herbereken met PV → verschil in €
+
+Per maatregel tonen:
+- Besparing €/jaar
+- Geschatte investering (range)
+- Terugverdientijd (jaren) = investering / besparing
+- Effect op DPE-indicatie: "Van G naar E"
+
+Sorteer op terugverdientijd (kortste eerst).
+Markeer de top-3 als "Aanbevolen".
+
+Investerings-ranges (indicatief, te tonen met disclaimer):
+- Dakisolatie: €40-80/m² (bron: ADEME)
+- Muurisolatie binnenzijde: €50-90/m², buitenzijde: €100-200/m²
+- Vloerisolatie: €30-60/m²
+- Ramen HR++: €400-800/raam
+- Warmtepomp lucht-water: €8.000-15.000
+- PV 3kWp: €5.000-8.000, 6kWp: €9.000-14.000
+
+### A2: Subsidie-verdict (niet alleen stoplichten)
+
+De subsidiecheck moet eindigen met een CONCREET advies:
+- "✅ MaPrimeRénov': geschat €X — aanvragen via maprimerenov.gouv.fr"
+- "✅ CEE: geschat €X — via uw installateur"  
+- "⚠️ Éco-PTZ: tot €50.000 renteloos — alleen via bank, bureaucratisch"
+- "❌ TVA 5,5%: niet van toepassing (reden)"
+
+Plus een samenvattende regel:
+"Totaal beschikbare subsidie: geschat €X–€Y. Netto investering na subsidie: €Z."
+"Onze inschatting: [Ja, aanvragen — het loont] of [Marginaal — weeg af tegen moeite]"
+
+Link naar relevante infofrankrijk.com artikelen per subsidie.
+
+### A3: Scenario-vergelijking (interactief)
+
+In de sectie "Wat kunt u doen?":
+Toon per maatregel een checkbox. Als de gebruiker maatregelen aanvinkt:
+- Herbereken het totaaleffect van de COMBINATIE
+- Toon: "Als u dakisolatie + warmtepomp combineert: van G → D, besparing €4.200/jaar"
+- Toon de bijgewerkte DPE-indicatie naast de huidige
+
+Dit maakt de tool tot een scenario-builder.
+
+---
+
+### BLOK D: LIVE DATA BRONNEN (toekomstig, niet in deze ronde)
+
+Voor een volgende fase — elektriciteit en fioul live ophalen:
+
+**Elektriciteit TRV:**
+- Bron: data.gouv.fr dataset "Historique des tarifs réglementés de vente d'électricité"
+- CSV: direct downloadbaar, geen API-key nodig
+- Velden: DATE_DEBUT, P_SOUSCRITE, PART_VARIABLE_TTC (= prijs/kWh Base TTC)
+- Filter: meest recente datum, 6kVA, option BASE
+- Frequentie: 2× per jaar (feb + aug)
+
+**Fioul:**
+- Bron: data.economie.gouv.fr "Prix des carburants flux instantané v2"
+- API: open, geen key nodig
+- Filter: product = fioul domestique, gemiddelde nationale prijs
+- Frequentie: wekelijks
+
+**PV-tarieven:**
+- Bron: CRE open data, trimestrieel S21 CSV
+- Frequentie: per kwartaal
+
+Gas, pellets, hout: blijven hardcoded met bron + datum.
+
+---
