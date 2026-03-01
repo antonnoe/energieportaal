@@ -3,16 +3,10 @@ import type { PortaalInput, PortaalResult, SubsidieIntake } from '../engine/type
 import { compute, createDefaultInput } from '../engine/compute.ts';
 import { getZoneIdFromPostcode, getDepartementFromPostcode } from '../data/dept-zone-map.ts';
 import { getHuisTypeById } from '../data/huizen-matrix.ts';
-import { DEFAULTS } from '../engine/constants.ts';
+import { DEFAULTS, DEFAULT_PRIJZEN, DEFAULT_EXPORT_TARIEF } from '../engine/constants.ts';
 
 // ─── Globale state ───────────────────────────────────────────────────────────
 
-/**
- * ToolState bevat alle invoer als strings (voor formulier-binding)
- * plus afgeleide waarden voor de rekenmotor.
- *
- * Ondersteunt zowel de nieuwe 5-stappen flow als de oude 3-tab UI.
- */
 export interface ToolState {
   // ── Stap 1: Locatie ──
   postcode: string;
@@ -42,24 +36,24 @@ export interface ToolState {
   auxHeating: string;
   auxFraction: string;
   auxEfficiency: string;
-  hasHRV: string;              // 'ja' | 'nee'
-  hrvEfficiency: string;       // %
+  hasHRV: string;
+  hrvEfficiency: string;
   personen: string;
   douchesPerDag: string;
   literPerDouche: string;
   dhwSystem: string;
   dhwEfficiency: string;
   basisElektriciteit: string;
-  hasEV: string;               // 'ja' | 'nee'
+  hasEV: string;
   evKmPerJaar: string;
   evVerbruik: string;
-  hasPV: string;               // 'ja' | 'nee'
+  hasPV: string;
   pvVermogen: string;
-  pvZelfverbruik: string;      // %
-  hasZwembad: string;          // 'ja' | 'nee'
+  pvZelfverbruik: string;
+  hasZwembad: string;
   zwembadOppervlak: string;
   zwembadMaanden: string;
-  hasKoeling: string;          // 'ja' | 'nee'
+  hasKoeling: string;
   koelingEER: string;
 
   // ── Stap 5: Financieel ──
@@ -83,26 +77,6 @@ export interface ToolState {
 
   // ── UI ──
   currentStep: number;
-  activeTab: 'snel' | 'expert' | 'subsidie' | 'stappen';
-
-  // ── Backward compatible (oude UI) ──
-  oppervlakte: string;
-  bouwjaar: string;
-  isolatie: string;
-  verwarming: string;
-  tegemoetkomingen: string;
-  muurIsolatie: string;
-  dakIsolatie: string;
-  vloerIsolatie: string;
-  raamType: string;
-  ventilatieType: string;
-  hrvEfficientie: string;
-  verwarmingScop: string;
-  stookgrens: string;
-  klimaatzone: string;
-  dhwPersonen: string;
-  heeftEV: string;
-  heeftPV: string;
 }
 
 const DEFAULT_STATE: ToolState = {
@@ -154,16 +128,16 @@ const DEFAULT_STATE: ToolState = {
   hasKoeling: 'nee',
   koelingEER: '3.0',
 
-  // Stap 5
+  // Stap 5 — feb 2026 prijzen
   setpoint: '20',
   awaySetpoint: '16',
   daysPresent: '300',
   daysAway: '65',
-  prijsGas: '0.12',
-  prijsStookolie: '0.14',
-  prijsElektriciteit: '0.25',
-  prijsHout: '0.06',
-  exportTarief: '0.06',
+  prijsGas: String(DEFAULT_PRIJZEN.gas),
+  prijsStookolie: String(DEFAULT_PRIJZEN.stookolie),
+  prijsElektriciteit: String(DEFAULT_PRIJZEN.elektrisch),
+  prijsHout: String(DEFAULT_PRIJZEN.hout),
+  exportTarief: String(DEFAULT_EXPORT_TARIEF),
 
   // Subsidie
   subsidieUsage: 'rp',
@@ -175,26 +149,6 @@ const DEFAULT_STATE: ToolState = {
 
   // UI
   currentStep: 1,
-  activeTab: 'stappen',
-
-  // Backward compatible
-  oppervlakte: '100',
-  bouwjaar: '1980',
-  isolatie: 'matig',
-  verwarming: 'gas',
-  tegemoetkomingen: 'onbekend',
-  muurIsolatie: 'geen',
-  dakIsolatie: 'geen',
-  vloerIsolatie: 'geen',
-  raamType: 'enkel',
-  ventilatieType: 'naturel',
-  hrvEfficientie: '75',
-  verwarmingScop: '0',
-  stookgrens: '18',
-  klimaatzone: 'H1b',
-  dhwPersonen: '2',
-  heeftEV: 'nee',
-  heeftPV: 'nee',
 };
 
 // ─── State → PortaalInput converter ──────────────────────────────────────────
@@ -270,11 +224,11 @@ export function stateToPortaalInput(state: ToolState): PortaalInput {
     daysPresent: Number(state.daysPresent) || DEFAULTS.daysPresent,
     daysAway: Number(state.daysAway) || DEFAULTS.daysAway,
 
-    prijsGas: Number(state.prijsGas) || 0.12,
-    prijsStookolie: Number(state.prijsStookolie) || 0.14,
-    prijsElektriciteit: Number(state.prijsElektriciteit) || 0.25,
-    prijsHout: Number(state.prijsHout) || 0.06,
-    exportTarief: Number(state.exportTarief) || 0.06,
+    prijsGas: Number(state.prijsGas) || DEFAULT_PRIJZEN.gas,
+    prijsStookolie: Number(state.prijsStookolie) || DEFAULT_PRIJZEN.stookolie,
+    prijsElektriciteit: Number(state.prijsElektriciteit) || DEFAULT_PRIJZEN.elektrisch,
+    prijsHout: Number(state.prijsHout) || DEFAULT_PRIJZEN.hout,
+    exportTarief: Number(state.exportTarief) || DEFAULT_EXPORT_TARIEF,
 
     subsidieIntake,
   };
@@ -285,7 +239,6 @@ export function stateToPortaalInput(state: ToolState): PortaalInput {
 interface ToolStateContextValue {
   toolState: ToolState;
   setField: (key: keyof ToolState, value: string) => void;
-  setActiveTab: (tab: ToolState['activeTab']) => void;
   setCurrentStep: (step: number) => void;
   setPostcode: (postcode: string) => void;
   setHuisType: (huisTypeId: string) => void;
@@ -300,10 +253,6 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
 
   const setField = useCallback((key: keyof ToolState, value: string) => {
     setToolState((prev) => ({ ...prev, [key]: value }));
-  }, []);
-
-  const setActiveTab = useCallback((tab: ToolState['activeTab']) => {
-    setToolState((prev) => ({ ...prev, activeTab: tab }));
   }, []);
 
   const setCurrentStep = useCallback((step: number) => {
@@ -346,7 +295,6 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
       value={{
         toolState,
         setField,
-        setActiveTab,
         setCurrentStep,
         setPostcode,
         setHuisType,

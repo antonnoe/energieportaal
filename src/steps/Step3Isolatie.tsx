@@ -1,4 +1,5 @@
 import { useToolState } from '../context/ToolStateContext';
+import { CoachWidget } from '../components/CoachWidget';
 
 function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
   id: string; label: string; value: string; unit?: string;
@@ -6,7 +7,7 @@ function NumField({ id, label, value, unit, onChange, min, max, step, helpText }
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-semibold mb-1 flex items-center">{label}<CoachWidget fieldId={id} /></label>
       <div className="relative">
         <input
           id={id} type="number" min={min} max={max} step={step ?? 0.1}

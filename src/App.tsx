@@ -1,9 +1,5 @@
 import './index.css'
 import { ToolStateProvider, useToolState } from './context/ToolStateContext'
-import { Navigation } from './components/Navigation'
-import { SnelAdvies } from './pages/SnelAdvies'
-import { Expertmodus } from './pages/Expertmodus'
-import { SubsidieFinance } from './pages/SubsidieFinance'
 
 import { Step1Locatie } from './steps/Step1Locatie'
 import { Step2Woningtype } from './steps/Step2Woningtype'
@@ -98,18 +94,49 @@ function StepNavButtons() {
   )
 }
 
+/** C3: Rapport bouwt progressief op */
 function Rapport() {
+  const { toolState } = useToolState()
+  const step = toolState.currentStep
+
+  if (step < 1) {
+    return (
+      <p className="text-sm text-gray-400 italic">Vul stap 1 in om het rapport te starten.</p>
+    )
+  }
+
   return (
     <div className="space-y-6">
+      {/* Woningprofiel — altijd zichtbaar vanaf stap 1 */}
       <Woningprofiel />
-      <hr className="border-gray-200" />
-      <Energieprofiel />
-      <hr className="border-gray-200" />
-      <DPESchatting />
-      <hr className="border-gray-200" />
-      <Besparingsadvies />
-      <hr className="border-gray-200" />
-      <SubsidieCheck />
+
+      {/* DPE-indicatie — vanaf stap 3 */}
+      {step >= 3 && (
+        <>
+          <hr className="border-gray-200" />
+          <DPESchatting />
+        </>
+      )}
+
+      {/* Energieprofiel — vanaf stap 4 */}
+      {step >= 4 && (
+        <>
+          <hr className="border-gray-200" />
+          <Energieprofiel />
+          <hr className="border-gray-200" />
+          <Besparingsadvies />
+        </>
+      )}
+
+      {/* Subsidie — vanaf stap 5 */}
+      {step >= 5 && (
+        <>
+          <hr className="border-gray-200" />
+          <SubsidieCheck />
+        </>
+      )}
+
+      {/* Grondslagen — altijd zichtbaar vanaf stap 1 */}
       <hr className="border-gray-200" />
       <Grondslagen />
     </div>
@@ -117,6 +144,8 @@ function Rapport() {
 }
 
 function StappenFlow() {
+  const { toolState } = useToolState()
+
   return (
     <div className="pb-20">
       {/* Desktop: split layout. Mobile: stacked */}
@@ -143,58 +172,8 @@ function StappenFlow() {
         </div>
       </div>
 
-      <FloatingEuro />
-    </div>
-  )
-}
-
-function AppShell() {
-  const { toolState, setActiveTab } = useToolState()
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-primary text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-lg font-bold tracking-tight">EnergiePortaal</h1>
-            <p className="text-xs text-white/70">Energieadvies voor Nederlandse huiseigenaren in Frankrijk</p>
-          </div>
-          <div className="flex gap-1">
-            {[
-              { id: 'stappen' as const, label: 'Portaal' },
-              { id: 'snel' as const, label: 'Snel' },
-              { id: 'expert' as const, label: 'Expert' },
-              { id: 'subsidie' as const, label: 'Subsidie' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  toolState.activeTab === tab.id
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/60 hover:text-white/90 hover:bg-white/10'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
-
-      {/* Oude navigatie alleen voor oude tabs */}
-      {(toolState.activeTab === 'snel' || toolState.activeTab === 'expert' || toolState.activeTab === 'subsidie') && (
-        <Navigation />
-      )}
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {toolState.activeTab === 'stappen' && <StappenFlow />}
-        {toolState.activeTab === 'snel' && <SnelAdvies />}
-        {toolState.activeTab === 'expert' && <Expertmodus />}
-        {toolState.activeTab === 'subsidie' && <SubsidieFinance />}
-      </main>
+      {/* C4: FloatingEuro pas zichtbaar na stap 3 */}
+      {toolState.currentStep >= 3 && <FloatingEuro />}
     </div>
   )
 }
@@ -202,7 +181,19 @@ function AppShell() {
 export default function App() {
   return (
     <ToolStateProvider>
-      <AppShell />
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <header className="bg-primary text-white shadow-md">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <h1 className="font-heading text-lg font-bold tracking-tight">EnergiePortaal</h1>
+            <p className="text-xs text-white/70">Energieadvies voor Nederlandse huiseigenaren in Frankrijk</p>
+          </div>
+        </header>
+
+        <main className="max-w-7xl mx-auto px-4 py-6">
+          <StappenFlow />
+        </main>
+      </div>
     </ToolStateProvider>
   )
 }

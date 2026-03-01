@@ -36,7 +36,7 @@ export function Besparingsadvies() {
         </p>
         {savings.dpeNaMaatregelen.letter !== result.dpe.letter && (
           <p className="text-green-700 mt-1">
-            DPE na alle maatregelen: {result.dpe.letter} → {savings.dpeNaMaatregelen.letter} ({Math.round(savings.dpeNaMaatregelen.kwhPerM2)} kWh/m²)
+            DPE-indicatie na alle maatregelen: {result.dpe.letter} → {savings.dpeNaMaatregelen.letter} ({Math.round(savings.dpeNaMaatregelen.kwhPerM2)} kWh/m²)
           </p>
         )}
       </div>
@@ -45,7 +45,7 @@ export function Besparingsadvies() {
       {savings.maatregelenVoorVolgendeDPE.length > 0 && result.dpe.letter !== 'A' && (
         <div className="bg-primary/5 border border-primary/15 rounded-lg p-3 text-sm">
           <p className="font-semibold text-primary mb-1">
-            Om DPE-klasse {result.dpe.letter} te verlaten:
+            Om DPE-indicatie klasse {result.dpe.letter} te verlaten:
           </p>
           <ul className="list-disc list-inside text-gray-700 space-y-0.5">
             {savings.maatregelenVoorVolgendeDPE.map((m) => (

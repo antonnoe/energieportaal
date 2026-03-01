@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
+import { CoachWidget } from '../components/CoachWidget';
 
 function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
   id: string; label: string; value: string; unit?: string;
@@ -7,7 +8,7 @@ function NumField({ id, label, value, unit, onChange, min, max, step, helpText }
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-semibold mb-1 flex items-center">{label}<CoachWidget fieldId={id} /></label>
       <div className="relative">
         <input
           id={id} type="number" min={min} max={max} step={step ?? 0.01}
@@ -28,7 +29,7 @@ function SelectField({ id, label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-semibold mb-1 flex items-center">{label}<CoachWidget fieldId={id} /></label>
       <select
         id={id} value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
@@ -68,7 +69,7 @@ export function Step5Financieel() {
       {/* Energieprijzen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
         <SectionTitle>Energieprijzen</SectionTitle>
-        <p className="text-xs text-gray-400">Standaardprijzen voor Frankrijk (2024/2025). Pas aan naar uw eigen tarief.</p>
+        <p className="text-xs text-gray-400">Standaardprijzen voor Frankrijk (februari 2026). Pas aan naar uw eigen tarief.</p>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="prijsGas" label="Gas" value={toolState.prijsGas} unit="€/kWh" onChange={sf('prijsGas')} min={0.01} max={1} step={0.01} />
           <NumField id="prijsElektriciteit" label="Elektriciteit" value={toolState.prijsElektriciteit} unit="€/kWh" onChange={sf('prijsElektriciteit')} min={0.01} max={1} step={0.01} />

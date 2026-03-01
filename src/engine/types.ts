@@ -273,6 +273,9 @@ export interface DebugInfo {
   auxFrac: number;
   auxEff: number;
 
+  // HDD effectief (gewogen)
+  hddEff: number;
+
   // DHW
   dhwLitersPerDag: number;
   dhwDeltaT: number;
@@ -283,6 +286,15 @@ export interface DebugInfo {
 
   // Prijzen
   prijzen: Record<string, number>;
+
+  // Kosten per categorie (voor grondslagen)
+  kostenVerwarmingHoofd: number;
+  kostenVerwarmingBij: number;
+  kostenDhw: number;
+  kostenElektriciteit: number;
+  kostenEV: number;
+  kostenZwembad: number;
+  kostenKoeling: number;
 }
 
 // ─── Maatregel / besparing ────────────────────────────────────────────────────

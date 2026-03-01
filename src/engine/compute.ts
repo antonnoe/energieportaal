@@ -32,6 +32,7 @@ import {
   CP_WATER,
   ZWEMBAD_VERLIES_PER_M2,
   DEFAULTS,
+  DEFAULT_EXPORT_TARIEF,
 } from './constants.ts';
 import { berekenDPE } from './dpe.ts';
 
@@ -262,20 +263,29 @@ export function compute(input: PortaalInput): PortaalResult {
   const co2Elektriciteit = (elektriciteitBasis + evKwh + koelingKwh + zwembadKwh) * CO2_FACTOR.elektrisch;
   const co2Kg = Math.round(co2Hoofdverwarming + co2Bijverwarming + co2Dhw + co2Elektriciteit);
 
+  // ── HDD effectief (gewogen) ──
+  const fracPresent = input.daysPresent / 365;
+  const fracAway = input.daysAway / 365;
+  const hddEff = hddPresent * fracPresent + hddAway * fracAway;
+
   // ── Kosten ──
-  const kostenVerwarming =
-    verwarmingHoofd * getPrijsPerKwh(input.mainHeating, prijzen) +
-    (input.auxHeating !== 'geen'
-      ? verwarmingBij * getPrijsPerKwh(input.auxHeating, prijzen)
-      : 0);
+  const kostenVerwarmingHoofd = verwarmingHoofd * getPrijsPerKwh(input.mainHeating, prijzen);
+  const kostenVerwarmingBij = input.auxHeating !== 'geen'
+    ? verwarmingBij * getPrijsPerKwh(input.auxHeating, prijzen)
+    : 0;
+  const kostenVerwarming = kostenVerwarmingHoofd + kostenVerwarmingBij;
 
   const kostenDhw = dhwInput * getPrijsPerKwh(input.dhwSystem, prijzen);
-  const kostenElektriciteit = (elektriciteitBasis + evKwh + koelingKwh + zwembadKwh) * prijzen.elektriciteit;
+  const kostenEV = evKwh * prijzen.elektriciteit;
+  const kostenZwembad = zwembadKwh * prijzen.elektriciteit;
+  const kostenKoeling = koelingKwh * prijzen.elektriciteit;
+  const kostenElekBasis = elektriciteitBasis * prijzen.elektriciteit;
+  const kostenElektriciteit = kostenElekBasis + kostenEV + kostenZwembad + kostenKoeling;
   const kostenTotaal = kostenVerwarming + kostenDhw + kostenElektriciteit;
 
   const pvBesparing =
     pvZelfverbruikKwh * prijzen.elektriciteit +
-    pvExportKwh * (input.exportTarief || 0.06);
+    pvExportKwh * (input.exportTarief || DEFAULT_EXPORT_TARIEF);
   const nettoKosten = Math.max(0, kostenTotaal - pvBesparing);
 
   // ── Debug ──
@@ -295,8 +305,9 @@ export function compute(input: PortaalInput): PortaalResult {
     hddBasis: zone.hdd,
     hddCorrPresent: hddPresent,
     hddCorrAway: hddAway,
-    fracPresent: input.daysPresent / 365,
-    fracAway: input.daysAway / 365,
+    fracPresent,
+    fracAway,
+    hddEff,
     mainFrac,
     mainEff,
     auxFrac,
@@ -306,6 +317,13 @@ export function compute(input: PortaalInput): PortaalResult {
     dhwEff,
     pvYieldZone: zone.pv,
     prijzen,
+    kostenVerwarmingHoofd,
+    kostenVerwarmingBij,
+    kostenDhw,
+    kostenElektriciteit: kostenElekBasis,
+    kostenEV,
+    kostenZwembad,
+    kostenKoeling,
   };
 
   return {
@@ -398,7 +416,7 @@ export function createDefaultInput(): PortaalInput {
     prijsStookolie: DEFAULT_PRIJZEN.stookolie,
     prijsElektriciteit: DEFAULT_PRIJZEN.elektrisch,
     prijsHout: DEFAULT_PRIJZEN.hout,
-    exportTarief: 0.06,
+    exportTarief: DEFAULT_EXPORT_TARIEF,
     subsidieIntake: {
       usage: 'rp',
       ageGt2: 'ja',

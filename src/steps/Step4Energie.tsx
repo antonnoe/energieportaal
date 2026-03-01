@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
+import { CoachWidget } from '../components/CoachWidget';
 
 const VERWARMING_OPTIES = [
   { value: 'gas', label: 'Gasketel' },
@@ -15,7 +16,7 @@ function NumField({ id, label, value, unit, onChange, min, max, step }: {
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-semibold mb-1 flex items-center">{label}<CoachWidget fieldId={id} /></label>
       <div className="relative">
         <input
           id={id} type="number" min={min} max={max} step={step ?? 1}
@@ -35,7 +36,7 @@ function SelectField({ id, label, value, options, onChange }: {
 }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
+      <label htmlFor={id} className="text-sm font-semibold mb-1 flex items-center">{label}<CoachWidget fieldId={id} /></label>
       <select
         id={id} value={value} onChange={(e) => onChange(e.target.value)}
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
@@ -54,7 +55,7 @@ function Toggle({ id, label, value, onChange, helpText }: {
   return (
     <div className="flex items-center justify-between py-1">
       <div>
-        <label htmlFor={id} className="text-sm font-semibold cursor-pointer">{label}</label>
+        <label htmlFor={id} className="text-sm font-semibold cursor-pointer flex items-center">{label}<CoachWidget fieldId={id} /></label>
         {helpText && <p className="text-xs text-gray-400">{helpText}</p>}
       </div>
       <button

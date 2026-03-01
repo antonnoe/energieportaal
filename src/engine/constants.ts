@@ -40,17 +40,25 @@ export const CO2_FACTOR: Record<VerwarmingType, number> = {
   hout: 0.030,
 };
 
-// ─── Standaard energieprijzen (€/kWh) ────────────────────────────────────────
+// ─── Standaard energieprijzen (€/kWh) — februari 2026 ───────────────────────
+//
+// Bron: tarieven Frankrijk feb 2026
+//   elektra:  0.2516 €/kWh (TRV)
+//   gas:      0.1051 €/kWh (PCI)
+//   fioul:    1.18 €/L ÷ 10 kWh/L = 0.118 €/kWh
+//   pellet:   0.385 €/kg ÷ 4.8 kWh/kg = 0.080 €/kWh
+//   hout:     85 €/stère ÷ 1500 kWh/stère = 0.057 €/kWh
+//   propaan:  1.90 €/L ÷ 6.5 kWh/L = 0.29 €/kWh (niet apart gemodelleerd)
 
 export const DEFAULT_PRIJZEN: Record<VerwarmingType, number> = {
-  gas: 0.12,
-  stookolie: 0.14,
-  warmtepomp: 0.25,
-  elektrisch: 0.25,
-  hout: 0.06,
+  gas: 0.1051,
+  stookolie: 0.118,
+  warmtepomp: 0.2516,
+  elektrisch: 0.2516,
+  hout: 0.057,
 };
 
-export const DEFAULT_EXPORT_TARIEF = 0.06; // €/kWh PV-export
+export const DEFAULT_EXPORT_TARIEF = 0.13; // €/kWh PV-export (OA EDF tarif S1 2026)
 
 // ─── DPE-drempelwaarden en kleuren (officieel Frans schema) ──────────────────
 

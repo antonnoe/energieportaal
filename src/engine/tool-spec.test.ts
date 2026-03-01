@@ -4,7 +4,6 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  snelAdviesFields,
   stap1Fields,
   stap2Fields,
   stap3Fields,
@@ -16,10 +15,6 @@ import {
 } from './tool-spec.ts';
 
 describe('Velddefinities', () => {
-  it('snelAdviesFields bevat 5 velden', () => {
-    expect(snelAdviesFields).toHaveLength(5);
-  });
-
   it('stap1 t/m stap5 bestaan en hebben velden', () => {
     expect(stap1Fields.length).toBeGreaterThan(0);
     expect(stap2Fields.length).toBeGreaterThan(0);
@@ -50,38 +45,36 @@ describe('Velddefinities', () => {
 });
 
 describe('validateFields', () => {
-  it('returns no errors for valid input', () => {
-    const values = { oppervlakte: 100, bouwjaar: 1990, isolatie: 'goed', verwarming: 'gas' };
-    const errors = validateFields(snelAdviesFields, values);
+  it('returns no errors for valid stap2 input', () => {
+    const values = { huisTypeId: 'pavillon', woonoppervlak: 100, verdiepingen: 1 };
+    const errors = validateFields(stap2Fields, values);
     expect(errors).toHaveLength(0);
   });
 
   it('reports errors for missing required fields', () => {
-    const errors = validateFields(snelAdviesFields, {});
+    const errors = validateFields(stap2Fields, {});
     expect(errors.length).toBeGreaterThan(0);
     const fieldIds = errors.map((e) => e.fieldId);
-    expect(fieldIds).toContain('oppervlakte');
-    expect(fieldIds).toContain('bouwjaar');
-    expect(fieldIds).toContain('isolatie');
-    expect(fieldIds).toContain('verwarming');
+    expect(fieldIds).toContain('huisTypeId');
+    expect(fieldIds).toContain('woonoppervlak');
   });
 
-  it('reports error when oppervlakte is below minimum', () => {
-    const values = { oppervlakte: 5, bouwjaar: 2000, isolatie: 'matig', verwarming: 'gas' };
-    const errors = validateFields(snelAdviesFields, values);
-    expect(errors.some((e) => e.fieldId === 'oppervlakte')).toBe(true);
+  it('reports error when woonoppervlak is below minimum', () => {
+    const values = { huisTypeId: 'pavillon', woonoppervlak: 5, verdiepingen: 1 };
+    const errors = validateFields(stap2Fields, values);
+    expect(errors.some((e) => e.fieldId === 'woonoppervlak')).toBe(true);
   });
 
-  it('reports error when oppervlakte is above maximum', () => {
-    const values = { oppervlakte: 5000, bouwjaar: 2000, isolatie: 'matig', verwarming: 'gas' };
-    const errors = validateFields(snelAdviesFields, values);
-    expect(errors.some((e) => e.fieldId === 'oppervlakte')).toBe(true);
+  it('reports error when woonoppervlak is above maximum', () => {
+    const values = { huisTypeId: 'pavillon', woonoppervlak: 5000, verdiepingen: 1 };
+    const errors = validateFields(stap2Fields, values);
+    expect(errors.some((e) => e.fieldId === 'woonoppervlak')).toBe(true);
   });
 
   it('reports error for non-numeric value in number field', () => {
-    const values = { oppervlakte: 'abc', bouwjaar: 2000, isolatie: 'goed', verwarming: 'gas' };
-    const errors = validateFields(snelAdviesFields, values);
-    expect(errors.some((e) => e.fieldId === 'oppervlakte')).toBe(true);
+    const values = { huisTypeId: 'pavillon', woonoppervlak: 'abc', verdiepingen: 1 };
+    const errors = validateFields(stap2Fields, values);
+    expect(errors.some((e) => e.fieldId === 'woonoppervlak')).toBe(true);
   });
 });
 

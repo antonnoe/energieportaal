@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { HUIZEN_MATRIX } from '../data/huizen-matrix';
+import { CoachWidget } from '../components/CoachWidget';
 
 export function Step2Woningtype() {
   const { toolState, setField, setHuisType } = useToolState();
@@ -50,8 +51,8 @@ export function Step2Woningtype() {
       {/* Oppervlak & verdiepingen */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="woonoppervlak" className="block text-sm font-semibold mb-1">
-            Woonoppervlakte <span className="text-red-500">*</span>
+          <label htmlFor="woonoppervlak" className="text-sm font-semibold mb-1 flex items-center">
+            Woonoppervlakte <span className="text-red-500 ml-0.5">*</span><CoachWidget fieldId="woonoppervlak" />
           </label>
           <div className="relative">
             <input
@@ -77,8 +78,8 @@ export function Step2Woningtype() {
           </div>
         </div>
         <div>
-          <label htmlFor="verdiepingen" className="block text-sm font-semibold mb-1">
-            Verdiepingen
+          <label htmlFor="verdiepingen" className="text-sm font-semibold mb-1 flex items-center">
+            Verdiepingen<CoachWidget fieldId="verdiepingen" />
           </label>
           <select
             id="verdiepingen"

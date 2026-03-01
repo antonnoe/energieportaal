@@ -41,7 +41,7 @@ export function DPESchatting() {
 
   return (
     <section className="space-y-4">
-      <h2 className="font-heading text-lg font-bold text-primary">DPE-schatting</h2>
+      <h2 className="font-heading text-lg font-bold text-primary">DPE-indicatie</h2>
 
       {/* Grote DPE letter */}
       <div className="flex items-center gap-4">
@@ -103,6 +103,13 @@ export function DPESchatting() {
           <p>{dpe.verhuurverbod.beschrijving}</p>
         </div>
       )}
+
+      {/* Disclaimer */}
+      <p className="text-xs text-gray-400 italic leading-relaxed">
+        Let op: dit is een indicatieve schatting op basis van de ingevoerde gegevens.
+        Een officieel DPE-rapport kan alleen worden opgesteld door een gecertificeerd diagnostiqueur.
+        De werkelijke DPE-klasse kan afwijken.
+      </p>
     </section>
   );
 }

@@ -28,7 +28,7 @@ export function FloatingEuro() {
               {result.dpe.letter}
             </div>
             <div className="hidden sm:block">
-              <p className="text-xs text-gray-500">DPE</p>
+              <p className="text-xs text-gray-500">DPE-ind.</p>
               <p className="text-xs font-medium">{Math.round(result.dpe.kwhPerM2)} kWh/m²</p>
             </div>
           </div>
