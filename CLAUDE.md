@@ -338,12 +338,35 @@ DPE: 325 kWh/m²/jaar → E
 
 ---
 
-## INTEGRATIES (TOEKOMSTIG)
+## INTEGRATIES
 
-### Le Bricoleur (Café Claude)
-Een zwevende [i] knop bij elk invoerveld die context-gevoelige uitleg geeft.
-Technisch: een CoachTip component dat per veld-ID een tooltip toont.
-Toekomst: koppeling met Café Claude API voor dynamische uitleg.
+### AI-Coach Widget (Fase 6 — NU bouwen)
+Een zwevende [i] knop bij ELK invoerveld EN bij elke regel in de grondslagen.
+Bij klik: roept de Anthropic API aan met de actuele context en geeft een korte, 
+begrijpelijke uitleg in het Nederlands.
+
+**Technisch:**
+- Component: `src/components/CoachWidget.tsx`
+- Roept `https://api.anthropic.com/v1/messages` aan (model: claude-sonnet-4-20250514)
+- Geen API key nodig in de code (wordt al afgehandeld)
+- Per element een prompt die bevat: veld-naam, huidige waarde, woningtype, context
+- Maximaal 150 woorden antwoord
+- Floating tooltip die opent bij klik op [i]
+
+**Voorbeeld prompt:**
+```
+Je bent een Nederlandse energieadviseur. Leg in max 3 zinnen uit wat deze waarde 
+betekent voor de gebruiker. Gebruik geen jargon. Geef praktisch advies.
+
+Context: Woningtype: La Longère (1948), Zone: Méditerranée
+Veld: Htr (transmissieverlies)
+Waarde: 744,6 W/K
+```
+
+**Voorbeeld antwoord:**
+"Uw woning verliest 744,6 Watt per graad temperatuurverschil via muren, dak, vloer 
+en ramen. Dat is veel — vergelijkbaar met 7 olieradiatoren continu aan. De muren 
+zijn de grootste bron (50%). Muurisolatie zou het meeste opleveren."
 
 ### DossierFrankrijk
 De PDF-export moet een formaat hebben dat eenvoudig in DossierFrankrijk kan worden opgeslagen.
@@ -351,7 +374,7 @@ Toekomst: directe API-koppeling.
 
 ### PDF-generator
 Moet een complete samenvatting genereren met:
-- Woningprofiel + DPE
+- Woningprofiel + DPE-indicatie
 - Kostenopsplitsing
 - Subsidie-overzicht met stoplichten
 - Berekeningsgrondslagen
@@ -420,14 +443,16 @@ test: tests toevoegen/aanpassen
 
 ## WAT ER NU IS vs WAT ER MOET KOMEN
 
-### Huidige staat (slecht)
-- 3 losse tabbladen die elk hun eigen berekening doen
-- Uitgeklede engine zonder de diepte van de V1 tools
-- Geen huizenmatrix
-- Geen DPE-schatting
-- Geen subsidie-logica
-- Geen grondslagen-paneel
-- Geen PDF-export
+### Huidige staat (Fase 1-5 klaar, correcties nodig)
+- Engine, data, state, stappen en rapport zijn gebouwd
+- 125 tests, allemaal groen
+- MAAR: oude tabs staan er nog in (Portaal/Snel/Expert/Subsidie)
+- MAAR: energieprijzen zijn verouderd
+- MAAR: rekenfout in totaalberekening (spookgetal)
+- MAAR: rapport toont data voordat er genoeg invoer is
+- MAAR: geen AI-coach tooltips
+- MAAR: DPE wordt ten onrechte gepresenteerd als officieel
+- Zie CORRECTIES FASE 6 voor alles wat nog moet
 
 ### Gewenste staat
 - Eén stapsgewijze flow (5 stappen) voor invoer
@@ -447,11 +472,122 @@ Alle code wordt NIEUW geschreven in TypeScript/React voor energieportaal.
 
 ### Aanpak
 
-**Fase 1: Engine** — Bouw de volledige rekenmotor in `src/engine/` met alle V1 logica. Schrijf tests.
-**Fase 2: Data** — Huizenmatrix, dept→zone mapping, bronverwijzingen in `src/data/`.
-**Fase 3: State** — ToolStateContext die de volledige invoer + resultaat beheert.
-**Fase 4: Stappen** — De 5 invoerstappen in `src/steps/`.
-**Fase 5: Rapport** — Het doorlopende rapport met 6 secties + FloatingEuro.
-**Fase 6: Extras** — PDF-export, coach-tooltips.
+**Fase 1: Engine** — Bouw de volledige rekenmotor in `src/engine/` met alle V1 logica. Schrijf tests. ✅ KLAAR
+**Fase 2: Data** — Huizenmatrix, dept→zone mapping, bronverwijzingen in `src/data/`. ✅ KLAAR
+**Fase 3: State** — ToolStateContext die de volledige invoer + resultaat beheert. ✅ KLAAR
+**Fase 4: Stappen** — De 5 invoerstappen in `src/steps/`. ✅ KLAAR
+**Fase 5: Rapport** — Het doorlopende rapport met 6 secties + FloatingEuro. ✅ KLAAR
+**Fase 6: Correcties + AI-Coach** — Zie CORRECTIES hieronder.
 
 Werk per fase. Commit per fase. Test per fase.
+
+---
+
+## CORRECTIES FASE 6 (URGENT)
+
+### Deze correcties moeten ALLEMAAL in één ronde worden uitgevoerd.
+
+### C1: Tabs verwijderen
+Verwijder de VOLLEDIGE tabnavigatie in de header (Portaal / Snel / Expert / Subsidie).
+Er is maar één flow: 5 stappen invoer → 1 doorlopend rapport. Geen tabs. Geen oude views.
+Verwijder ook alle code die bij de oude tabs hoort (oude components, routes, etc).
+
+### C2: Klimaatzone niet handmatig
+Zodra een geldige postcode (5 cijfers) is ingevoerd:
+- Zone wordt automatisch bepaald via dept→zone mapping
+- GEEN dropdown meer voor klimaatzone
+- GEEN stedenknoppen/snelknoppen
+- Toon alleen: "Zone: Méditerranée (1400 graaddagen)" als bevestiging
+- Less is more
+
+### C3: Rapport bouwt progressief op
+Het rapport rechts is LEEG totdat Stap 1 (Locatie + postcode) is voltooid.
+Daarna toont het rapport alleen de secties waarvoor genoeg data is:
+- Na Stap 1: Woningprofiel (locatie, zone)
+- Na Stap 2: + woningtype, U-waarden
+- Na Stap 3: + warmteverlies, DPE-indicatie
+- Na Stap 4: + energieverbruik, kosten
+- Na Stap 5: + subsidies, grondslagen compleet
+
+Secties waarvoor nog geen data is, worden NIET getoond (geen lege placeholders).
+
+### C4: FloatingEuro pas na Stap 3
+De FloatingEuro balk mag pas verschijnen als er minimaal een warmteverliesberekening is
+(na Stap 3: Isolatie). Daarvóór is er geen zinvolle €-waarde om te tonen.
+
+### C5: Energieprijzen updaten
+De standaard energieprijzen in `src/engine/constants.ts` moeten worden geupdate naar 
+actuele waarden (februari 2026). De OUDE waarden zijn verouderd.
+
+```typescript
+// ENERGIEPRIJZEN — Bron: CRE / DGEC / Markt — februari 2026
+// Gebruiker kan altijd handmatig aanpassen in Stap 5
+const ENERGY_PRICES_DEFAULT = {
+  elec:    0.1940,  // €/kWh — CRE Tarif Bleu Base feb 2026
+  gas:     0.1051,  // €/kWh — CRE Prix Repère chauffage feb 2026 (≈ €1,05/m³)
+  fioul:   1.18,    // €/L   — DGEC gemiddelde feb 2026
+  pellet:  0.385,   // €/kg  — Propellet/SDES vrac feb 2026
+  wood:    85,      // €/stère — marktgemiddelde 2025-2026
+  propaan: 1.90,    // €/L   — marktgemiddelde 2026
+};
+
+// Conversie naar kWh (PCI)
+const KWH_CONVERSION = {
+  elec: 1,        // 1 kWh = 1 kWh
+  gas: 10,        // 1 m³ ≈ 10 kWh
+  fioul: 10,      // 1 L ≈ 10 kWh
+  pellet: 4.8,    // 1 kg ≈ 4,8 kWh
+  wood: 1800,     // 1 stère ≈ 1800 kWh
+  propaan: 7.1,   // 1 L ≈ 7,1 kWh
+};
+```
+
+### C6: Rekenfout in totaalberekening fixen
+Het totaal in het rapport en de grondslagen moet TRANSPARANT optellen.
+Elke post moet expliciet zichtbaar zijn:
+
+```
+ENERGIEVERBRUIK (kWh/jaar)
+  Ruimteverwarming (final):  53.810 kWh  (thermisch: 48.429 / η=0,9)
+  Tapwater DHW (final):       1.320 kWh  (thermisch: 1.188 / η=0,9)
+  Basiselektriciteit:         2.500 kWh  (huishouden)
+  [EV laden]:                     0 kWh  (niet ingevuld)
+  [Zwembad]:                      0 kWh  (niet ingevuld)
+  [Koeling]:                      0 kWh  (niet ingevuld)
+  ─────────────────────────────────────
+  TOTAAL:                    57.630 kWh
+```
+
+Geen spookgetallen. Elke kWh moet herleidbaar zijn.
+
+### C7: HDD presenteren als gewogen HDD
+In de grondslagen, NIET twee losse regels voor aanwezig/afwezig.
+WEL: duidelijk gewogen berekening:
+
+```
+GRAADDAGEN
+  Basis HDD zone: 2200 K·d
+  Setpoint aanwezig: 20°C (82% van jaar) → HDD_corr = 2600
+  Setpoint afwezig:  16°C (18% van jaar) → HDD_corr = 1800
+  Gewogen HDD_eff = 2600 × 0,82 + 1800 × 0,18 = 2.456 K·d
+```
+
+### C8: "DPE" hernoemen naar "DPE-indicatie"
+OVERAL in de tool — rapport, grondslagen, FloatingEuro, PDF — moet staan:
+- "DPE-indicatie" (niet "DPE" of "DPE-schatting")
+- Met disclaimer: "Indicatieve berekening op basis van invoergegevens. 
+  Geen officiële DPE-audit. Een gecertificeerde DPE kan afwijken."
+
+### C9: Grondslagen uitbreiden
+De grondslagen moeten ALLES tonen, inclusief:
+- Gebruikte energieprijzen per energiesoort (€/kWh, bron, datum)
+- Conversie kWh↔eenheid voor elke brandstof
+- Elke post in de kostenberekening: kWh × prijs = € per categorie
+- Totale kosten per jaar EN per maand
+
+### C10: AI-Coach Widget bouwen
+Bouw de CoachWidget component zoals beschreven in de INTEGRATIES sectie hierboven.
+- [i] knop bij elk invoerveld in Stap 1-5
+- [i] knop bij elke regel in de grondslagen
+- Bij klik: API-call naar Claude met context → korte uitleg in tooltip
+- Geen volledige chatbot, alleen gerichte uitleg per element
