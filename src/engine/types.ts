@@ -302,8 +302,20 @@ export interface Maatregel {
   besparingEurJaar: number;
   terugverdientijdJaar: number;
   dpeReductieKwhM2: number;                       // kWh/m² reductie
+  dpeNaLetter: string;                            // DPE-letter na maatregel
+  dpeNaKwhM2: number;                             // kWh/m² na maatregel
   co2ReductieKg: number;
   bron: string;
+}
+
+export interface CombinatieResult {
+  geselecteerdeMaatregelen: string[];
+  besparingKwhJaar: number;
+  besparingEurJaar: number;
+  kostenSchatting: { min: number; max: number };
+  terugverdientijdJaar: number;
+  huidigeDpe: DPEResultaat;
+  nieuweDpe: DPEResultaat;
 }
 
 export interface SavingsResult {
