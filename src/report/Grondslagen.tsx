@@ -58,6 +58,9 @@ export function Grondslagen() {
             <p>Setpoint aanwezig: {debug.setpoint}°C ({(debug.fracPresent * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrPresent)}</p>
             <p>Setpoint afwezig:  {debug.awaySetpoint}°C ({(debug.fracAway * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrAway)}</p>
             <p className="font-semibold">Gewogen HDD_eff = {Math.round(debug.hddCorrPresent)} × {debug.fracPresent.toFixed(2)} + {Math.round(debug.hddCorrAway)} × {debug.fracAway.toFixed(2)} = {Math.round(debug.hddEffGewogen)} K·d</p>
+            {debug.fracPresent + debug.fracAway < 0.999 && (
+              <p className="text-amber-700">Aanwezig: {(debug.fracPresent * 100).toFixed(0)}% | Afwezig: {(debug.fracAway * 100).toFixed(0)}% | Leegstand: {((1 - debug.fracPresent - debug.fracAway) * 100).toFixed(0)}% (geen verwarming)</p>
+            )}
           </div>
 
           {/* F7: Transparante energieberekening */}
@@ -69,7 +72,7 @@ export function Grondslagen() {
               <p>  Bijverwarming ({toolState.auxHeating}, &eta;={debug.auxEff}): {result.verwarmingBij.toLocaleString('nl-NL')} kWh ({(debug.auxFrac * 100).toFixed(0)}%)</p>
             )}
             <p>  Verwarming totaal (final):     {result.verwarmingTotaal.toLocaleString('nl-NL')} kWh</p>
-            <p>  DHW ({debug.dhwLitersPerDag} L/dag, &eta;={debug.dhwEff}): {result.dhwInput.toLocaleString('nl-NL')} kWh (therm: {result.dhwThermisch.toLocaleString('nl-NL')})</p>
+            <p>  DHW ({debug.dhwLitersPerDag} L/dag, &eta;={debug.dhwEff}): {result.dhwInput.toLocaleString('nl-NL')} kWh (therm: {result.dhwThermisch.toLocaleString('nl-NL')}){toolState.dhwSystem === 'hout' ? ' ⚠️ (ongebruikelijk — bevestigd door gebruiker)' : ''}</p>
             <p>  Basiselektriciteit:            {result.elektriciteitBasis.toLocaleString('nl-NL')} kWh</p>
             {result.evKwh > 0 && <p>  EV laden:                      {result.evKwh.toLocaleString('nl-NL')} kWh</p>}
             {result.zwembadKwh > 0 && <p>  Zwembad:                       {result.zwembadKwh.toLocaleString('nl-NL')} kWh</p>}

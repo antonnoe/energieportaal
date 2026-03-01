@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { HUIZEN_MATRIX } from '../data/huizen-matrix';
+import { CoachWidget } from '../components/CoachWidget';
 
 export function Step2Woningtype() {
   const { toolState, setField, setHuisType } = useToolState();
@@ -50,8 +51,9 @@ export function Step2Woningtype() {
       {/* Oppervlak & verdiepingen */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="woonoppervlak" className="block text-sm font-semibold mb-1">
+          <label htmlFor="woonoppervlak" className="flex items-center text-sm font-semibold mb-1">
             Woonoppervlakte <span className="text-red-500">*</span>
+            <CoachWidget veld="Woonoppervlakte" waarde={toolState.woonoppervlak} />
           </label>
           <div className="relative">
             <input
@@ -75,10 +77,17 @@ export function Step2Woningtype() {
             />
             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">m²</span>
           </div>
+          {Number(toolState.woonoppervlak) > 0 && Number(toolState.woonoppervlak) < 20 && (
+            <p className="text-xs text-red-600 mt-1">Minimaal 20 m² voor een betrouwbare berekening</p>
+          )}
+          {Number(toolState.woonoppervlak) > 1000 && (
+            <p className="text-xs text-red-600 mt-1">Maximaal 1000 m² voor een betrouwbare berekening</p>
+          )}
         </div>
         <div>
-          <label htmlFor="verdiepingen" className="block text-sm font-semibold mb-1">
+          <label htmlFor="verdiepingen" className="flex items-center text-sm font-semibold mb-1">
             Verdiepingen
+            <CoachWidget veld="Verdiepingen" waarde={toolState.verdiepingen} />
           </label>
           <select
             id="verdiepingen"

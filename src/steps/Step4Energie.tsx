@@ -1,6 +1,7 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
 import { DEFAULT_EFFICIENCY } from '../engine/constants';
+import { CoachWidget } from '../components/CoachWidget';
 
 const VERWARMING_KNOPPEN = [
   { value: 'gas', label: 'Gas-ketel', eff: DEFAULT_EFFICIENCY.gas },
@@ -154,7 +155,7 @@ export function Step4Energie() {
 
       {/* U1: Verwarming knoppen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Hoofdverwarming</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Hoofdverwarming</SectionTitle><CoachWidget veld="Hoofdverwarming" /></div>
         <ButtonGroup
           options={VERWARMING_KNOPPEN.map(k => ({ value: k.value, label: k.label }))}
           selected={toolState.mainHeating}
@@ -176,7 +177,7 @@ export function Step4Energie() {
 
       {/* Ventilatie */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Ventilatie</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Ventilatie</SectionTitle><CoachWidget veld="WTW" /></div>
         <Toggle id="hasHRV" label="WTW-ventilatie (VMC double flux)" value={toolState.hasHRV} onChange={sf('hasHRV')} helpText="Mechanische ventilatie met warmteterugwinning" />
         {toolState.hasHRV === 'ja' && (
           <NumField id="hrvEfficiency" label="WTW-rendement" value={toolState.hrvEfficiency} unit="%" onChange={sf('hrvEfficiency')} min={50} max={95} step={5} />
@@ -185,7 +186,7 @@ export function Step4Energie() {
 
       {/* U1: Tapwater knoppen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Tapwater</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Tapwater</SectionTitle><CoachWidget veld="Tapwater" /></div>
         <ButtonGroup
           options={DHW_KNOPPEN}
           selected={
@@ -193,6 +194,12 @@ export function Step4Energie() {
           }
           onSelect={handleDhwSelect}
         />
+        {toolState.dhwSystem === 'hout' && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-xs text-amber-800">
+            <CoachWidget veld="DHW hout" waarschuwing="Warm water via houtverwarming is ongebruikelijk in Frankrijk. Bedoelde u een elektrische boiler of warmtepompboiler? Het kan wel bij een bouilleur/poêle bouilleur." />
+            <span className="ml-1">Warm water via hout is ongebruikelijk. Bevestig uw keuze of kies een andere optie.</span>
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-3">
           <NumField id="personen" label="Personen" value={toolState.personen} onChange={sf('personen')} min={1} max={10} />
           <NumField id="douchesPerDag" label="Douches/dag/pp" value={toolState.douchesPerDag} onChange={sf('douchesPerDag')} min={0} max={3} step={0.5} />
@@ -202,7 +209,7 @@ export function Step4Energie() {
 
       {/* Elektriciteit */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Elektriciteit &amp; apparaten</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Elektriciteit &amp; apparaten</SectionTitle><CoachWidget veld="Basiselektriciteit" /></div>
         <NumField id="basisElektriciteit" label="Basisverbruik" value={toolState.basisElektriciteit} unit="kWh/jaar" onChange={sf('basisElektriciteit')} min={0} max={20000} step={100} />
       </div>
 
