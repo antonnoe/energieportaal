@@ -175,7 +175,7 @@ const DEFAULT_STATE: ToolState = {
 
   // UI
   currentStep: 1,
-  activeTab: 'snel',
+  activeTab: 'stappen',
 
   // Backward compatible
   oppervlakte: '100',
