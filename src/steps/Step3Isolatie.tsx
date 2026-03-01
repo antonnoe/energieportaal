@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
 import { ISOLATIE_MUUR, ISOLATIE_DAK, ISOLATIE_VLOER, ISOLATIE_RAAM } from '../engine/constants';
+import { CoachWidget } from '../components/CoachWidget';
 
 function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
   id: string; label: string; value: string; unit?: string;
@@ -37,7 +38,7 @@ function IsolatieKeuze({ label, niveaus, selected, onSelect, uWaarde, huisTypeId
 
   return (
     <div className="space-y-2">
-      <p className="text-sm font-semibold">{label}</p>
+      <p className="text-sm font-semibold flex items-center">{label} <CoachWidget veld={label} /></p>
       <div className="flex flex-wrap gap-1.5">
         {niveaus.map((n) => {
           const u = typeof n.uWaarde === 'function' ? n.uWaarde(huisTypeId) : n.uWaarde;

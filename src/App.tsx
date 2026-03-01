@@ -95,19 +95,49 @@ function StepNavButtons() {
 }
 
 function Rapport() {
+  const { toolState, result } = useToolState()
+
+  // Rapport is leeg tot er een geldige postcode is (5 cijfers)
+  const hasPostcode = toolState.postcode.length === 5
+  // Na stap 3: er is een geldige warmteverliesberekening
+  const hasHeatCalc = hasPostcode && result.verwarmingTotaal > 0
+  // Na stap 5: subsidie-parameters zijn beschikbaar
+  const hasFinancieel = hasHeatCalc && toolState.currentStep >= 5
+
+  if (!hasPostcode) {
+    return (
+      <div className="text-center py-12 text-gray-400 text-sm">
+        <p className="text-lg mb-1">Hier wordt uw rapportage gebouwd</p>
+        <p>Vul een postcode in bij Stap 1 om te beginnen.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <Woningprofiel />
-      <hr className="border-gray-200" />
-      <Energieprofiel />
-      <hr className="border-gray-200" />
-      <DPESchatting />
-      <hr className="border-gray-200" />
-      <Besparingsadvies />
-      <hr className="border-gray-200" />
-      <SubsidieCheck />
-      <hr className="border-gray-200" />
-      <Grondslagen />
+      {hasHeatCalc && (
+        <>
+          <hr className="border-gray-200" />
+          <Energieprofiel />
+          <hr className="border-gray-200" />
+          <DPESchatting />
+          <hr className="border-gray-200" />
+          <Besparingsadvies />
+        </>
+      )}
+      {hasFinancieel && (
+        <>
+          <hr className="border-gray-200" />
+          <SubsidieCheck />
+        </>
+      )}
+      {hasHeatCalc && (
+        <>
+          <hr className="border-gray-200" />
+          <Grondslagen />
+        </>
+      )}
     </div>
   )
 }

@@ -177,6 +177,26 @@ function getPrijsPerKwh(
 export function compute(input: PortaalInput): PortaalResult {
   const zone = getZoneById(input.zoneId);
 
+  // ── V7: Validatie oppervlak ──
+  const validationErrors: string[] = [];
+  if (input.woonoppervlak < 20) {
+    validationErrors.push('Minimaal 20 m² voor een betrouwbare berekening');
+  }
+  if (input.woonoppervlak > 1000) {
+    validationErrors.push('Maximaal 1000 m² voor een betrouwbare berekening');
+  }
+
+  // ── V8: Validatie fracties ──
+  const fracCheck = input.daysPresent / 365 + input.daysAway / 365;
+  if (fracCheck > 1.001) {
+    validationErrors.push('Dagen aanwezig + afwezig mogen niet meer dan 365 zijn');
+  }
+
+  // Bij ongeldige oppervlak of overtredende fracties: return nul-resultaat
+  if (input.woonoppervlak < 20 || input.woonoppervlak > 1000 || fracCheck > 1.001) {
+    return createEmptyResult(zone, input, validationErrors);
+  }
+
   // ── Volume ──
   const volume = input.woonoppervlak * input.verdiepingen * input.plafondHoogte;
 
@@ -353,6 +373,36 @@ export function compute(input: PortaalInput): PortaalResult {
     pvBesparing: Math.round(pvBesparing),
     nettoKosten: Math.round(nettoKosten),
     debug,
+    validationErrors: [],
+  };
+}
+
+/** Leeg resultaat bij validatiefouten — niet doorrekenen */
+function createEmptyResult(zone: ReturnType<typeof getZoneById>, input: PortaalInput, errors: string[]): PortaalResult {
+  const dpe = berekenDPE(0);
+  const debug: DebugInfo = {
+    zone,
+    huisType: input.huisTypeId,
+    uaMuur: 0, uaDak: 0, uaVloer: 0, uaRaam: 0,
+    volume: 0, achGebruikt: 0, hventVoorHRV: 0,
+    setpoint: input.setpoint, awaySetpoint: input.awaySetpoint, Tref: zone.Tref,
+    hddBasis: zone.hdd, hddCorrPresent: 0, hddCorrAway: 0, hddEffGewogen: 0,
+    fracPresent: 0, fracAway: 0, mainFrac: 0, mainEff: 0, auxFrac: 0, auxEff: 0,
+    dhwLitersPerDag: 0, dhwDeltaT: 28, dhwEff: 0, pvYieldZone: zone.pv,
+    prijzen: { gas: 0, stookolie: 0, elektriciteit: 0, hout: 0, propaan: 0 },
+  };
+  return {
+    uaWK: 0, hventWK: 0, hventEffWK: 0, hTotaalWK: 0,
+    hddPresent: 0, hddAway: 0, warmtevraagThermisch: 0,
+    verwarmingHoofd: 0, verwarmingBij: 0, verwarmingTotaal: 0,
+    dhwThermisch: 0, dhwInput: 0, elektriciteitBasis: 0,
+    evKwh: 0, zwembadKwh: 0, koelingKwh: 0,
+    totaalVerbruikKwh: 0, dpeVerbruikKwh: 0,
+    pvProductieKwh: 0, pvZelfverbruikKwh: 0, pvExportKwh: 0, netGridKwh: 0,
+    dpe, co2Kg: 0,
+    kostenVerwarming: 0, kostenDhw: 0, kostenElektriciteit: 0,
+    kostenTotaal: 0, pvBesparing: 0, nettoKosten: 0,
+    debug, validationErrors: errors,
   };
 }
 

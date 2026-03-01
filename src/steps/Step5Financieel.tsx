@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
+import { CoachWidget } from '../components/CoachWidget';
 
 const PV_PRESETS = [
   { id: 'geen', label: 'Geen', kwp: 0 },
@@ -80,18 +81,30 @@ export function Step5Financieel() {
 
       {/* Stookgedrag */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Stookgedrag</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Stookgedrag</SectionTitle><CoachWidget veld="Temperatuur" /></div>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="setpoint" label="Temperatuur (aanwezig)" value={toolState.setpoint} unit="°C" onChange={sf('setpoint')} min={15} max={25} step={0.5} />
           <NumField id="awaySetpoint" label="Temperatuur (afwezig)" value={toolState.awaySetpoint} unit="°C" onChange={sf('awaySetpoint')} min={5} max={20} step={0.5} />
           <NumField id="daysPresent" label="Dagen aanwezig" value={toolState.daysPresent} unit="d/jr" onChange={sf('daysPresent')} min={0} max={365} step={5} />
           <NumField id="daysAway" label="Dagen afwezig" value={toolState.daysAway} unit="d/jr" onChange={sf('daysAway')} min={0} max={365} step={5} />
         </div>
+        {(() => {
+          const totaal = Number(toolState.daysPresent) + Number(toolState.daysAway);
+          if (totaal > 365) {
+            return <p className="text-xs text-red-600">Dagen aanwezig + afwezig mogen niet meer dan 365 zijn ({totaal} dagen ingevuld)</p>;
+          }
+          if (totaal < 365) {
+            const leegstand = 365 - totaal;
+            const pct = Math.round((leegstand / 365) * 100);
+            return <p className="text-xs text-amber-700">Leegstand: {leegstand} dagen/jaar ({pct}%) — geen verwarming gedurende leegstand</p>;
+          }
+          return null;
+        })()}
       </div>
 
       {/* U1: Zonnepanelen knoppen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Zonnepanelen</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Zonnepanelen</SectionTitle><CoachWidget veld="Zonnepanelen" /></div>
         <div className="flex flex-wrap gap-1.5">
           {PV_PRESETS.map((p) => (
             <button
@@ -120,7 +133,7 @@ export function Step5Financieel() {
 
       {/* Energieprijzen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Energieprijzen</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Energieprijzen</SectionTitle><CoachWidget veld="Elektriciteit" /></div>
         <p className="text-xs text-gray-400">Standaardprijzen februari 2026. Pas aan naar uw eigen tarief.</p>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="prijsElektriciteit" label="Elektriciteit" value={toolState.prijsElektriciteit} unit="€/kWh" onChange={sf('prijsElektriciteit')} min={0.01} max={1} step={0.001} helpText="TRV Base 6kVA TTC" />
@@ -134,7 +147,7 @@ export function Step5Financieel() {
 
       {/* Subsidie intake */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Subsidie-parameters</SectionTitle>
+        <div className="flex items-center gap-1"><SectionTitle>Subsidie-parameters</SectionTitle><CoachWidget veld="Subsidie" /></div>
         <p className="text-xs text-gray-400">Deze gegevens bepalen voor welke subsidies u in aanmerking komt.</p>
         <div className="grid grid-cols-2 gap-3">
           <SelectField id="subsidieUsage" label="Gebruik woning" value={toolState.subsidieUsage} onChange={sf('subsidieUsage')} options={[

@@ -785,3 +785,21 @@ Voor een volgende fase — elektriciteit en fioul live ophalen:
 Gas, pellets, hout: blijven hardcoded met bron + datum.
 
 ---
+
+## INVOERVALIDATIE (Fase 7 Ronde 3)
+
+### V7: Minimum/maximum oppervlak
+- Minimum: 20 m² (studio). Onder 20: waarschuwing + niet doorrekenen.
+- Maximum: 1000 m² (kasteel). Boven 1000: waarschuwing + niet doorrekenen.
+- Reden: bij extreem klein oppervlak leidt normaal huishoudverbruik tot onrealistische DPE.
+
+### V8: Fracties aanwezig + afwezig
+- fracPresent + fracAway ≤ 1.0 altijd.
+- Als < 1.0: verschil is "leegstand" (geen verwarming). Expliciet tonen in grondslagen.
+- Als > 1.0: foutmelding, niet doorrekenen.
+
+### V9: DHW op hout/pellet waarschuwing
+- Als DHW-type = hout of pellet: CoachWidget waarschuwing tonen.
+- Wél toestaan (bouilleur bestaat), maar markeren als uitzonderlijk.
+
+---

@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { berekenSavings } from './savings.ts';
+import { berekenSavings, berekenCombinatie } from './savings.ts';
 import { compute, createDefaultInput } from './compute.ts';
 
 describe('berekenSavings', () => {
@@ -136,5 +136,98 @@ describe('berekenSavings', () => {
 
     // RT2012 met warmtepomp, WTW en PV: weinig verbeterpotentieel
     expect(savings.maatregelen.length).toBeLessThan(4);
+  });
+});
+
+// ─── berekenCombinatie ────────────────────────────────────────────────────────
+
+describe('berekenCombinatie', () => {
+  it('geeft positieve besparing bij geldige maatregelen (dak + muur)', () => {
+    const input = createDefaultInput();
+    input.uMuur = 2.5;
+    input.uDak = 3.5;
+    input.uVloer = 1.5;
+    input.uRaam = 5.8;
+    input.ach = 0.9;
+    input.mainHeating = 'gas';
+
+    const result = compute(input);
+    const combi = berekenCombinatie(input, result, ['dak-isolatie', 'muur-isolatie-binnen']);
+
+    expect(combi.besparingKwhJaar).toBeGreaterThan(0);
+    expect(combi.besparingEurJaar).toBeGreaterThan(0);
+    expect(combi.kostenSchatting.min).toBeGreaterThan(0);
+    expect(combi.kostenSchatting.max).toBeGreaterThanOrEqual(combi.kostenSchatting.min);
+    expect(combi.terugverdientijdJaar).toBeGreaterThan(0);
+  });
+
+  it('verbetert de DPE-letter bij significante maatregelen', () => {
+    const input = createDefaultInput();
+    input.uMuur = 2.5;
+    input.uDak = 3.5;
+    input.uVloer = 1.5;
+    input.uRaam = 5.8;
+    input.ach = 0.9;
+    input.mainHeating = 'gas';
+
+    const result = compute(input);
+    const combi = berekenCombinatie(input, result, [
+      'dak-isolatie', 'muur-isolatie-buiten', 'vloer-isolatie', 'ramen-hr',
+    ]);
+
+    // Nieuwe DPE kwhPerM2 moet lager zijn dan huidige
+    expect(combi.nieuweDpe.kwhPerM2).toBeLessThan(combi.huidigeDpe.kwhPerM2);
+  });
+
+  it('geeft nul besparing als geen maatregelen geselecteerd', () => {
+    const input = createDefaultInput();
+    const result = compute(input);
+    const combi = berekenCombinatie(input, result, []);
+
+    expect(combi.besparingKwhJaar).toBe(0);
+    expect(combi.besparingEurJaar).toBe(0);
+    expect(combi.kostenSchatting.min).toBe(0);
+    expect(combi.kostenSchatting.max).toBe(0);
+  });
+
+  it('geeft maximale besparing bij alle maatregelen', () => {
+    const input = createDefaultInput();
+    input.uMuur = 2.5;
+    input.uDak = 3.5;
+    input.uVloer = 1.5;
+    input.uRaam = 5.8;
+    input.ach = 0.9;
+    input.mainHeating = 'gas';
+    input.hasPV = false;
+    input.hasHRV = false;
+
+    const result = compute(input);
+    const allIds = [
+      'dak-isolatie', 'muur-isolatie-binnen', 'vloer-isolatie',
+      'ramen-hr', 'warmtepomp', 'wtw-ventilatie', 'pv-panelen',
+    ];
+    const combi = berekenCombinatie(input, result, allIds);
+
+    // Alle maatregelen samen moeten flinke besparing opleveren
+    expect(combi.besparingKwhJaar).toBeGreaterThan(0);
+    expect(combi.besparingEurJaar).toBeGreaterThan(0);
+    expect(combi.nieuweDpe.kwhPerM2).toBeLessThan(combi.huidigeDpe.kwhPerM2);
+  });
+
+  it('besparing is altijd >= 0 (nooit negatief)', () => {
+    const input = createDefaultInput();
+    input.uMuur = 0.2;
+    input.uDak = 0.15;
+    input.uVloer = 0.2;
+    input.uRaam = 1.2;
+    input.mainHeating = 'warmtepomp';
+    input.mainEfficiency = 3.5;
+
+    const result = compute(input);
+    const combi = berekenCombinatie(input, result, ['dak-isolatie', 'muur-isolatie-binnen']);
+
+    // Zelfs als maatregelen niet meer van toepassing zijn, mag besparing niet negatief zijn
+    expect(combi.besparingKwhJaar).toBeGreaterThanOrEqual(0);
+    expect(combi.besparingEurJaar).toBeGreaterThanOrEqual(0);
   });
 });

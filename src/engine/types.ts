@@ -242,6 +242,9 @@ export interface PortaalResult {
 
   // Debug — elke tussenstap
   debug: DebugInfo;
+
+  // Validatiefouten (leeg als alles ok)
+  validationErrors: string[];
 }
 
 export interface DebugInfo {

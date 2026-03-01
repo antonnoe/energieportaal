@@ -9,12 +9,13 @@ import { berekenSavings } from '../engine/savings';
  * Verborgen als heating_kwh === 0 of undefined.
  */
 export function FloatingEuro() {
-  const { result, portaalInput } = useToolState();
+  const { result, portaalInput, toolState } = useToolState();
 
   const savings = useMemo(() => berekenSavings(portaalInput, result), [portaalInput, result]);
 
-  // U3: Verberg als geen geldige warmteverliesberekening
-  if (!result.verwarmingTotaal || result.verwarmingTotaal === 0) {
+  // U3: Verberg als geen geldige postcode of geen warmteverliesberekening
+  const hasPostcode = toolState.postcode.length === 5;
+  if (!hasPostcode || !result.verwarmingTotaal || result.verwarmingTotaal === 0) {
     return null;
   }
 
