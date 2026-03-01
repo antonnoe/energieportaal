@@ -5,8 +5,10 @@
  *  - Hoeveel kWh/jaar bespaard wordt
  *  - Hoeveel €/jaar bespaard wordt
  *  - De geschatte terugverdientijd
- *  - De DPE-impact (kWh/m² reductie)
+ *  - De DPE-impact (kWh/m² reductie + nieuwe letter)
  *  - Welke combinatie nodig is om één DPE-klasse te stijgen
+ *
+ * A3: berekenCombinatie() — scenario-vergelijking voor meerdere geselecteerde maatregelen.
  */
 
 import type {
@@ -14,6 +16,7 @@ import type {
   PortaalResult,
   Maatregel,
   SavingsResult,
+  CombinatieResult,
 } from './types.ts';
 import { compute } from './compute.ts';
 import { berekenDPE } from './dpe.ts';
@@ -35,12 +38,12 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'dak-isolatie',
     naam: 'Dakisolatie',
-    beschrijving: 'Isoleer het dak met minerale wol of PIR-platen (R ≥ 6 m²·K/W).',
+    beschrijving: 'Isoleer het dak met minerale wol of PIR-platen (R \u2265 6 m\u00b2\u00b7K/W).',
     categorie: 'isolatie',
     kostenPerM2: { min: 40, max: 80 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
     apply: (input) => {
-      if (input.uDak <= 0.2) return null; // al goed geïsoleerd
+      if (input.uDak <= 0.2) return null; // al goed ge\u00efsoleerd
       return { ...input, uDak: 0.17 };
     },
     getOppervlak: (input) => input.oppervlakDak,
@@ -48,7 +51,7 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'muur-isolatie-binnen',
     naam: 'Muurisolatie (binnenzijde)',
-    beschrijving: 'Isoleer de muren aan de binnenkant met gipsplaat + isolatie (R ≥ 3,7 m²·K/W).',
+    beschrijving: 'Isoleer de muren aan de binnenkant met gipsplaat + isolatie (R \u2265 3,7 m\u00b2\u00b7K/W).',
     categorie: 'isolatie',
     kostenPerM2: { min: 50, max: 100 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
@@ -61,7 +64,7 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'muur-isolatie-buiten',
     naam: 'Muurisolatie (buitenzijde / ITE)',
-    beschrijving: 'Isoleer de muren aan de buitenkant (ITE) — effectiever dan binnenisolatie, vermindert koudebruggen.',
+    beschrijving: 'Isoleer de muren aan de buitenkant (ITE) \u2014 effectiever dan binnenisolatie, vermindert koudebruggen.',
     categorie: 'isolatie',
     kostenPerM2: { min: 120, max: 200 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
@@ -74,7 +77,7 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'vloer-isolatie',
     naam: 'Vloerisolatie',
-    beschrijving: 'Isoleer de vloer vanuit de kruipruimte of kelder (R ≥ 3 m²·K/W).',
+    beschrijving: 'Isoleer de vloer vanuit de kruipruimte of kelder (R \u2265 3 m\u00b2\u00b7K/W).',
     categorie: 'isolatie',
     kostenPerM2: { min: 30, max: 60 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
@@ -87,7 +90,7 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'ramen-hr',
     naam: 'Ramen HR++ (dubbel glas)',
-    beschrijving: 'Vervang enkel of oud dubbel glas door HR++ beglazing (U ≤ 1,3 W/m²·K).',
+    beschrijving: 'Vervang enkel of oud dubbel glas door HR++ beglazing (U \u2264 1,3 W/m\u00b2\u00b7K).',
     categorie: 'isolatie',
     kostenPerM2: { min: 400, max: 800 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
@@ -100,9 +103,9 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'warmtepomp',
     naam: 'Warmtepomp (lucht-water)',
-    beschrijving: 'Vervang de huidige verwarming door een lucht-water warmtepomp (SCOP ≥ 3,5).',
+    beschrijving: 'Vervang de huidige verwarming door een lucht-water warmtepomp (SCOP \u2265 3,5).',
     categorie: 'verwarming',
-    kostenPerM2: { min: 80, max: 150 }, // per m² woonoppervlak
+    kostenPerM2: { min: 80, max: 150 }, // per m\u00b2 woonoppervlak
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
     apply: (input) => {
       if (input.mainHeating === 'warmtepomp') return null;
@@ -119,7 +122,7 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
   {
     id: 'wtw-ventilatie',
     naam: 'WTW-ventilatie (warmteterugwinning)',
-    beschrijving: 'Installeer een mechanisch ventilatiesysteem met warmteterugwinning (rendement ≥ 75%).',
+    beschrijving: 'Installeer een mechanisch ventilatiesysteem met warmteterugwinning (rendement \u2265 75%).',
     categorie: 'ventilatie',
     kostenPerM2: { min: 40, max: 80 },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
@@ -134,13 +137,13 @@ const MAATREGEL_TEMPLATES: MaatregelTemplate[] = [
     naam: 'Zonnepanelen (3 kWp)',
     beschrijving: 'Installeer 3 kWp zonnepanelen op het dak voor eigen stroomproductie.',
     categorie: 'hernieuwbaar',
-    kostenPerM2: { min: 300, max: 500 }, // per kWp (niet per m²)
+    kostenPerM2: { min: 300, max: 500 }, // per kWp (niet per m\u00b2)
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
     apply: (input) => {
       if (input.hasPV) return null;
       return { ...input, hasPV: true, pvVermogen: 3, pvZelfverbruik: 0.30 };
     },
-    getOppervlak: () => 3, // kWp, niet m²
+    getOppervlak: () => 3, // kWp, niet m\u00b2
   },
 ];
 
@@ -184,6 +187,8 @@ function berekenMaatregel(
     besparingEurJaar: Math.round(besparingEur),
     terugverdientijdJaar: Math.round(terugverdientijd * 10) / 10,
     dpeReductieKwhM2: Math.round(dpeReductie),
+    dpeNaLetter: nieuwResultaat.dpe.letter,
+    dpeNaKwhM2: nieuwResultaat.dpe.kwhPerM2,
     co2ReductieKg: Math.round(co2Reductie),
     bron: template.bron,
   };
@@ -217,7 +222,7 @@ export function berekenSavings(
     maatregelen.reduce((s, m) => s + m.dpeReductieKwhM2, 0));
   const dpeNaMaatregelen = berekenDPE(nieuweKwhM2);
 
-  // Welke maatregelen zijn nodig om één DPE-klasse te stijgen?
+  // Welke maatregelen zijn nodig om \u00e9\u00e9n DPE-klasse te stijgen?
   const kwhNodig = huidigResultaat.dpe.kwhTotVolgendeKlasse;
   const maatregelenVoorVolgendeDPE = vindMinimaleSetVoorDPE(maatregelen, kwhNodig);
 
@@ -230,9 +235,58 @@ export function berekenSavings(
   };
 }
 
+// ─── A3: Scenario-vergelijking ──────────────────────────────────────────────
+
 /**
- * Vind de minimale set maatregelen (gesorteerd op kWh/m² impact) die samen
- * voldoende kWh/m² besparen om één DPE-klasse te stijgen.
+ * Bereken het gecombineerde effect van meerdere geselecteerde maatregelen.
+ * Past alle geselecteerde maatregelen sequentieel toe op de invoer
+ * en berekent het totaalresultaat (interactie-effecten meegenomen).
+ */
+export function berekenCombinatie(
+  input: PortaalInput,
+  huidigResultaat: PortaalResult,
+  geselecteerdeIds: string[]
+): CombinatieResult {
+  let combinedInput = { ...input };
+  let totalKostenMin = 0;
+  let totalKostenMax = 0;
+
+  for (const id of geselecteerdeIds) {
+    const template = MAATREGEL_TEMPLATES.find(t => t.id === id);
+    if (!template) continue;
+
+    const modified = template.apply(combinedInput);
+    if (modified) {
+      combinedInput = modified;
+      const opp = template.getOppervlak(input); // originele input voor oppervlak
+      totalKostenMin += template.kostenPerM2.min * opp;
+      totalKostenMax += template.kostenPerM2.max * opp;
+    }
+  }
+
+  const nieuwResultaat = compute(combinedInput);
+
+  const besparingKwh = huidigResultaat.totaalVerbruikKwh - nieuwResultaat.totaalVerbruikKwh;
+  const besparingEur = huidigResultaat.nettoKosten - nieuwResultaat.nettoKosten;
+  const gemKosten = (totalKostenMin + totalKostenMax) / 2;
+  const terugverdientijd = besparingEur > 0 ? gemKosten / besparingEur : 999;
+
+  return {
+    geselecteerdeMaatregelen: geselecteerdeIds,
+    besparingKwhJaar: Math.round(besparingKwh),
+    besparingEurJaar: Math.round(besparingEur),
+    kostenSchatting: { min: Math.round(totalKostenMin), max: Math.round(totalKostenMax) },
+    terugverdientijdJaar: Math.round(terugverdientijd * 10) / 10,
+    huidigeDpe: huidigResultaat.dpe,
+    nieuweDpe: nieuwResultaat.dpe,
+  };
+}
+
+// ─── Hulpfuncties ───────────────────────────────────────────────────────────
+
+/**
+ * Vind de minimale set maatregelen (gesorteerd op kWh/m\u00b2 impact) die samen
+ * voldoende kWh/m\u00b2 besparen om \u00e9\u00e9n DPE-klasse te stijgen.
  */
 function vindMinimaleSetVoorDPE(
   maatregelen: Maatregel[],
