@@ -86,6 +86,7 @@ export interface ToolState {
   activeTab: 'stappen';
   mobilePanel: 'invoer' | 'rapport';
   huisTypeGekozen: boolean;
+  highestStepVisited: number;
 }
 
 const DEFAULT_STATE: ToolState = {
@@ -167,6 +168,7 @@ const DEFAULT_STATE: ToolState = {
   activeTab: 'stappen',
   mobilePanel: 'invoer',
   huisTypeGekozen: false,
+  highestStepVisited: 1,
 };
 
 // ─── State → PortaalInput converter ──────────────────────────────────────────
@@ -276,7 +278,11 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setCurrentStep = useCallback((step: number) => {
-    setToolState((prev) => ({ ...prev, currentStep: step }));
+    setToolState((prev) => ({
+      ...prev,
+      currentStep: step,
+      highestStepVisited: Math.max(prev.highestStepVisited, step),
+    }));
   }, []);
 
   const setPostcode = useCallback((postcode: string) => {

@@ -37,7 +37,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   {
     id: 'colombage',
     naam: 'Colombage / Vakwerk',
-    periode: 'Tot ~1900',
+    periode: 'Vóór ~1900',
     uMuur: 1.5,
     uDak: 2.5,
     uVloer: 1.2,
@@ -88,7 +88,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   },
   {
     id: 'pavillon',
-    naam: 'Le Pavillon Parpaing',
+    naam: 'Pavillon Parpaing',
     periode: '1950–1975',
     uMuur: 2.8,
     uDak: 3.0,
@@ -114,7 +114,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   },
   {
     id: 'placo',
-    naam: 'Placo-Polystyrène',
+    naam: 'Maison Placo (1975–1990)',
     periode: '1975–1990',
     uMuur: 0.8,
     uDak: 1.0,
@@ -140,7 +140,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   },
   {
     id: 'traditioneel-plus',
-    naam: 'Traditioneel+',
+    naam: 'Maison Traditionnelle',
     periode: '1990–2012',
     uMuur: 0.4,
     uDak: 0.3,
@@ -166,7 +166,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   {
     id: 'rt2012',
     naam: 'RT2012 / RE2020',
-    periode: 'Na 2012',
+    periode: 'Vanaf 2012',
     uMuur: 0.2,
     uDak: 0.15,
     uVloer: 0.2,
@@ -190,7 +190,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   },
   {
     id: 'appartement-oud',
-    naam: 'Appartement (oud)',
+    naam: 'Appartement (vóór 1975)',
     periode: 'Vóór 1975',
     uMuur: 2.0,
     uDak: 0.5,
@@ -216,7 +216,7 @@ export const HUIZEN_MATRIX: HuisType[] = [
   },
   {
     id: 'appartement-recent',
-    naam: 'Appartement (recent)',
+    naam: 'Appartement (na 1975)',
     periode: 'Na 1975',
     uMuur: 0.6,
     uDak: 0.3,
