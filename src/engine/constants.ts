@@ -180,7 +180,7 @@ export interface IsolatieNiveau {
 
 export const ISOLATIE_MUUR: IsolatieNiveau[] = [
   { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => {
-    const oud = ['longere','colombage','pavillon','appartement-oud'];
+    const oud = ['longere','colombage','pierre','pavillon','appartement-oud'];
     return oud.includes(ht) ? 2.5 : 1.5;
   }},
   { id: 'basis', label: 'Basis (5–8 cm)', uWaarde: () => 0.6 },
