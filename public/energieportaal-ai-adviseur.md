@@ -66,7 +66,7 @@ RT2012 (vanaf 2013): max 50 kWh/m²/jaar primaire energie. Goede isolatie (U-muu
 | Océanique | Bretagne, Pays de la Loire, Nouvelle-Aquitaine (kust) | 1800-2200 | 1100-1250 | 8-10 | Mild, vochtig, matige verwarming |
 | Semi-continental | Grand Est, Bourgogne-Franche-Comté, Auvergne | 2400-2800 | 1050-1200 | 5-7 | Koude winters, warme zomers |
 | Méditerranée | PACA, Occitanie (kust), Corse | 1200-1600 | 1350-1550 | 11-13 | Zacht, veel zon, koeling relevant |
-| Montagne | Alpen, Pyreneeen, Massif Central (>800m) | 2800-3500 | 1100-1400 | 2-5 | Zeer koud, lange stookperiode |
+| Montagne | Alpen, Pyreneeën, Massif Central (>800m) | 2800-3500 | 1100-1400 | 2-5 | Zeer koud, lange stookperiode |
 
 ### Graaddagen (HDD) uitleg
 Graaddagen meten hoeveel en hoe lang het buiten kouder is dan de gewenste binnentemperatuur. Meer graaddagen = meer verwarmingsbehoefte. Een woning in Strasbourg (2500 HDD) heeft ruim 50% meer verwarming nodig dan dezelfde woning in Montpellier (1400 HDD).
@@ -96,7 +96,7 @@ De U-waarde geeft aan hoeveel warmte per seconde door 1 m² van een bouwdeel str
 Het totale warmteverlies door de gebouwschil: som van (U × oppervlak) per bouwdeel. Uitgedrukt in W/K — hoeveel Watt de woning verliest per graad temperatuurverschil.
 
 ### Ventilatieverlies (Hvent)
-Warmteverlies door luchtverversing: 0.34 × volume × luchtwisselingspercentage. Bij een woning met warmteterugwinning (VMC double flux, rendement 75%) wordt dit effectief gevierd.
+Warmteverlies door luchtverversing: 0.34 × volume × luchtwisselingspercentage. Bij een woning met warmteterugwinning (VMC double flux, rendement 75%) wordt dit effectief gehalveerd.
 
 ### Hoe dit te lezen voor de gebruiker
 "Uw woning verliest X Watt per graad temperatuurverschil. Bij een verschil van 15 graden (0°C buiten, 15°C binnen voor de verwarming aan slaat) is dat X × 15 = Y Watt continu. Dat is vergelijkbaar met Z olieradiatoren die permanent aanstaan."

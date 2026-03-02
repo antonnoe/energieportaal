@@ -1,4 +1,5 @@
 import { useToolState } from '../context/ToolStateContext';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 function Bar({ label, kwh, maxKwh, color }: { label: string; kwh: number; maxKwh: number; color: string }) {
   const pct = Math.min(100, (kwh / Math.max(1, maxKwh)) * 100);
@@ -22,7 +23,10 @@ export function Energieprofiel() {
 
   return (
     <section className="space-y-4">
-      <h2 className="font-heading text-lg font-bold text-primary">Energieprofiel</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="font-heading text-lg font-bold text-primary">Energieprofiel</h2>
+        <AIAdviseur veld="Energieprofiel" />
+      </div>
 
       {/* Warmteverlies samenvatting */}
       <div className="bg-gray-50 rounded-lg p-3 text-sm">
