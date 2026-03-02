@@ -83,6 +83,7 @@ export interface ToolState {
 
   // ── UI ──
   currentStep: number;
+  highestStepVisited: number;
   activeTab: 'stappen';
   mobilePanel: 'invoer' | 'rapport';
   huisTypeGekozen: boolean;
@@ -95,7 +96,7 @@ const DEFAULT_STATE: ToolState = {
   zoneId: 'paris',
 
   // Stap 2
-  huisTypeId: 'pavillon',
+  huisTypeId: '',
   woonoppervlak: '100',
   verdiepingen: '1',
 
@@ -164,6 +165,7 @@ const DEFAULT_STATE: ToolState = {
 
   // UI
   currentStep: 1,
+  highestStepVisited: 1,
   activeTab: 'stappen',
   mobilePanel: 'invoer',
   huisTypeGekozen: false,
@@ -276,7 +278,11 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setCurrentStep = useCallback((step: number) => {
-    setToolState((prev) => ({ ...prev, currentStep: step }));
+    setToolState((prev) => ({
+      ...prev,
+      currentStep: step,
+      highestStepVisited: Math.max(prev.highestStepVisited, step),
+    }));
   }, []);
 
   const setPostcode = useCallback((postcode: string) => {
@@ -288,7 +294,7 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
   const setHuisType = useCallback((huisTypeId: string) => {
     setToolState((prev) => {
       const huisType = getHuisTypeById(huisTypeId);
-      if (!huisType) return { ...prev, huisTypeId, huisTypeGekozen: true };
+      if (!huisType) return prev;
 
       const opp = Number(prev.woonoppervlak) || 100;
       return {

@@ -13,9 +13,14 @@ export function FloatingEuro() {
 
   const savings = useMemo(() => berekenSavings(portaalInput, result), [portaalInput, result]);
 
-  // U3: Verberg als geen geldige postcode of geen warmteverliesberekening
+  // Alleen tonen bij rapportNiveau 3 (postcode + woningtype + stap 3 bezocht)
   const hasPostcode = toolState.postcode.length === 5;
-  if (!hasPostcode || !result.verwarmingTotaal || result.verwarmingTotaal === 0) {
+  const rapportNiveau =
+    !hasPostcode ? 0 :
+    !toolState.huisTypeGekozen ? 1 :
+    toolState.highestStepVisited < 3 ? 2 :
+    3;
+  if (rapportNiveau < 3) {
     return null;
   }
 

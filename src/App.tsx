@@ -124,17 +124,15 @@ function StepNavButtons() {
 }
 
 function Rapport() {
-  const { toolState, result } = useToolState()
+  const { toolState } = useToolState()
 
   // Bereken rapportNiveau (0|1|2|3)
   const hasPostcode = toolState.postcode.length === 5
-  const huisTypeGekozen = toolState.huisTypeGekozen
-  const hasHeatCalc = result.verwarmingTotaal > 0
-
-  let rapportNiveau = 0
-  if (hasPostcode && !huisTypeGekozen) rapportNiveau = 1
-  if (hasPostcode && huisTypeGekozen && !hasHeatCalc) rapportNiveau = 2
-  if (hasPostcode && huisTypeGekozen && hasHeatCalc) rapportNiveau = 3
+  const rapportNiveau =
+    !hasPostcode ? 0 :
+    !toolState.huisTypeGekozen ? 1 :
+    toolState.highestStepVisited < 3 ? 2 :
+    3
 
   const zone = getZoneById(toolState.zoneId)
 

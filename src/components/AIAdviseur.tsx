@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 
 interface AIAdviseurProps {
@@ -7,13 +7,23 @@ interface AIAdviseurProps {
   context?: string;
 }
 
-// Cache: stateHash+veld → response text
+// Cache: stableHash+veld → response text
 const cache = new Map<string, string>();
 
 let systemPromptCache: string | null = null;
 
-function getStateHash(toolState: any): string {
-  return JSON.stringify(toolState);
+function getStableHash(toolState: any): string {
+  return JSON.stringify({
+    postcode: toolState.postcode,
+    zoneId: toolState.zoneId,
+    huisTypeId: toolState.huisTypeId,
+    woonoppervlak: toolState.woonoppervlak,
+    uMuur: toolState.uMuur,
+    uDak: toolState.uDak,
+    uVloer: toolState.uVloer,
+    uRaam: toolState.uRaam,
+    mainHeating: toolState.mainHeating,
+  });
 }
 
 async function loadSystemPrompt(): Promise<string> {
@@ -29,7 +39,9 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [position, setPosition] = useState<{ vertical: 'above' | 'below'; horizontal: 'center' | 'left' | 'right' }>({ vertical: 'above', horizontal: 'center' });
   const ref = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const { toolState, result } = useToolState();
 
   // Close on click outside
@@ -44,6 +56,14 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
     return () => document.removeEventListener('mousedown', handleClick);
   }, [open]);
 
+  const computePosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    const vertical = rect.top < 250 ? 'below' : 'above';
+    const horizontal = rect.left < 150 ? 'left' : rect.right > window.innerWidth - 150 ? 'right' : 'center';
+    setPosition({ vertical, horizontal });
+  }, []);
+
   const handleClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
 
@@ -52,16 +72,19 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
       return;
     }
 
-    setOpen(true);
+    computePosition();
 
-    // Check cache
-    const hash = getStateHash(toolState);
+    // Check cache FIRST — if hit, show instantly without loading state
+    const hash = getStableHash(toolState);
     const cacheKey = `${hash}:${veld}`;
     if (cache.has(cacheKey)) {
       setAnswer(cache.get(cacheKey)!);
+      setError(null);
+      setOpen(true);
       return;
     }
 
+    setOpen(true);
     setLoading(true);
     setError(null);
     setAnswer(null);
@@ -92,9 +115,15 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
     }
   };
 
+  const positionClasses = [
+    position.vertical === 'above' ? 'bottom-full mb-1' : 'top-full mt-1',
+    position.horizontal === 'left' ? 'left-0' : position.horizontal === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2',
+  ].join(' ');
+
   return (
     <div className="relative inline-flex" ref={ref}>
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleClick}
         aria-label={`AI-advies over ${veld}`}
@@ -103,7 +132,7 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
         ?
       </button>
       {open && (
-        <div className="absolute z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
+        <div className={`absolute z-50 ${positionClasses} w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed max-h-[300px] overflow-y-auto`}>
           <div className="flex items-start justify-between gap-1 mb-1">
             <span className="font-semibold text-blue-700 text-[11px]">AI-adviseur: {veld}</span>
             <button
