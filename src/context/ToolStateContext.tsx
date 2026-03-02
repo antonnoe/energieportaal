@@ -85,6 +85,7 @@ export interface ToolState {
   currentStep: number;
   activeTab: 'stappen';
   mobilePanel: 'invoer' | 'rapport';
+  huisTypeGekozen: boolean;
 }
 
 const DEFAULT_STATE: ToolState = {
@@ -165,6 +166,7 @@ const DEFAULT_STATE: ToolState = {
   currentStep: 1,
   activeTab: 'stappen',
   mobilePanel: 'invoer',
+  huisTypeGekozen: false,
 };
 
 // ─── State → PortaalInput converter ──────────────────────────────────────────
@@ -286,12 +288,13 @@ export function ToolStateProvider({ children }: { children: React.ReactNode }) {
   const setHuisType = useCallback((huisTypeId: string) => {
     setToolState((prev) => {
       const huisType = getHuisTypeById(huisTypeId);
-      if (!huisType) return { ...prev, huisTypeId };
+      if (!huisType) return { ...prev, huisTypeId, huisTypeGekozen: true };
 
       const opp = Number(prev.woonoppervlak) || 100;
       return {
         ...prev,
         huisTypeId,
+        huisTypeGekozen: true,
         uMuur: String(huisType.uMuur),
         uDak: String(huisType.uDak),
         uVloer: String(huisType.uVloer),

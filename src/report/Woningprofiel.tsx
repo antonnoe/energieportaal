@@ -1,6 +1,7 @@
 import { useToolState } from '../context/ToolStateContext';
 import { getHuisTypeById } from '../data/huizen-matrix';
 import { getZoneById } from '../engine/constants';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Woningprofiel() {
   const { toolState, result } = useToolState();
@@ -9,7 +10,10 @@ export function Woningprofiel() {
 
   return (
     <section className="space-y-3">
-      <h2 className="font-heading text-lg font-bold text-primary">Woningprofiel</h2>
+      <div className="flex items-center gap-1">
+        <h2 className="font-heading text-lg font-bold text-primary">Woningprofiel</h2>
+        <AIAdviseur veld="Woningprofiel" />
+      </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm">
         <span className="text-gray-500">Woningtype</span>

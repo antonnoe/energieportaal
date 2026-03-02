@@ -1,6 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { HUIZEN_MATRIX } from '../data/huizen-matrix';
-import { CoachWidget } from '../components/CoachWidget';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Step2Woningtype() {
   const { toolState, setField, setHuisType } = useToolState();
@@ -53,7 +53,7 @@ export function Step2Woningtype() {
         <div>
           <label htmlFor="woonoppervlak" className="flex items-center text-sm font-semibold mb-1">
             Woonoppervlakte <span className="text-red-500">*</span>
-            <CoachWidget veld="Woonoppervlakte" waarde={toolState.woonoppervlak} />
+            <AIAdviseur veld="Woonoppervlakte" waarde={toolState.woonoppervlak} />
           </label>
           <div className="relative">
             <input
@@ -87,7 +87,7 @@ export function Step2Woningtype() {
         <div>
           <label htmlFor="verdiepingen" className="flex items-center text-sm font-semibold mb-1">
             Verdiepingen
-            <CoachWidget veld="Verdiepingen" waarde={toolState.verdiepingen} />
+            <AIAdviseur veld="Verdiepingen" waarde={toolState.verdiepingen} />
           </label>
           <select
             id="verdiepingen"

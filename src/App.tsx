@@ -14,6 +14,35 @@ import { Besparingsadvies } from './report/Besparingsadvies'
 import { SubsidieCheck } from './report/SubsidieCheck'
 import { Grondslagen } from './report/Grondslagen'
 import { FloatingEuro } from './report/FloatingEuro'
+import { getZoneById } from './engine/constants'
+
+/** RapportSectie — wrapper die children toont in kleur of grijs afhankelijk van rapportNiveau */
+function RapportSectie({ niveau, minimumNiveau, children, placeholder }: {
+  niveau: number;
+  minimumNiveau: number;
+  children: React.ReactNode;
+  placeholder?: string;
+}) {
+  if (niveau >= minimumNiveau) {
+    return (
+      <div className="transition-all duration-[400ms] ease-in-out opacity-100 grayscale-0">
+        {children}
+      </div>
+    );
+  }
+
+  if (placeholder) {
+    return (
+      <div className="transition-all duration-[400ms] ease-in-out opacity-40 grayscale">
+        <div className="bg-gray-50 rounded-lg p-4 text-center text-sm text-gray-400">
+          {placeholder}
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
 
 const STEP_LABELS = [
   { nr: 1, label: 'Locatie' },
@@ -97,47 +126,82 @@ function StepNavButtons() {
 function Rapport() {
   const { toolState, result } = useToolState()
 
-  // Rapport is leeg tot er een geldige postcode is (5 cijfers)
+  // Bereken rapportNiveau (0|1|2|3)
   const hasPostcode = toolState.postcode.length === 5
-  // Na stap 3: er is een geldige warmteverliesberekening
-  const hasHeatCalc = hasPostcode && result.verwarmingTotaal > 0
-  // Na stap 5: subsidie-parameters zijn beschikbaar
-  const hasFinancieel = hasHeatCalc && toolState.currentStep >= 5
+  const huisTypeGekozen = toolState.huisTypeGekozen
+  const hasHeatCalc = result.verwarmingTotaal > 0
 
-  if (!hasPostcode) {
+  let rapportNiveau = 0
+  if (hasPostcode && !huisTypeGekozen) rapportNiveau = 1
+  if (hasPostcode && huisTypeGekozen && !hasHeatCalc) rapportNiveau = 2
+  if (hasPostcode && huisTypeGekozen && hasHeatCalc) rapportNiveau = 3
+
+  const zone = getZoneById(toolState.zoneId)
+
+  // Niveau 0: Niets ingevuld
+  if (rapportNiveau === 0) {
     return (
       <div className="text-center py-12 text-gray-400 text-sm">
-        <p className="text-lg mb-1">Hier wordt uw rapportage gebouwd</p>
-        <p>Vul een postcode in bij Stap 1 om te beginnen.</p>
+        <p className="text-lg mb-1">Vul uw postcode in om de rapportage te starten</p>
       </div>
     )
   }
 
+  const hasFinancieel = rapportNiveau === 3 && toolState.currentStep >= 5
+  const grijsPlaceholder = rapportNiveau === 1
+    ? 'Kies uw woningtype om verder te gaan'
+    : 'Vul de isolatiewaarden in voor een DPE-indicatie'
+
   return (
     <div className="space-y-6">
-      <Woningprofiel />
-      {hasHeatCalc && (
-        <>
-          <hr className="border-gray-200" />
-          <Energieprofiel />
-          <hr className="border-gray-200" />
-          <DPESchatting />
-          <hr className="border-gray-200" />
-          <Besparingsadvies />
-        </>
-      )}
+      {/* Klimaatblok — altijd zichtbaar vanaf niveau 1 */}
+      <div className={`transition-all duration-[400ms] ease-in-out ${rapportNiveau >= 2 ? 'opacity-100 grayscale-0' : 'opacity-100'}`}>
+        <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm space-y-1">
+          <p className="font-semibold text-green-800">
+            Zone: {zone.name} ({zone.hdd} graaddagen)
+          </p>
+          <p className="text-green-700 text-xs">
+            Département {toolState.departement} &middot; PV-opbrengst {zone.pv} kWh/kWp/jaar &middot; Ref. buitentemp {zone.Tref} °C
+          </p>
+        </div>
+      </div>
+
+      {/* Woningprofiel — in kleur vanaf niveau 2 */}
+      <RapportSectie niveau={rapportNiveau} minimumNiveau={2} placeholder={grijsPlaceholder}>
+        <Woningprofiel />
+      </RapportSectie>
+
+      {/* Energieprofiel — in kleur vanaf niveau 3 */}
+      <RapportSectie niveau={rapportNiveau} minimumNiveau={3} placeholder={grijsPlaceholder}>
+        <hr className="border-gray-200" />
+        <Energieprofiel />
+      </RapportSectie>
+
+      {/* DPE-indicatie — in kleur vanaf niveau 3 */}
+      <RapportSectie niveau={rapportNiveau} minimumNiveau={3} placeholder={grijsPlaceholder}>
+        <hr className="border-gray-200" />
+        <DPESchatting />
+      </RapportSectie>
+
+      {/* Besparingsadvies — in kleur vanaf niveau 3 */}
+      <RapportSectie niveau={rapportNiveau} minimumNiveau={3} placeholder={grijsPlaceholder}>
+        <hr className="border-gray-200" />
+        <Besparingsadvies />
+      </RapportSectie>
+
+      {/* Subsidie — alleen bij niveau 3 + stap >= 5 */}
       {hasFinancieel && (
         <>
           <hr className="border-gray-200" />
           <SubsidieCheck />
         </>
       )}
-      {hasHeatCalc && (
-        <>
-          <hr className="border-gray-200" />
-          <Grondslagen />
-        </>
-      )}
+
+      {/* Grondslagen — in kleur vanaf niveau 3 */}
+      <RapportSectie niveau={rapportNiveau} minimumNiveau={3}>
+        <hr className="border-gray-200" />
+        <Grondslagen />
+      </RapportSectie>
     </div>
   )
 }

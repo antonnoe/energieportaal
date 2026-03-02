@@ -1,6 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { ZONES } from '../engine/constants';
-import { CoachWidget } from '../components/CoachWidget';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Step1Locatie() {
   const { toolState, setPostcode } = useToolState();
@@ -18,7 +18,7 @@ export function Step1Locatie() {
       <div>
         <label htmlFor="postcode" className="flex items-center text-sm font-semibold mb-1">
           Postcode <span className="text-red-500">*</span>
-          <CoachWidget veld="Postcode" waarde={toolState.postcode} />
+          <AIAdviseur veld="Postcode" waarde={toolState.postcode} />
         </label>
         <input
           id="postcode"
