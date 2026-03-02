@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import { berekenSavings, berekenCombinatie } from '../engine/savings';
 import { getDPEKleur } from '../engine/dpe';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 const categorieIcons: Record<string, string> = {
   isolatie: '\ud83e\uddf1',
@@ -43,7 +44,7 @@ export function Besparingsadvies() {
 
   return (
     <section className="space-y-4">
-      <h2 className="font-heading text-lg font-bold text-primary">Wat kunt u doen?</h2>
+      <h2 className="font-heading text-lg font-bold text-primary flex items-center">Wat kunt u doen? <AIAdviseur veld="Aanbevelingen" /></h2>
       <p className="text-xs text-gray-500">
         Selecteer maatregelen om het gecombineerde effect te berekenen. Gesorteerd op terugverdientijd (kortste eerst).
       </p>

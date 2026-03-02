@@ -1,6 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { ZONES } from '../engine/constants';
-import { CoachWidget } from '../components/CoachWidget';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Step1Locatie() {
   const { toolState, setPostcode } = useToolState();
@@ -18,7 +18,7 @@ export function Step1Locatie() {
       <div>
         <label htmlFor="postcode" className="flex items-center text-sm font-semibold mb-1">
           Postcode <span className="text-red-500">*</span>
-          <CoachWidget veld="Postcode" waarde={toolState.postcode} />
+          <AIAdviseur veld="Postcode" waarde={toolState.postcode} />
         </label>
         <input
           id="postcode"
@@ -38,8 +38,9 @@ export function Step1Locatie() {
       {/* Zone bevestiging — alleen na geldige postcode */}
       {toolState.postcode.length === 5 && zone && (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm space-y-1">
-          <p className="font-semibold text-green-800">
+          <p className="font-semibold text-green-800 flex items-center">
             Zone: {zone.name} ({zone.hdd} graaddagen)
+            <AIAdviseur veld="Klimaatzone" waarde={zone.name} />
           </p>
           <p className="text-green-700 text-xs">
             Département {toolState.departement} &middot; PV-opbrengst {zone.pv} kWh/kWp/jaar &middot; Ref. buitentemp {zone.Tref} °C

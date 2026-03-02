@@ -180,29 +180,33 @@ export interface IsolatieNiveau {
 
 export const ISOLATIE_MUUR: IsolatieNiveau[] = [
   { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => {
-    const oud = ['longere','colombage','pavillon','appartement-oud'];
-    return oud.includes(ht) ? 2.5 : 1.5;
+    const mapping: Record<string, number> = {
+      longere: 2.5, pierre: 2.0, colombage: 1.5, pavillon: 2.8, 'appartement-oud': 2.0,
+    };
+    return mapping[ht] ?? 1.5;
   }},
-  { id: 'basis', label: 'Basis (5–8 cm)', uWaarde: () => 0.6 },
-  { id: 'goed', label: 'Goed (10–15 cm)', uWaarde: () => 0.3 },
-  { id: 'uitstekend', label: 'Uitstekend (>15 cm)', uWaarde: () => 0.18 },
+  { id: 'basis', label: 'Basis (5–8 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.8 : 0.6 },
+  { id: 'goed', label: 'Goed (10–15 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.4 : 0.3 },
+  { id: 'uitstekend', label: 'Uitstekend (>15 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.2 : 0.18 },
 ];
 
 export const ISOLATIE_DAK: IsolatieNiveau[] = [
   { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => {
-    const oud = ['longere','pavillon'];
-    return oud.includes(ht) ? 3.0 : 2.0;
+    const mapping: Record<string, number> = {
+      longere: 3.5, pavillon: 3.0, pierre: 2.5,
+    };
+    return mapping[ht] ?? 2.0;
   }},
-  { id: 'basis', label: 'Basis (10 cm)', uWaarde: () => 0.4 },
-  { id: 'goed', label: 'Goed (20 cm)', uWaarde: () => 0.2 },
-  { id: 'uitstekend', label: 'Uitstekend (>25 cm)', uWaarde: () => 0.14 },
+  { id: 'basis', label: 'Basis (10 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.5 : 0.4 },
+  { id: 'goed', label: 'Goed (20 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.25 : 0.2 },
+  { id: 'uitstekend', label: 'Uitstekend (>25 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.15 : 0.14 },
 ];
 
 export const ISOLATIE_VLOER: IsolatieNiveau[] = [
-  { id: 'geen', label: 'Geen isolatie', uWaarde: () => 1.2 },
-  { id: 'basis', label: 'Basis (5 cm)', uWaarde: () => 0.5 },
-  { id: 'goed', label: 'Goed (10 cm)', uWaarde: () => 0.3 },
-  { id: 'uitstekend', label: 'Uitstekend (>12 cm)', uWaarde: () => 0.2 },
+  { id: 'geen', label: 'Geen isolatie', uWaarde: (ht) => ht === 'pierre' ? 1.2 : 1.2 },
+  { id: 'basis', label: 'Basis (5 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.5 : 0.5 },
+  { id: 'goed', label: 'Goed (10 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.3 : 0.3 },
+  { id: 'uitstekend', label: 'Uitstekend (>12 cm)', uWaarde: (ht) => ht === 'pierre' ? 0.2 : 0.2 },
 ];
 
 export const ISOLATIE_RAAM: { id: string; label: string; uWaarde: number }[] = [

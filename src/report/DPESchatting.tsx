@@ -1,5 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import { DPE_KLASSEN } from '../engine/constants';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 function DPEBalk({ kwhPerM2, huidigeKlasseIndex }: { kwhPerM2: number; huidigeKlasseIndex: number }) {
   return (
@@ -41,7 +42,7 @@ export function DPESchatting() {
 
   return (
     <section className="space-y-4">
-      <h2 className="font-heading text-lg font-bold text-primary">DPE-indicatie</h2>
+      <h2 className="font-heading text-lg font-bold text-primary flex items-center">DPE-indicatie <AIAdviseur veld="DPE-indicatie" waarde={`${dpe.letter} (${Math.round(dpe.kwhPerM2)} kWh/m²)`} /></h2>
 
       {/* Grote DPE letter */}
       <div className="flex items-center gap-4">

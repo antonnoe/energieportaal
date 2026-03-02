@@ -1,5 +1,7 @@
+import React from 'react'
 import './index.css'
 import { ToolStateProvider, useToolState } from './context/ToolStateContext'
+import { ZONES } from './engine/constants'
 
 import { Step1Locatie } from './steps/Step1Locatie'
 import { Step2Woningtype } from './steps/Step2Woningtype'
@@ -94,50 +96,129 @@ function StepNavButtons() {
   )
 }
 
+/**
+ * Bepaal het rapportniveau op basis van de invoer.
+ * 0 = niets ingevuld, 1 = postcode, 2 = woningtype+oppervlak, 3 = isolatie+verwarming
+ */
+function getRapportNiveau(toolState: ReturnType<typeof useToolState>['toolState'], result: ReturnType<typeof useToolState>['result']): 0 | 1 | 2 | 3 {
+  if (!toolState.postcode || toolState.postcode.length < 5) return 0
+  if (!toolState.huisTypeId || !toolState.woonoppervlak || Number(toolState.woonoppervlak) === 0) return 1
+  if (!result.verwarmingTotaal || result.verwarmingTotaal === 0) return 2
+  return 3
+}
+
+function RapportSectie({ active, placeholder, children }: {
+  active: boolean; placeholder?: string; children: React.ReactNode
+}) {
+  if (active) {
+    return <div className="rapport-section rapport-section--active">{children}</div>
+  }
+  return (
+    <div className="rapport-section rapport-section--inactive" data-placeholder={placeholder}>
+      {children}
+      {placeholder && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <p className="text-sm text-gray-400 italic bg-white/80 px-4 py-2 rounded-lg">{placeholder}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function KlimaatBlok() {
+  const { toolState } = useToolState()
+  const zone = ZONES.find((z: { id: string }) => z.id === toolState.zoneId)
+  if (!zone) return null
+
+  return (
+    <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm space-y-0.5">
+      <p className="font-semibold text-green-800">Zone: {zone.name}</p>
+      <p className="text-green-700 text-xs">
+        D&eacute;partement {toolState.departement} &middot; PV-opbrengst {zone.pv} kWh/kWp/jaar &middot; Ref. buitentemp {zone.Tref} &deg;C
+      </p>
+      <p className="text-green-700 text-xs">
+        Verwarmingsgraaddagen: {zone.hdd} &middot; Koelingsgraaddagen: {zone.cdd}
+      </p>
+    </div>
+  )
+}
+
 function Rapport() {
   const { toolState, result } = useToolState()
+  const niveau = getRapportNiveau(toolState, result)
 
-  // Rapport is leeg tot er een geldige postcode is (5 cijfers)
-  const hasPostcode = toolState.postcode.length === 5
-  // Na stap 3: er is een geldige warmteverliesberekening
-  const hasHeatCalc = hasPostcode && result.verwarmingTotaal > 0
-  // Na stap 5: subsidie-parameters zijn beschikbaar
-  const hasFinancieel = hasHeatCalc && toolState.currentStep >= 5
-
-  if (!hasPostcode) {
+  // Niveau 0: helemaal leeg
+  if (niveau === 0) {
     return (
       <div className="text-center py-12 text-gray-400 text-sm">
-        <p className="text-lg mb-1">Hier wordt uw rapportage gebouwd</p>
-        <p>Vul een postcode in bij Stap 1 om te beginnen.</p>
+        <p className="text-lg mb-1">Vul uw postcode in om de rapportage te starten</p>
       </div>
     )
   }
 
+  // Niveau 1: alleen klimaatblok + grijze rest
+  if (niveau === 1) {
+    return (
+      <div className="space-y-6">
+        <KlimaatBlok />
+        <RapportSectie active={false} placeholder="Kies uw woningtype om verder te gaan">
+          <Woningprofiel />
+        </RapportSectie>
+      </div>
+    )
+  }
+
+  // Niveau 2: klimaatblok + woningprofiel ingekleurd + rest grijs
+  if (niveau === 2) {
+    return (
+      <div className="space-y-6">
+        <KlimaatBlok />
+        <RapportSectie active={true}>
+          <Woningprofiel />
+        </RapportSectie>
+        <hr className="border-gray-200" />
+        <RapportSectie active={false} placeholder="Wordt berekend na isolatie- en energie-invoer">
+          <Energieprofiel />
+        </RapportSectie>
+        <RapportSectie active={false} placeholder="Wordt berekend na isolatie- en energie-invoer">
+          <DPESchatting />
+        </RapportSectie>
+      </div>
+    )
+  }
+
+  // Niveau 3: alles ingekleurd
+  const hasFinancieel = toolState.currentStep >= 5
   return (
     <div className="space-y-6">
-      <Woningprofiel />
-      {hasHeatCalc && (
-        <>
-          <hr className="border-gray-200" />
-          <Energieprofiel />
-          <hr className="border-gray-200" />
-          <DPESchatting />
-          <hr className="border-gray-200" />
-          <Besparingsadvies />
-        </>
-      )}
+      <KlimaatBlok />
+      <RapportSectie active={true}>
+        <Woningprofiel />
+      </RapportSectie>
+      <hr className="border-gray-200" />
+      <RapportSectie active={true}>
+        <Energieprofiel />
+      </RapportSectie>
+      <hr className="border-gray-200" />
+      <RapportSectie active={true}>
+        <DPESchatting />
+      </RapportSectie>
+      <hr className="border-gray-200" />
+      <RapportSectie active={true}>
+        <Besparingsadvies />
+      </RapportSectie>
       {hasFinancieel && (
         <>
           <hr className="border-gray-200" />
-          <SubsidieCheck />
+          <RapportSectie active={true}>
+            <SubsidieCheck />
+          </RapportSectie>
         </>
       )}
-      {hasHeatCalc && (
-        <>
-          <hr className="border-gray-200" />
-          <Grondslagen />
-        </>
-      )}
+      <hr className="border-gray-200" />
+      <RapportSectie active={true}>
+        <Grondslagen />
+      </RapportSectie>
     </div>
   )
 }

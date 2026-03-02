@@ -3,6 +3,7 @@ import { useToolState } from '../context/ToolStateContext';
 import { getHuisTypeById } from '../data/huizen-matrix';
 import { BRONNEN } from '../data/sources';
 import { PRIJS_BRONNEN } from '../engine/constants';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Grondslagen() {
   const [open, setOpen] = useState(false);
@@ -17,7 +18,7 @@ export function Grondslagen() {
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between py-2 text-left"
       >
-        <h2 className="font-heading text-lg font-bold text-primary">Grondslagen</h2>
+        <h2 className="font-heading text-lg font-bold text-primary flex items-center">Grondslagen <AIAdviseur veld="Grondslagen" /></h2>
         <span className="text-gray-400 text-lg">{open ? '\u25B2' : '\u25BC'}</span>
       </button>
 

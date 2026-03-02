@@ -1,5 +1,5 @@
 /**
- * huizen-matrix.ts — 8 Franse woningtypes met standaard U-waarden, ACH,
+ * huizen-matrix.ts — 9 Franse woningtypes met standaard U-waarden, ACH,
  * oppervlakte-ratio's, thermische massa, isolatiescore en vochtadvies.
  *
  * Bron: infofrankrijk.com/de-isolatie-van-het-franse-huis/
@@ -30,6 +30,32 @@ export const HUIZEN_MATRIX: HuisType[] = [
       muurPerM2: 1.5,
       dakPerM2: 0.6,
       vloerPerM2: 0.6,
+      raamPerM2: 0.12,
+    },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'pierre',
+    naam: 'Maison en Pierre',
+    periode: 'Vóór 1948',
+    uMuur: 2.0,
+    uDak: 2.5,
+    uVloer: 1.2,
+    uRaam: 4.5,
+    ach: 0.5,
+    beschrijving: 'Stenen woning (kalksteen, graniet of leisteen), dikke muren van 50-60 cm. Hoge thermische massa, maar zonder isolatie aanzienlijk warmteverlies.',
+    thermischeMassa: 'hoog',
+    isolatiescore: 3,
+    vochtadvies: 'Stenen muren — binnenisolatie met dampopen materiaal aanbevolen. Gebruik nooit cement of polystyreen direct op de steen.',
+    waarschuwingen: [
+      'Dikke stenen muren vereisen dampopen isolatiesysteem',
+      'Check bij de mairie of de gevel beschermd is (ABF/périmètre de protection)',
+      'Enkel glas is een groot warmtelek — HR++ ramen geven veel comfort',
+    ],
+    oppervlakteRatios: {
+      muurPerM2: 1.4,
+      dakPerM2: 0.7,
+      vloerPerM2: 0.7,
       raamPerM2: 0.12,
     },
     bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',

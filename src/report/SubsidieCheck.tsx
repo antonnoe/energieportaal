@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import { evaluateSubsidie } from '../engine/subsidie-rules';
+import { AIAdviseur } from '../components/AIAdviseur';
 
 const statusStyles = {
   green: { bg: 'bg-green-50', border: 'border-green-200', dot: 'bg-green-500', text: 'text-green-800', icon: '\u2705' },
@@ -49,7 +50,7 @@ export function SubsidieCheck() {
 
   return (
     <section className="space-y-4">
-      <h2 className="font-heading text-lg font-bold text-primary">Subsidie & Financiering</h2>
+      <h2 className="font-heading text-lg font-bold text-primary flex items-center">Subsidie &amp; Financiering <AIAdviseur veld="Subsidie" /></h2>
 
       {/* Subsidie kaarten */}
       <div className="space-y-2">
