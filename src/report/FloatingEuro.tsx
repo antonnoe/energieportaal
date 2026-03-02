@@ -15,7 +15,8 @@ export function FloatingEuro() {
 
   // U3: Verberg als geen geldige postcode of geen warmteverliesberekening
   const hasPostcode = toolState.postcode.length === 5;
-  if (!hasPostcode || !result.verwarmingTotaal || result.verwarmingTotaal === 0) {
+  const heeftIsolatieStap = toolState.highestStepVisited >= 3;
+  if (!hasPostcode || !heeftIsolatieStap) {
     return null;
   }
 
