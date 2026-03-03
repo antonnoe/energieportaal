@@ -121,11 +121,13 @@ export function Step4Energie() {
   const sf = (key: keyof ToolState) => (v: string) => setField(key, v);
 
   const handleVerwarmingSelect = (value: string) => {
+    const oldHeating = toolState.mainHeating;
     setField('mainHeating', value);
-    const knop = VERWARMING_KNOPPEN.find(k => k.value === value);
-    if (knop) {
-      setField('mainEfficiency', '0'); // Use default efficiency
+    // Als DHW "meeliep" met verwarming, laat het meelopen
+    if (toolState.dhwSystem === oldHeating) {
+      setField('dhwSystem', value);
     }
+    setField('mainEfficiency', '0');
   };
 
   const handleDhwSelect = (value: string) => {

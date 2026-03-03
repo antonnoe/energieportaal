@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 300,
+        max_tokens: 600,
         system: system,
         messages: [{ role: 'user', content: prompt }],
       }),

@@ -132,7 +132,7 @@ function Rapport() {
   // Bereken rapportNiveau (0|1|2|3)
   const hasPostcode = toolState.postcode.length === 5
   const huisTypeGekozen = toolState.huisTypeGekozen
-  const heeftIsolatieStap = toolState.highestStepVisited >= 3
+  const heeftIsolatieStap = toolState.highestStepVisited >= 4
 
   let rapportNiveau = 0
   if (hasPostcode && !huisTypeGekozen) rapportNiveau = 1
