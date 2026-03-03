@@ -17,7 +17,7 @@ function Bar({ label, kwh, maxKwh, color }: { label: string; kwh: number; maxKwh
 }
 
 export function Energieprofiel() {
-  const { result } = useToolState();
+  const { result, toolState, portaalInput } = useToolState();
 
   const maxKwh = result.totaalVerbruikKwh;
 
@@ -98,36 +98,63 @@ export function Energieprofiel() {
       {/* Kosten */}
       <div className="bg-primary/5 border border-primary/15 rounded-lg p-3">
         <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">Jaarlijkse kosten</p>
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Verwarming</span>
-            <span className="font-medium">€ {result.kostenVerwarming.toLocaleString('nl-NL')}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Tapwater</span>
-            <span className="font-medium">€ {result.kostenDhw.toLocaleString('nl-NL')}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Elektriciteit</span>
-            <span className="font-medium">€ {result.kostenElektriciteit.toLocaleString('nl-NL')}</span>
-          </div>
-          <div className="flex justify-between border-t border-primary/15 pt-1 font-semibold">
-            <span>Totaal</span>
-            <span>€ {result.kostenTotaal.toLocaleString('nl-NL')}</span>
-          </div>
-          {result.pvBesparing > 0 && (
-            <>
-              <div className="flex justify-between text-green-700">
-                <span>PV-besparing</span>
-                <span className="font-medium">-€ {result.pvBesparing.toLocaleString('nl-NL')}</span>
+        {(() => {
+          const prijsElek = portaalInput.prijsElektriciteit;
+          const basisElekKosten = Math.round(result.elektriciteitBasis * prijsElek);
+          const zwembadKosten = Math.round(result.zwembadKwh * prijsElek);
+          const koelingKosten = Math.round(result.koelingKwh * prijsElek);
+          const evKosten = Math.round(result.evKwh * prijsElek);
+          return (
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Verwarming</span>
+                <span className="font-medium">€ {result.kostenVerwarming.toLocaleString('nl-NL')}</span>
               </div>
-              <div className="flex justify-between font-bold text-primary border-t border-primary/15 pt-1">
-                <span>Netto kosten</span>
-                <span>€ {result.nettoKosten.toLocaleString('nl-NL')}</span>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Tapwater</span>
+                <span className="font-medium">€ {result.kostenDhw.toLocaleString('nl-NL')}</span>
               </div>
-            </>
-          )}
-        </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Elektriciteit</span>
+                <span className="font-medium">€ {basisElekKosten.toLocaleString('nl-NL')}</span>
+              </div>
+              {toolState.hasZwembad === 'ja' && result.zwembadKwh > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Zwembad</span>
+                  <span className="font-medium">€ {zwembadKosten.toLocaleString('nl-NL')}</span>
+                </div>
+              )}
+              {toolState.hasKoeling === 'ja' && result.koelingKwh > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Koeling</span>
+                  <span className="font-medium">€ {koelingKosten.toLocaleString('nl-NL')}</span>
+                </div>
+              )}
+              {toolState.hasEV === 'ja' && result.evKwh > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">EV laden</span>
+                  <span className="font-medium">€ {evKosten.toLocaleString('nl-NL')}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t border-primary/15 pt-1 font-semibold">
+                <span>Totaal</span>
+                <span>€ {result.kostenTotaal.toLocaleString('nl-NL')}</span>
+              </div>
+              {result.pvBesparing > 0 && (
+                <>
+                  <div className="flex justify-between text-green-700">
+                    <span>PV-besparing</span>
+                    <span className="font-medium">-€ {result.pvBesparing.toLocaleString('nl-NL')}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-primary border-t border-primary/15 pt-1">
+                    <span>Netto kosten</span>
+                    <span>€ {result.nettoKosten.toLocaleString('nl-NL')}</span>
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
       </div>
     </section>
   );

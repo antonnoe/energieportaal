@@ -14,6 +14,9 @@ import { Besparingsadvies } from './report/Besparingsadvies'
 import { SubsidieCheck } from './report/SubsidieCheck'
 import { Grondslagen } from './report/Grondslagen'
 import { FloatingEuro } from './report/FloatingEuro'
+import { Disclaimer } from './report/Disclaimer'
+import { PdfExport } from './report/PdfExport'
+import { DossierKnop } from './report/DossierKnop'
 import { getZoneById } from './engine/constants'
 
 /** RapportSectie — wrapper die children toont in kleur of grijs afhankelijk van rapportNiveau */
@@ -202,6 +205,17 @@ function Rapport() {
         <hr className="border-gray-200" />
         <Grondslagen />
       </RapportSectie>
+
+      {/* Disclaimer — in kleur vanaf niveau 3 */}
+      {rapportNiveau === 3 && <Disclaimer />}
+
+      {/* PDF + Dossier knoppen — alleen bij niveau 3 */}
+      {rapportNiveau === 3 && (
+        <div className="flex gap-3 mt-4">
+          <PdfExport />
+          <DossierKnop />
+        </div>
+      )}
     </div>
   )
 }

@@ -162,7 +162,10 @@ export function Step4Energie() {
           onSelect={handleVerwarmingSelect}
         />
         <p className="text-xs text-gray-400">{effLabel} &mdash; 0 = standaard gebruiken</p>
-        <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} />
+        <div className="flex items-center gap-1">
+          <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} />
+          <AIAdviseur veld="Rendement/SCOP" />
+        </div>
 
         <SelectField
           id="auxHeating" label="Bijverwarming"
@@ -171,7 +174,10 @@ export function Step4Energie() {
           onChange={sf('auxHeating')}
         />
         {toolState.auxHeating !== 'geen' && (
-          <NumField id="auxFraction" label="Aandeel bijverwarming" value={toolState.auxFraction} unit="%" onChange={sf('auxFraction')} min={0} max={90} step={5} />
+          <div className="flex items-center gap-1">
+            <NumField id="auxFraction" label="Aandeel bijverwarming" value={toolState.auxFraction} unit="%" onChange={sf('auxFraction')} min={0} max={90} step={5} />
+            <AIAdviseur veld="Bijverwarming" />
+          </div>
         )}
       </div>
 
@@ -216,12 +222,18 @@ export function Step4Energie() {
       {/* Optionele systemen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
         <SectionTitle>Optionele systemen</SectionTitle>
-        <Toggle id="hasEV" label="Elektrische auto" value={toolState.hasEV} onChange={sf('hasEV')} helpText="Laadt u thuis een EV op?" />
+        <div className="flex items-center gap-1">
+          <Toggle id="hasEV" label="Elektrische auto" value={toolState.hasEV} onChange={sf('hasEV')} helpText="Laadt u thuis een EV op?" />
+          <AIAdviseur veld="Elektrische auto" />
+        </div>
         {toolState.hasEV === 'ja' && (
           <NumField id="evKmPerJaar" label="Kilometers/jaar" value={toolState.evKmPerJaar} unit="km" onChange={sf('evKmPerJaar')} min={0} max={100000} step={1000} />
         )}
 
-        <Toggle id="hasZwembad" label="Zwembad (verwarmd)" value={toolState.hasZwembad} onChange={sf('hasZwembad')} />
+        <div className="flex items-center gap-1">
+          <Toggle id="hasZwembad" label="Zwembad (verwarmd)" value={toolState.hasZwembad} onChange={sf('hasZwembad')} />
+          <AIAdviseur veld="Zwembad" />
+        </div>
         {toolState.hasZwembad === 'ja' && (
           <div className="grid grid-cols-2 gap-3">
             <NumField id="zwembadOppervlak" label="Oppervlak" value={toolState.zwembadOppervlak} unit="m²" onChange={sf('zwembadOppervlak')} min={1} max={200} step={1} />
