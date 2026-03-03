@@ -129,6 +129,14 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
   );
 }
 
+function getDefaultEffLabel(type: string): string {
+  const defaults: Record<string, string> = {
+    gas: '0.90', stookolie: '0.85', warmtepomp: '3.5',
+    elektrisch: '1.0', hout: '0.75', propaan: '0.90',
+  };
+  return defaults[type] ?? '?';
+}
+
 function buildContextPrompt(
   veld: string,
   waarde: string | number | undefined,
@@ -149,6 +157,10 @@ function buildContextPrompt(
     `- Dak: U=${toolState.uDak} W/m²·K (${toolState.dakOppervlak} m²)`,
     `- Vloer: U=${toolState.uVloer} W/m²·K (${toolState.vloerOppervlak} m²)`,
     `- Ramen: U=${toolState.uRaam} W/m²·K (${toolState.raamOppervlak} m²)`,
+    `- Raamtype: ${toolState.isolatieNiveauRaam || 'handmatig ingevoerd'}`,
+    `- Muurniveau: ${toolState.isolatieNiveauMuur || 'handmatig'}`,
+    `- Dakniveau: ${toolState.isolatieNiveauDak || 'handmatig'}`,
+    `- Vloerniveau: ${toolState.isolatieNiveauVloer || 'handmatig'}`,
     ``,
     `WARMTEVERLIES:`,
     `- Transmissie (Htr): ${result.uaWK} W/K`,
@@ -156,7 +168,7 @@ function buildContextPrompt(
     `- Totaal (Htot): ${result.hTotaalWK} W/K`,
     ``,
     `ENERGIE:`,
-    `- Hoofdverwarming: ${toolState.mainHeating} (η/SCOP=${toolState.mainEfficiency})`,
+    `- Hoofdverwarming: ${toolState.mainHeating} (η/SCOP=${Number(toolState.mainEfficiency) > 0 ? toolState.mainEfficiency : 'standaard (' + getDefaultEffLabel(toolState.mainHeating) + ')'})`,
     `- Bijverwarming: ${toolState.auxHeating || 'geen'} (${toolState.auxFraction}%)`,
     `- DHW-systeem: ${toolState.dhwSystem}`,
     `- DHW rendement: ${toolState.dhwEfficiency}`,
