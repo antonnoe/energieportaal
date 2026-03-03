@@ -60,6 +60,7 @@ export interface SubsidieIntake {
   workType: WorkType;
   mprPath: MprPath;
   heatlossDone: boolean;
+  dpeLetter?: string;
 }
 
 export interface SubsidieCard {
