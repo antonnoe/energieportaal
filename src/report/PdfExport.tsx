@@ -23,7 +23,7 @@ export function PdfExport() {
   const zone = getZoneById(toolState.zoneId);
   const huisType = getHuisTypeById(toolState.huisTypeId);
   const savings = useMemo(() => berekenSavings(portaalInput, result), [portaalInput, result]);
-  const subsidie = useMemo(() => evaluateSubsidie(portaalInput.subsidieIntake), [portaalInput.subsidieIntake]);
+  const subsidie = useMemo(() => evaluateSubsidie({ ...portaalInput.subsidieIntake, dpeLetter: result.dpe.letter }), [portaalInput.subsidieIntake, result.dpe.letter]);
 
   const handleExport = () => {
     const doc = new jsPDF('p', 'mm', 'a4');
@@ -428,7 +428,7 @@ export function PdfExport() {
       c.shortTitle,
       statusLabel[c.status] ?? c.status,
       c.amount,
-      c.reason.substring(0, 80),
+      c.reason.substring(0, 120),
     ]);
 
     autoTable(doc, {
@@ -527,7 +527,7 @@ export function PdfExport() {
       'DISCLAIMER - Dit rapport is gegenereerd door EnergiePortaal, een simulatietool van InfoFrankrijk.com.',
       'Het is GEEN officieel DPE-rapport en vervangt geen advies van een gecertificeerde energieadviseur.',
       'De DPE-indicatie werkt met finale energie en uw invoer, niet met de officiele 3CL-DPE 2021 methode.',
-      'Energieprijzen zijn momentopnamen (feb 2026). Investeringsbedragen zijn indicatief (bron: ADEME).',
+      'Energieprijzen zijn momentopnamen (maart 2026). Investeringsbedragen zijn indicatief (bron: ADEME).',
       'Subsidie-informatie is indicatief en zonder inkomensvraag.',
       `\xA9 ${new Date().getFullYear()} InfoFrankrijk.com - EnergiePortaal v2`,
     ];

@@ -38,11 +38,11 @@ const SUBSIDIE_AANVRAAG: Record<string, { aanvraagwijze: string; url: string }> 
 };
 
 export function SubsidieCheck() {
-  const { portaalInput } = useToolState();
+  const { portaalInput, result } = useToolState();
 
   const subsidie = useMemo(
-    () => evaluateSubsidie(portaalInput.subsidieIntake),
-    [portaalInput.subsidieIntake]
+    () => evaluateSubsidie({ ...portaalInput.subsidieIntake, dpeLetter: result.dpe.letter }),
+    [portaalInput.subsidieIntake, result.dpe.letter]
   );
 
   const eligibleCards = subsidie.cards.filter(c => c.eligible);

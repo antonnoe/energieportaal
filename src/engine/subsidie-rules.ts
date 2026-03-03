@@ -61,7 +61,7 @@ function evalMaPrimeGeste(intake: SubsidieIntake): SubsidieCard {
 
 function evalMaPrimeAmpleur(intake: SubsidieIntake): SubsidieCard {
   let status: StoplichtStatus = 'green';
-  let reason = 'U lijkt in aanmerking te komen voor MaPrimeRénov\' Ampleur.';
+  let reason = 'U lijkt in aanmerking te komen voor MaPrimeRénov\' Ampleur. Let op: een verplicht gesprek met France Rénov\' is vereist voor aanvraag (sinds feb 2026).';
 
   if (intake.stage === 'gestart') {
     status = 'red';
@@ -84,6 +84,13 @@ function evalMaPrimeAmpleur(intake: SubsidieIntake): SubsidieCard {
   } else if (intake.usage === 'onbekend' || intake.ageGt2 === 'onbekend') {
     status = 'amber';
     reason = 'Controleer: woning moet hoofdverblijfplaats zijn en ouder dan 2 jaar.';
+  }
+
+  // Sinds 23 feb 2026: MPR Ampleur alleen voor DPE E, F of G
+  // (Bron: ecologie.gouv.fr/reouverture-du-guichet-maprimerenov)
+  if (intake.dpeLetter && !['E', 'F', 'G'].includes(intake.dpeLetter)) {
+    status = 'red';
+    reason = 'Sinds 23 februari 2026 is MPR\' Ampleur alleen beschikbaar voor woningen met DPE E, F of G. Uw woning valt buiten dit criterium.';
   }
 
   return {
@@ -215,7 +222,7 @@ function buildActionPlan(intake: SubsidieIntake, cards: SubsidieCard[]): string[
   const plan: string[] = [];
 
   if (intake.stage === 'voor' || intake.stage === 'offertes') {
-    plan.push('1. Vraag een gecertificeerde energieadviseur (Mon Accompagnateur Rénov\') aan via France Rénov\'.');
+    plan.push('1. Maak EERST een verplichte afspraak met een France Rénov\' adviseur (gratis). Sinds 23 feb 2026 is dit verplicht voor alle MPR\' aanvragen. Ga naar france-renov.gouv.fr/preparer-projet/trouver-conseiller.');
 
     if (!intake.heatlossDone) {
       plan.push('2. Laat een warmteverliesberekening (audit énergétique) uitvoeren — verplicht voor MPR\' Ampleur.');

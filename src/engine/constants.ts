@@ -42,20 +42,20 @@ export const CO2_FACTOR: Record<VerwarmingType, number> = {
   propaan: 0.235,
 };
 
-// ─── ENERGIEPRIJZEN — Bron: CRE / DGEC / Markt — februari 2026 ─────────────
-// Alle prijzen in €/kWh (omgerekend via KWH_CONVERSION).
+// --- ENERGIEPRIJZEN --- Bron: CRE / DGEC / Markt --- maart 2026 -----------
+// Alle prijzen in EUR/kWh (omgerekend via KWH_CONVERSION).
 // Gebruiker kan altijd handmatig aanpassen in Stap 5.
 
 export const DEFAULT_PRIJZEN: Record<VerwarmingType, number> = {
-  gas: 0.1051,        // CRE Prix Repère chauffage, feb 2026 (≈ €1,05/m³)
-  stookolie: 0.118,   // DGEC wekelijks gemiddelde, feb 2026 (€1,18/L ÷ 10 kWh/L)
-  warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026
-  elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026
-  hout: 0.047,        // marktgemiddelde 2025-2026 (€85/stère ÷ 1800 kWh/stère)
-  propaan: 0.268,     // marktgemiddelde 2026 (€1,90/L ÷ 7,1 kWh/L)
+  gas: 0.1051,        // CRE Prix Repere chauffage, mars 2026 (EUR 1,05/m3)
+  stookolie: 0.119,   // DGEC/FioulReduc gemiddelde, mars 2026 (EUR 1,19/L / 10 kWh/L)
+  warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026 (stabiel tot aug 2026)
+  elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026 (stabiel tot aug 2026)
+  hout: 0.047,        // marktgemiddelde 2025-2026 (EUR 85/stere / 1800 kWh/stere)
+  propaan: 0.268,     // marktgemiddelde 2026 (EUR 1,90/L / 7,1 kWh/L)
 };
 
-export const DEFAULT_EXPORT_TARIEF = 0.04; // €/kWh — S21 surplus ≤9 kWc, Q1 2026
+export const DEFAULT_EXPORT_TARIEF = 0.04; // EUR/kWh - S21 surplus <=9 kWc, Q1 2026
 
 // ─── Prijsbronnen voor weergave in grondslagen ──────────────────────────────
 
@@ -68,18 +68,18 @@ export interface PrijsBron {
 export const PRIJS_BRONNEN: Record<string, PrijsBron> = {
   elektriciteit: {
     label: 'Elektriciteit',
-    prijsPerKwh: '0,1940 €/kWh TTC',
-    bron: 'CRE TRV Base 6kVA, feb 2026',
+    prijsPerKwh: '0,1940 EUR/kWh TTC',
+    bron: 'CRE TRV Base 6kVA, feb 2026 (stabiel tot aug 2026)',
   },
   gas: {
     label: 'Gas',
-    prijsPerKwh: '0,1051 €/kWh PCI',
-    bron: 'CRE Prix Repère chauffage, feb 2026',
+    prijsPerKwh: '0,1051 EUR/kWh PCI',
+    bron: 'CRE Prix Repere chauffage, mars 2026',
   },
   stookolie: {
     label: 'Fioul (stookolie)',
-    prijsPerKwh: '0,118 €/kWh (1,18 €/L)',
-    bron: 'DGEC wekelijks gemiddelde, feb 2026',
+    prijsPerKwh: '0,119 EUR/kWh (1,19 EUR/L)',
+    bron: 'DGEC/FioulReduc gemiddelde, mars 2026',
   },
   hout: {
     label: 'Hout',
