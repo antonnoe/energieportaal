@@ -97,8 +97,12 @@ export function calcWarmtevraag(
   daysPresent: number,
   daysAway: number
 ): number {
-  const fracPresent = daysPresent / 365;
-  const fracAway = daysAway / 365;
+  // Clamp: totaal mag niet > 365 dagen
+  const totalDays = Math.min(365, daysPresent + daysAway);
+  const clampedPresent = Math.min(daysPresent, totalDays);
+  const clampedAway = totalDays - clampedPresent;
+  const fracPresent = clampedPresent / 365;
+  const fracAway = clampedAway / 365;
   return hTotaal * (hddPresent * fracPresent + hddAway * fracAway) * 24 / 1000;
 }
 
@@ -214,8 +218,12 @@ export function compute(input: PortaalInput): PortaalResult {
   const hddAway = calcHDDCorrected(zone.hdd, input.awaySetpoint, zone.Tref);
 
   // ── F4: Gewogen HDD_eff — exacte berekening zonder tussentijdse afronding ──
-  const fracPresent = input.daysPresent / 365;
-  const fracAway = input.daysAway / 365;
+  // Clamp: totaal mag niet > 365 dagen
+  const totalDays = Math.min(365, input.daysPresent + input.daysAway);
+  const clampedPresent = Math.min(input.daysPresent, totalDays);
+  const clampedAway = totalDays - clampedPresent;
+  const fracPresent = clampedPresent / 365;
+  const fracAway = clampedAway / 365;
   const hddEffGewogen = hddPresent * fracPresent + hddAway * fracAway;
 
   // ── Thermische warmtevraag ──
