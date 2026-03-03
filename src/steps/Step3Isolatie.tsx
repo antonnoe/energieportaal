@@ -168,7 +168,7 @@ export function Step3Isolatie() {
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
         <h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">Luchtdichtheid &amp; ventilatie</h3>
         <div className="grid grid-cols-2 gap-3">
-          <NumField id="ach" label="Luchtwisseling (ACH)" value={toolState.ach} unit="/uur" onChange={sf('ach')} min={0.1} max={2} helpText="Oud: 0.8 · Nieuw: 0.3" />
+          <NumField id="ach" label="Luchtwisseling (ACH)" value={toolState.ach} unit="/uur" onChange={sf('ach')} min={0.1} max={2} helpText="Luchtwisselingen per uur. Oud huis: 0.6-1.0 / Nieuw huis: 0.3-0.5" />
           <NumField id="plafondHoogte" label="Plafondhoogte" value={toolState.plafondHoogte} unit="m" onChange={sf('plafondHoogte')} min={2} max={5} helpText="Standaard 2,5 m" />
         </div>
       </div>

@@ -18,6 +18,7 @@ import { Disclaimer } from './report/Disclaimer'
 import { PdfExport } from './report/PdfExport'
 import { DossierKnop } from './report/DossierKnop'
 import { getZoneById } from './engine/constants'
+import { getRapportNiveau } from './engine/rapport-niveau'
 
 /** RapportSectie — wrapper die children toont in kleur of grijs afhankelijk van rapportNiveau */
 function RapportSectie({ niveau, minimumNiveau, children, placeholder }: {
@@ -129,15 +130,7 @@ function StepNavButtons() {
 function Rapport() {
   const { toolState } = useToolState()
 
-  // Bereken rapportNiveau (0|1|2|3)
-  const hasPostcode = toolState.postcode.length === 5
-  const huisTypeGekozen = toolState.huisTypeGekozen
-  const heeftIsolatieStap = toolState.highestStepVisited >= 4
-
-  let rapportNiveau = 0
-  if (hasPostcode && !huisTypeGekozen) rapportNiveau = 1
-  if (hasPostcode && huisTypeGekozen && !heeftIsolatieStap) rapportNiveau = 2
-  if (hasPostcode && huisTypeGekozen && heeftIsolatieStap) rapportNiveau = 3
+  const rapportNiveau = getRapportNiveau(toolState)
 
   const zone = getZoneById(toolState.zoneId)
 

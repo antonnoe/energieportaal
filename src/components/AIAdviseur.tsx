@@ -56,7 +56,8 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
 
     // Check cache
     const hash = getStateHash(toolState);
-    const cacheKey = `${hash}:${veld}`;
+    const contextHash = context ? getStateHash(context) : '';
+    const cacheKey = `${hash}:${veld}:${waarde ?? ''}:${contextHash}`;
     if (cache.has(cacheKey)) {
       setAnswer(cache.get(cacheKey)!);
       return;

@@ -159,11 +159,13 @@ export function SubsidieCheck() {
           <a href="https://france-renov.gouv.fr/preparer-projet/trouver-conseiller" target="_blank" rel="noopener noreferrer" className="text-primary underline">
             France R\u00e9nov' — vind een adviseur
           </a>
+          {' '}(zoek een gratis adviseur bij u in de buurt)
         </p>
         <p>
           <a href="https://france-renov.gouv.fr/annuaire-rge" target="_blank" rel="noopener noreferrer" className="text-primary underline">
             Annuaire RGE — gecertificeerde vakmensen
           </a>
+          {' '}(zoek een gecertificeerde aannemer)
         </p>
       </div>
     </section>

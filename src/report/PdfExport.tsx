@@ -461,6 +461,8 @@ export function PdfExport() {
     doc.setTextColor(GRAY);
     textLine('Meer info: infofrankrijk.com/maprimerenov-2026-bezint-eer-ge-begint/');
     textLine('Exacte berekening: mesaides.france-renov.gouv.fr');
+    textLine('france-renov.gouv.fr/preparer-projet/trouver-conseiller (zoek een gratis adviseur bij u in de buurt)');
+    textLine('france-renov.gouv.fr/annuaire-rge (zoek een gecertificeerde aannemer)');
     doc.setTextColor('#333333');
     doc.setFontSize(9);
 
