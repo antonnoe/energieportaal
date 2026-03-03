@@ -82,7 +82,9 @@ export function Besparingsadvies() {
       {combinatie && geselecteerd.size > 0 && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <p className="text-sm font-bold text-blue-900 mb-2">
-            Scenario: {geselecteerd.size} maatregel{geselecteerd.size > 1 ? 'en' : ''} gecombineerd
+            {geselecteerd.size === 1
+              ? `Effect van geselecteerde maatregel:`
+              : `Effect van ${geselecteerd.size} maatregelen samen:`}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
             <div className="bg-white rounded-lg p-2">
