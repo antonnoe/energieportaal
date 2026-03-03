@@ -85,8 +85,28 @@ export function Step5Financieel() {
         <div className="grid grid-cols-2 gap-3">
           <NumField id="setpoint" label="Temperatuur (aanwezig)" value={toolState.setpoint} unit="°C" onChange={sf('setpoint')} min={15} max={25} step={0.5} />
           <NumField id="awaySetpoint" label="Temperatuur (afwezig)" value={toolState.awaySetpoint} unit="°C" onChange={sf('awaySetpoint')} min={5} max={20} step={0.5} />
-          <NumField id="daysPresent" label="Dagen aanwezig" value={toolState.daysPresent} unit="d/jr" onChange={sf('daysPresent')} min={0} max={365} step={5} />
-          <NumField id="daysAway" label="Dagen afwezig" value={toolState.daysAway} unit="d/jr" onChange={sf('daysAway')} min={0} max={365} step={5} />
+          <NumField id="daysPresent" label="Dagen aanwezig" value={toolState.daysPresent} unit="d/jr"
+            onChange={(v) => {
+              const present = Math.min(365, Math.max(0, Number(v) || 0));
+              setField('daysPresent', String(present));
+              // Auto-corrigeer afwezig als totaal > 365
+              const away = Number(toolState.daysAway) || 0;
+              if (present + away > 365) {
+                setField('daysAway', String(365 - present));
+              }
+            }}
+            min={0} max={365} step={5} />
+          <NumField id="daysAway" label="Dagen afwezig" value={toolState.daysAway} unit="d/jr"
+            onChange={(v) => {
+              const away = Math.min(365, Math.max(0, Number(v) || 0));
+              setField('daysAway', String(away));
+              // Auto-corrigeer aanwezig als totaal > 365
+              const present = Number(toolState.daysPresent) || 0;
+              if (present + away > 365) {
+                setField('daysPresent', String(365 - away));
+              }
+            }}
+            min={0} max={365} step={5} />
         </div>
         {(() => {
           const totaal = Number(toolState.daysPresent) + Number(toolState.daysAway);
