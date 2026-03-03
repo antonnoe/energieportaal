@@ -15,7 +15,7 @@ function fmt(n: number): string {
 }
 
 function fmtEur(n: number): string {
-  return `€ ${fmt(n)}`;
+  return `EUR ${fmt(n)}`;
 }
 
 export function PdfExport() {
@@ -43,7 +43,7 @@ export function PdfExport() {
         // Header
         doc.setFontSize(8);
         doc.setTextColor(BRAND);
-        doc.text('EnergiePortaal — Energierapport', margin, 10);
+        doc.text('EnergiePortaal - Energierapport', margin, 10);
         doc.setTextColor(GRAY);
         doc.text(datum, pageWidth - margin, 10, { align: 'right' });
         // Footer
@@ -73,7 +73,7 @@ export function PdfExport() {
       doc.setDrawColor(BRAND);
       doc.setLineWidth(0.5);
       doc.line(margin, y, margin + contentWidth, y);
-      y += 8;
+      y += 10;
       doc.setTextColor('#333333');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -107,40 +107,40 @@ export function PdfExport() {
       doc.text(key, margin + indent, y);
       doc.setFont('helvetica', 'normal');
       const keyWidth = doc.getTextWidth(key + ' ');
-      doc.text(value, margin + indent + keyWidth, y);
+      doc.text(value, margin + indent + keyWidth + 1, y);
       y += 5;
     }
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // TITELBLAD
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     doc.setFontSize(24);
     doc.setTextColor(BRAND);
     doc.setFont('helvetica', 'bold');
-    doc.text('EnergiePortaal', pageWidth / 2, 60, { align: 'center' });
+    doc.text('EnergiePortaal', pageWidth / 2, 70, { align: 'center' });
     doc.setFontSize(16);
     doc.setTextColor('#444444');
-    doc.text('Energierapport', pageWidth / 2, 72, { align: 'center' });
+    doc.text('Energierapport', pageWidth / 2, 84, { align: 'center' });
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text(`${huisType?.naam ?? toolState.huisTypeId} — ${toolState.woonoppervlak} m²`, pageWidth / 2, 85, { align: 'center' });
-    doc.text(`${toolState.postcode} (dept. ${toolState.departement}) — ${zone.name}`, pageWidth / 2, 92, { align: 'center' });
+    doc.text(`${huisType?.naam ?? toolState.huisTypeId} - ${toolState.woonoppervlak} m2`, pageWidth / 2, 100, { align: 'center' });
+    doc.text(`${toolState.postcode} (dept. ${toolState.departement}) - ${zone.name}`, pageWidth / 2, 108, { align: 'center' });
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(result.dpe.kleur);
-    doc.text(`DPE-indicatie: ${result.dpe.letter} (${Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar)`, pageWidth / 2, 108, { align: 'center' });
+    doc.text(`DPE-indicatie: ${result.dpe.letter} (${Math.round(result.dpe.kwhPerM2)} kWh/m2/jaar)`, pageWidth / 2, 128, { align: 'center' });
     doc.setTextColor('#333333');
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.text(`Energiekosten: ${fmtEur(result.kostenTotaal)}/jaar`, pageWidth / 2, 118, { align: 'center' });
+    doc.text(`Energiekosten: ${fmtEur(result.kostenTotaal)}/jaar`, pageWidth / 2, 140, { align: 'center' });
     doc.setFontSize(8);
     doc.setTextColor(GRAY);
-    doc.text(`Gegenereerd op ${datum}`, pageWidth / 2, 135, { align: 'center' });
-    doc.text('InfoFrankrijk.com — EnergiePortaal v2', pageWidth / 2, 142, { align: 'center' });
+    doc.text(`Gegenereerd op ${datum}`, pageWidth / 2, 160, { align: 'center' });
+    doc.text('InfoFrankrijk.com - EnergiePortaal v2', pageWidth / 2, 168, { align: 'center' });
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 1: WONINGPROFIEL
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     doc.addPage();
     y = margin;
     chapterTitle(1, 'WONINGPROFIEL');
@@ -148,10 +148,10 @@ export function PdfExport() {
     kvLine('Type:', `${huisType?.naam ?? toolState.huisTypeId} (${huisType?.periode ?? ''})`);
     kvLine('Locatie:', `${toolState.postcode} (dept. ${toolState.departement})`);
     kvLine('Klimaatzone:', zone.name);
-    kvLine('Oppervlak:', `${toolState.woonoppervlak} m²`);
+    kvLine('Oppervlak:', `${toolState.woonoppervlak} m2`);
     kvLine('Verdiepingen:', toolState.verdiepingen);
-    kvLine('Volume:', `${result.debug.volume.toLocaleString('nl-NL')} m³`);
-    y += 3;
+    kvLine('Volume:', `${result.debug.volume.toLocaleString('nl-NL')} m3`);
+    y += 5;
 
     if (huisType?.beschrijving) {
       textLine(huisType.beschrijving);
@@ -161,7 +161,7 @@ export function PdfExport() {
     if (huisType?.waarschuwingen && huisType.waarschuwingen.length > 0) {
       subtitle('Aandachtspunten');
       for (const w of huisType.waarschuwingen) {
-        textLine(`• ${w}`, 2);
+        textLine(`- ${w}`, 2);
       }
       y += 2;
     }
@@ -170,7 +170,7 @@ export function PdfExport() {
     autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
-      head: [['Bouwdeel', 'U-waarde (W/m²·K)', 'Oppervlak (m²)', 'UA (W/K)']],
+      head: [['Bouwdeel', 'U-waarde (W/m2.K)', 'Oppervlak (m2)', 'UA (W/K)']],
       body: [
         ['Muur', toolState.uMuur, toolState.muurOppervlak, result.debug.uaMuur.toFixed(1)],
         ['Dak', toolState.uDak, toolState.dakOppervlak, result.debug.uaDak.toFixed(1)],
@@ -182,30 +182,30 @@ export function PdfExport() {
       alternateRowStyles: { fillColor: '#f9f5f5' },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 8;
+    y = (doc as any).lastAutoTable.finalY + 12;
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 2: LOCATIE & KLIMAAT
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     chapterTitle(2, 'LOCATIE & KLIMAAT');
 
     kvLine('Zone:', zone.name);
-    kvLine('Graaddagen (HDD):', `${zone.hdd} K·d`);
+    kvLine('Graaddagen (HDD):', `${zone.hdd} K.d`);
     kvLine('Koeldagen (CDD):', `${zone.cdd}`);
     kvLine('PV-opbrengst:', `${zone.pv} kWh/kWp/jaar`);
-    kvLine('Ref. buitentemperatuur:', `${zone.Tref} °C`);
-    kvLine('Zwembadtemperatuur:', `${zone.pool_temp} °C`);
-    y += 3;
+    kvLine('Ref. buitentemperatuur:', `${zone.Tref} \xB0C`);
+    kvLine('Zwembadtemperatuur:', `${zone.pool_temp} \xB0C`);
+    y += 5;
 
     textLine(
-      'De klimaatzone bepaalt het aantal graaddagen (HDD), dat direct de warmtevraag beïnvloedt. ' +
+      'De klimaatzone bepaalt het aantal graaddagen (HDD), dat direct de warmtevraag beinvloedt. ' +
       'Meer graaddagen betekent een koeler klimaat en dus meer verwarmingsenergie. ' +
       'De PV-opbrengst varieert van 1100 kWh/kWp in de bergen tot 1450 kWh/kWp aan de Middellandse Zee.'
     );
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 3: ISOLATIE & WARMTEVERLIES
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(40);
     chapterTitle(3, 'ISOLATIE & WARMTEVERLIES');
 
@@ -213,7 +213,7 @@ export function PdfExport() {
     autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
-      head: [['Bouwdeel', 'U (W/m²·K)', 'A (m²)', 'UA = U × A (W/K)']],
+      head: [['Bouwdeel', 'U (W/m2.K)', 'A (m2)', 'UA = U x A (W/K)']],
       body: [
         ['Muur', toolState.uMuur, toolState.muurOppervlak, result.debug.uaMuur.toFixed(1)],
         ['Dak', toolState.uDak, toolState.dakOppervlak, result.debug.uaDak.toFixed(1)],
@@ -226,25 +226,25 @@ export function PdfExport() {
       alternateRowStyles: { fillColor: '#f9f5f5' },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 6;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
     subtitle('Ventilatieverlies (Hvent)');
-    kvLine('Formule:', `0.34 × ${result.debug.volume} m³ × ${result.debug.achGebruikt} ACH = ${result.debug.hventVoorHRV.toFixed(1)} W/K`);
+    kvLine('Formule:', `0.34 x ${result.debug.volume} m3 x ${result.debug.achGebruikt} ACH = ${result.debug.hventVoorHRV.toFixed(1)} W/K`);
     if (toolState.hasHRV === 'ja') {
-      kvLine('WTW-correctie:', `${result.debug.hventVoorHRV.toFixed(1)} × (1 - ${(Number(toolState.hrvEfficiency) / 100).toFixed(2)}) = ${result.hventEffWK} W/K`);
+      kvLine('WTW-correctie:', `${result.debug.hventVoorHRV.toFixed(1)} x (1 - ${(Number(toolState.hrvEfficiency) / 100).toFixed(2)}) = ${result.hventEffWK} W/K`);
     }
     kvLine('Totaal H (Htr + Hvent):', `${result.uaWK} + ${result.hventEffWK} = ${result.hTotaalWK} W/K`);
-    y += 3;
+    y += 5;
 
     subtitle('Gewogen HDD');
-    kvLine('Basis HDD zone:', `${zone.hdd} K·d`);
-    kvLine('Aanwezig:', `${result.debug.setpoint}°C (${(result.debug.fracPresent * 100).toFixed(0)}%) → HDD = ${Math.round(result.debug.hddCorrPresent)}`);
-    kvLine('Afwezig:', `${result.debug.awaySetpoint}°C (${(result.debug.fracAway * 100).toFixed(0)}%) → HDD = ${Math.round(result.debug.hddCorrAway)}`);
-    kvLine('HDD_eff gewogen:', `${Math.round(result.debug.hddEffGewogen)} K·d`);
+    kvLine('Basis HDD zone:', `${zone.hdd} K.d`);
+    kvLine('Aanwezig:', `${result.debug.setpoint}\xB0C (${(result.debug.fracPresent * 100).toFixed(0)}%) - HDD = ${Math.round(result.debug.hddCorrPresent)}`);
+    kvLine('Afwezig:', `${result.debug.awaySetpoint}\xB0C (${(result.debug.fracAway * 100).toFixed(0)}%) - HDD = ${Math.round(result.debug.hddCorrAway)}`);
+    kvLine('HDD_eff gewogen:', `${Math.round(result.debug.hddEffGewogen)} K.d`);
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 4: DPE-INDICATIE
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(60);
     chapterTitle(4, 'DPE-INDICATIE');
 
@@ -255,7 +255,7 @@ export function PdfExport() {
     doc.text(result.dpe.letter, margin, y + 2);
     doc.setFontSize(12);
     doc.setTextColor('#333333');
-    doc.text(`${Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar`, margin + 15, y + 2);
+    doc.text(`${Math.round(result.dpe.kwhPerM2)} kWh/m2/jaar`, margin + 15, y + 2);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     y += 12;
@@ -271,13 +271,13 @@ export function PdfExport() {
       doc.text(klasse.letter, margin + 2, y + 3.7);
       if (klasse.maxKwhM2 !== Infinity) {
         doc.setFontSize(6);
-        doc.text(`≤ ${klasse.maxKwhM2}`, margin + barWidth - 12, y + 3.7);
+        doc.text(`<= ${klasse.maxKwhM2}`, margin + barWidth - 12, y + 3.7);
       }
       if (isHuidig) {
         doc.setTextColor('#333333');
         doc.setFontSize(8);
         doc.setFont('helvetica', 'bold');
-        doc.text(`◄ ${Math.round(result.dpe.kwhPerM2)} kWh/m²`, margin + barWidth + 3, y + 3.7);
+        doc.text(`<< ${Math.round(result.dpe.kwhPerM2)} kWh/m2`, margin + barWidth + 3, y + 3.7);
         doc.setFont('helvetica', 'normal');
       }
       y += 6.5;
@@ -285,12 +285,12 @@ export function PdfExport() {
     y += 4;
 
     if (result.dpe.kwhTotVolgendeKlasse > 0 && result.dpe.letter !== 'A') {
-      doc.setTextColor('#16a34a');
-      textLine(`↑ Naar betere klasse: nog ${Math.round(result.dpe.kwhTotVolgendeKlasse)} kWh/m² besparen`);
+      doc.setTextColor('#333333');
+      textLine(`Naar betere klasse: nog ${Math.round(result.dpe.kwhTotVolgendeKlasse)} kWh/m2 besparen`);
     }
     if (result.dpe.kwhTotLagereKlasse > 0 && result.dpe.letter !== 'G') {
-      doc.setTextColor('#ef4444');
-      textLine(`↓ Marge tot lagere klasse: ${Math.round(result.dpe.kwhTotLagereKlasse)} kWh/m²`);
+      doc.setTextColor(GRAY);
+      textLine(`Marge tot lagere klasse: ${Math.round(result.dpe.kwhTotLagereKlasse)} kWh/m2`);
     }
     doc.setTextColor('#333333');
     y += 2;
@@ -306,15 +306,15 @@ export function PdfExport() {
     doc.setTextColor(GRAY);
     textLine(
       'Disclaimer: Indicatieve berekening op basis van uw invoer en finale energie. ' +
-      'Geen officiële DPE-audit. Een gecertificeerde DPE classificeert op dubbele drempels ' +
-      '(energie én broeikasgassen), gebruikt conventies, en rekent in primaire energie.'
+      'Geen officiele DPE-audit. Een gecertificeerde DPE classificeert op dubbele drempels ' +
+      '(energie en broeikasgassen), gebruikt conventies, en rekent in primaire energie.'
     );
     doc.setTextColor('#333333');
     doc.setFontSize(9);
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 5: ENERGIEVERBRUIK & KOSTEN
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(50);
     chapterTitle(5, 'ENERGIEVERBRUIK & KOSTEN');
 
@@ -339,7 +339,7 @@ export function PdfExport() {
       alternateRowStyles: { fillColor: '#f9f5f5' },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 6;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
     subtitle('Kosten per categorie');
     const prijsElek = portaalInput.prijsElektriciteit;
@@ -356,25 +356,25 @@ export function PdfExport() {
     autoTable(doc, {
       startY: y,
       margin: { left: margin, right: margin },
-      head: [['Categorie', '€/jaar']],
+      head: [['Categorie', 'EUR/jaar']],
       body: kostenBody,
       headStyles: { fillColor: BRAND, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
       alternateRowStyles: { fillColor: '#f9f5f5' },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 6;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
-    kvLine('CO₂-uitstoot:', `${fmt(result.co2Kg)} kg/jaar`);
+    kvLine('CO2-uitstoot:', `${fmt(result.co2Kg)} kg/jaar`);
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 6: STOOKGEDRAG
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(40);
     chapterTitle(6, 'STOOKGEDRAG');
 
-    kvLine('Setpoint aanwezig:', `${toolState.setpoint} °C`);
-    kvLine('Setpoint afwezig:', `${toolState.awaySetpoint} °C`);
+    kvLine('Setpoint aanwezig:', `${toolState.setpoint} \xB0C`);
+    kvLine('Setpoint afwezig:', `${toolState.awaySetpoint} \xB0C`);
     kvLine('Dagen aanwezig:', `${toolState.daysPresent} dagen/jaar (${(result.debug.fracPresent * 100).toFixed(0)}%)`);
     kvLine('Dagen afwezig:', `${toolState.daysAway} dagen/jaar (${(result.debug.fracAway * 100).toFixed(0)}%)`);
 
@@ -382,7 +382,7 @@ export function PdfExport() {
     if (leegstand > 0.001) {
       kvLine('Leegstand:', `${(leegstand * 100).toFixed(0)}% (geen verwarming)`);
     }
-    y += 3;
+    y += 5;
 
     textLine(
       'De gewogen HDD houdt rekening met uw stookgedrag: bij lagere setpoints tijdens afwezigheid ' +
@@ -390,9 +390,9 @@ export function PdfExport() {
       'Leegstandsdagen (noch aanwezig noch afwezig) worden niet verwarmd.'
     );
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 7: ZONNEPANELEN
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(40);
     chapterTitle(7, 'ZONNEPANELEN');
 
@@ -403,9 +403,9 @@ export function PdfExport() {
       kvLine('Export:', `${fmt(result.pvExportKwh)} kWh`);
       kvLine('PV-besparing:', `${fmtEur(result.pvBesparing)}/jaar`);
       kvLine('Netto kosten:', `${fmtEur(result.nettoKosten)}/jaar`);
-      y += 3;
+      y += 5;
       textLine(
-        'PV-panelen verlagen uw elektriciteitsrekening maar beïnvloeden NIET de DPE-indicatie. ' +
+        'PV-panelen verlagen uw elektriciteitsrekening maar beinvloeden NIET de DPE-indicatie. ' +
         'De DPE classificeert op basis van verbruik, niet productie.'
       );
     } else {
@@ -413,13 +413,13 @@ export function PdfExport() {
       y += 2;
       textLine(
         'Overweeg zonnepanelen voor een lagere elektriciteitsrekening. ' +
-        `In uw zone (${zone.name}) is de verwachte opbrengst circa ${zone.pv} kWh per geïnstalleerde kWp.`
+        `In uw zone (${zone.name}) is de verwachte opbrengst circa ${zone.pv} kWh per geinstalleerde kWp.`
       );
     }
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 8: SUBSIDIES
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(50);
     chapterTitle(8, 'SUBSIDIES');
 
@@ -439,17 +439,22 @@ export function PdfExport() {
       headStyles: { fillColor: BRAND, fontSize: 8 },
       bodyStyles: { fontSize: 7 },
       alternateRowStyles: { fillColor: '#f9f5f5' },
-      columnStyles: { 3: { cellWidth: 60 } },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 25 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: 'auto' },
+      },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 6;
+    y = (doc as any).lastAutoTable.finalY + 10;
 
     if (subsidie.actionPlan.length > 0) {
       subtitle('Stappenplan');
       for (const stap of subsidie.actionPlan) {
         textLine(stap, 2);
       }
-      y += 3;
+      y += 5;
     }
 
     doc.setFontSize(8);
@@ -459,24 +464,24 @@ export function PdfExport() {
     doc.setTextColor('#333333');
     doc.setFontSize(9);
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // HOOFDSTUK 9: AANBEVELINGEN
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(50);
     chapterTitle(9, 'AANBEVELINGEN');
 
     if (savings.maatregelen.length === 0) {
-      textLine('Uw woning is al goed geïsoleerd en uitgerust. Er zijn geen significante besparingsmaatregelen meer beschikbaar.');
+      textLine('Uw woning is al goed geisoleerd en uitgerust. Er zijn geen significante besparingsmaatregelen meer beschikbaar.');
     } else {
       textLine(`${savings.maatregelen.length} maatregelen beschikbaar, gesorteerd op terugverdientijd (kortste eerst).`);
       y += 3;
 
       const aanbBody = savings.maatregelen.map((m, i) => [
-        i < 3 ? `★ ${m.naam}` : m.naam,
+        i < 3 ? `* ${m.naam}` : m.naam,
         `${fmtEur(m.besparingEurJaar)}/jr`,
-        `${fmtEur(m.kostenSchatting.min)}–${fmtEur(m.kostenSchatting.max)}`,
+        `${fmtEur(m.kostenSchatting.min)}-${fmtEur(m.kostenSchatting.max)}`,
         m.terugverdientijdJaar < 50 ? `${m.terugverdientijdJaar} jr` : '>50 jr',
-        `${result.dpe.letter} → ${m.dpeNaLetter}`,
+        `${result.dpe.letter} -> ${m.dpeNaLetter}`,
       ]);
 
       autoTable(doc, {
@@ -487,9 +492,16 @@ export function PdfExport() {
         headStyles: { fillColor: BRAND, fontSize: 8 },
         bodyStyles: { fontSize: 7 },
         alternateRowStyles: { fillColor: '#f9f5f5' },
+        columnStyles: {
+          0: { cellWidth: 45 },
+          1: { cellWidth: 25 },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 25 },
+          4: { cellWidth: 25 },
+        },
         theme: 'grid',
       });
-      y = (doc as any).lastAutoTable.finalY + 8;
+      y = (doc as any).lastAutoTable.finalY + 12;
 
       if (savings.maatregelen.length >= 3) {
         subtitle('Top-3 aanbevolen');
@@ -500,9 +512,9 @@ export function PdfExport() {
       }
     }
 
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     // DISCLAIMER
-    // ═══════════════════════════════════════════════════════════════
+    // ===================================================================
     checkPage(40);
     y += 6;
     doc.setDrawColor('#cccccc');
@@ -512,12 +524,12 @@ export function PdfExport() {
     doc.setFontSize(7);
     doc.setTextColor(GRAY);
     const disclaimerText = [
-      'DISCLAIMER — Dit rapport is gegenereerd door EnergiePortaal, een simulatietool van InfoFrankrijk.com.',
+      'DISCLAIMER - Dit rapport is gegenereerd door EnergiePortaal, een simulatietool van InfoFrankrijk.com.',
       'Het is GEEN officieel DPE-rapport en vervangt geen advies van een gecertificeerde energieadviseur.',
-      'De DPE-indicatie werkt met finale energie en uw invoer, niet met de officiële 3CL-DPE 2021 methode.',
+      'De DPE-indicatie werkt met finale energie en uw invoer, niet met de officiele 3CL-DPE 2021 methode.',
       'Energieprijzen zijn momentopnamen (feb 2026). Investeringsbedragen zijn indicatief (bron: ADEME).',
       'Subsidie-informatie is indicatief en zonder inkomensvraag.',
-      `© ${new Date().getFullYear()} InfoFrankrijk.com — EnergiePortaal v2`,
+      `\xA9 ${new Date().getFullYear()} InfoFrankrijk.com - EnergiePortaal v2`,
     ];
     for (const line of disclaimerText) {
       checkPage(5);
@@ -541,7 +553,7 @@ export function PdfExport() {
       onClick={handleExport}
       className="px-4 py-2.5 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary-dark transition-colors"
     >
-      📄 Download PDF-rapport
+      Download PDF-rapport
     </button>
   );
 }
