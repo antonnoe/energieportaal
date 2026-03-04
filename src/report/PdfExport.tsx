@@ -127,7 +127,7 @@ export function PdfExport() {
     doc.text(`${toolState.postcode} (dept. ${toolState.departement}) - ${zone.name}`, pageWidth / 2, 108, { align: 'center' });
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(result.dpe.kleur);
+    doc.setTextColor('#333333');
     doc.text(`DPE-indicatie: ${result.dpe.letter} (${Math.round(result.dpe.kwhPerM2)} kWh/m2/jaar)`, pageWidth / 2, 128, { align: 'center' });
     doc.setTextColor('#333333');
     doc.setFont('helvetica', 'normal');
@@ -251,7 +251,7 @@ export function PdfExport() {
     // DPE letter groot
     doc.setFontSize(24);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(result.dpe.kleur);
+    doc.setTextColor('#333333');
     doc.text(result.dpe.letter, margin, y + 2);
     doc.setFontSize(12);
     doc.setTextColor('#333333');
@@ -296,7 +296,7 @@ export function PdfExport() {
     y += 2;
 
     if (result.dpe.verhuurverbod) {
-      doc.setTextColor('#dc2626');
+      doc.setTextColor('#666666');
       textLine(result.dpe.verhuurverbod.beschrijving);
       doc.setTextColor('#333333');
       y += 2;
