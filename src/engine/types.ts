@@ -152,6 +152,7 @@ export interface PortaalInput {
   hasZwembad: boolean;
   zwembadOppervlak: number;     // m²
   zwembadMaanden: number;       // maanden actief
+  poolHeatingType: 'electric' | 'heatpump' | 'solar';
 
   // Koeling
   hasKoeling: boolean;
