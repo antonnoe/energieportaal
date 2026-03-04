@@ -85,7 +85,8 @@ export function PdfExport() {
 
     // Helper: chapter title
     function chapterTitle(nr: number, title: string) {
-      checkPage(20);
+      checkPage(25);
+      y += 8; // witruimte vóór nieuw hoofdstuk
       doc.setFontSize(14);
       doc.setTextColor(BRAND);
       doc.setFont('helvetica', 'bold');
@@ -534,6 +535,49 @@ export function PdfExport() {
     }
 
     // ===================================================================
+    // ===================================================================
+    // BIJLAGE: BEGRIPPEN & AFKORTINGEN
+    // ===================================================================
+    chapterTitle(10, 'BEGRIPPEN & AFKORTINGEN');
+
+    const glossary: [string, string][] = [
+      ['U-waarde (W/m2.K)', 'Warmtedoorlating van een bouwdeel. Lager = beter geisoleerd.'],
+      ['UA (W/K)', 'U-waarde x oppervlak. Totaal warmteverlies via een bouwdeel per graad temperatuurverschil.'],
+      ['R-waarde (m2.K/W)', 'Warmteweerstand van isolatie. Hoger = beter geisoleerd. R = 1/U.'],
+      ['HDD (graaddagen)', 'Heating Degree Days. Meet hoe koud het klimaat is. Meer graaddagen = meer stookbehoefte.'],
+      ['ACH (luchtwisselingen/uur)', 'Air Changes per Hour. Hoeveel keer per uur de lucht in huis volledig wordt ververst.'],
+      ['Htr (W/K)', 'Transmissieverlies. Warmteverlies via muren, dak, vloer en ramen.'],
+      ['Hvent (W/K)', 'Ventilatieverlies. Warmteverlies via luchtverversing en lekken.'],
+      ['Htot (W/K)', 'Totaal warmteverlies (Htr + Hvent).'],
+      ['DPE', 'Diagnostic de Performance Energetique. Frans energielabel (A t/m G).'],
+      ['kWh', 'Kilowattuur. Eenheid voor energieverbruik. 1 kWh = 3.600 kilojoule.'],
+      ['kWp', 'Kilowattpiek. Nominaal vermogen van zonnepanelen onder standaardcondities.'],
+      ['SCOP', 'Seasonal Coefficient of Performance. Gemiddeld jaarrendement van een warmtepomp.'],
+      ['COP', 'Coefficient of Performance. Momentaan rendement van een warmtepomp.'],
+      ['eta (rendement)', 'Efficientie van een verwarmingssysteem (0-1 voor ketels, >1 voor warmtepompen).'],
+      ['EER', 'Energy Efficiency Ratio. Rendement van een koelsysteem.'],
+      ['WTW / HRV', 'Warmteterugwinning. Mechanisch ventilatiesysteem dat warmte uit afgevoerde lucht terugwint.'],
+      ['DHW', 'Domestic Hot Water. Sanitair warm water (douche, bad, keuken).'],
+      ["MPR (MaPrimeRenov')", 'Franse subsidie voor energetische renovatie. Inkomensafhankelijk.'],
+      ['CEE', "Certificats d'Economies d'Energie. Energiebesparingscertificaten via energieleveranciers."],
+      ['Eco-PTZ', "Eco-Pret a Taux Zero. Rentevrije lening tot EUR 50.000 voor energierenovatie."],
+      ['RGE', 'Reconnu Garant de l\'Environnement. Keurmerk voor gecertificeerde aannemers (vereist voor subsidies).'],
+      ['TVA 5,5%', 'Verlaagd BTW-tarief op energetische renovatie (i.p.v. 20%).'],
+      ['PV', 'Photovoltaique. Zonnepanelen voor elektriciteitsproductie.'],
+    ];
+
+    autoTable(doc, {
+      startY: y,
+      margin: { left: margin, right: margin },
+      head: [['Begrip', 'Betekenis']],
+      body: glossary,
+      headStyles: { fillColor: BRAND, fontSize: 8 },
+      bodyStyles: { fontSize: 7 },
+      columnStyles: { 0: { cellWidth: 40, fontStyle: 'bold' } },
+      theme: 'striped',
+    });
+    y = (doc as any).lastAutoTable.finalY + 5;
+
     // DISCLAIMER
     // ===================================================================
     checkPage(40);
@@ -547,7 +591,7 @@ export function PdfExport() {
     const disclaimerText = [
       'DISCLAIMER - Dit rapport is gegenereerd door EnergiePortaal, een simulatietool van InfoFrankrijk.com.',
       'Het is GEEN officieel DPE-rapport en vervangt geen advies van een gecertificeerde energieadviseur.',
-      'De DPE-indicatie werkt met finale energie en uw invoer, niet met de officiele 3CL-DPE 2021 methode.',
+      'De DPE-indicatie is een gebouwkenmerk, berekend met gestandaardiseerde bewoning (365 dagen, 19 graden C). Geen officiele 3CL-DPE.',
       'Energieprijzen zijn momentopnamen (maart 2026). Investeringsbedragen zijn indicatief (bron: ADEME).',
       'Subsidie-informatie is indicatief en zonder inkomensvraag.',
       `\xA9 ${new Date().getFullYear()} InfoFrankrijk.com - EnergiePortaal v2`,
