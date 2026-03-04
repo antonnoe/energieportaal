@@ -24,7 +24,7 @@ export function Disclaimer() {
             kan het verbruik tot 60% hoger uitvallen.
           </li>
           <li>
-            Energieprijzen zijn momentopnamen (februari 2026) en kunnen afwijken van uw werkelijke tarief.
+            Energieprijzen zijn momentopnamen (maart 2026) en kunnen afwijken van uw werkelijke tarief.
           </li>
           <li>
             Investeringsbedragen en terugverdientijden zijn indicatief (bron: ADEME).

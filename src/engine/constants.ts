@@ -49,8 +49,8 @@ export const CO2_FACTOR: Record<VerwarmingType, number> = {
 export const DEFAULT_PRIJZEN: Record<VerwarmingType, number> = {
   gas: 0.1051,        // CRE Prix Repere chauffage, mars 2026 (EUR 1,05/m3)
   stookolie: 0.119,   // DGEC/FioulReduc gemiddelde, mars 2026 (EUR 1,19/L / 10 kWh/L)
-  warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026 (stabiel tot aug 2026)
-  elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, feb 2026 (stabiel tot aug 2026)
+  warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, maart 2026 (stabiel tot aug 2026)
+  elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, maart 2026 (stabiel tot aug 2026)
   hout: 0.047,        // marktgemiddelde 2025-2026 (EUR 85/stere / 1800 kWh/stere)
   propaan: 0.268,     // marktgemiddelde 2026 (EUR 1,90/L / 7,1 kWh/L)
 };
@@ -69,7 +69,7 @@ export const PRIJS_BRONNEN: Record<string, PrijsBron> = {
   elektriciteit: {
     label: 'Elektriciteit',
     prijsPerKwh: '0,1940 EUR/kWh TTC',
-    bron: 'CRE TRV Base 6kVA, feb 2026 (stabiel tot aug 2026)',
+    bron: 'CRE TRV Base 6kVA, maart 2026 (stabiel tot aug 2026)',
   },
   gas: {
     label: 'Gas',
@@ -84,12 +84,12 @@ export const PRIJS_BRONNEN: Record<string, PrijsBron> = {
   hout: {
     label: 'Hout',
     prijsPerKwh: '0,047 €/kWh (85 €/stère)',
-    bron: 'marktgemiddelde 2025-2026',
+    bron: 'marktgemiddelde, maart 2026',
   },
   propaan: {
     label: 'Propaan',
     prijsPerKwh: '0,268 €/kWh (1,90 €/L)',
-    bron: 'marktgemiddelde 2026',
+    bron: 'marktgemiddelde, maart 2026',
   },
   pvExport: {
     label: 'PV-export',
