@@ -147,6 +147,8 @@ export interface PortaalInput {
   hasPV: boolean;
   pvVermogen: number;           // kWp
   pvZelfverbruik: number;       // fractie 0–1
+  pvOrientatie: number;         // correctiefactor oriëntatie (0.55–1.0)
+  pvHelling: number;            // correctiefactor helling (0.90–1.0)
 
   // Zwembad
   hasZwembad: boolean;
