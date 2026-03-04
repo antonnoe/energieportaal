@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import { evaluateSubsidie } from '../engine/subsidie-rules';
 import { AIAdviseur } from '../components/AIAdviseur';
@@ -8,6 +8,37 @@ const statusStyles = {
   amber: { bg: 'bg-amber-50', border: 'border-amber-200', dot: 'bg-amber-500', text: 'text-amber-800', icon: '\u26a0\ufe0f' },
   red: { bg: 'bg-red-50', border: 'border-red-200', dot: 'bg-red-500', text: 'text-red-800', icon: '\u274c' },
 };
+
+const SUBSIDIE_INFO: Record<string, string> = {
+  'mpr-geste': 'Subsidie voor een enkele maatregel (isolatie, verwarming, ventilatie). Tot \u20ac15.000 afhankelijk van inkomen en maatregel.',
+  'mpr-ampleur': 'Subsidie voor een ingrijpende renovatie met minimaal 2 sprongen op de DPE-schaal. Tot \u20ac70.000. Alleen voor DPE E, F of G.',
+  cee: 'Energiebesparingscertificaten \u2014 uw energieleverancier betaalt een premie voor besparende maatregelen. Cumuleerbaar met MPR\u2019.',
+  'eco-ptz': 'Rentevrije lening tot \u20ac50.000 voor energetische renovatie. Looptijd tot 20 jaar. Cumuleerbaar met MPR\u2019.',
+  tva: 'Verlaagd BTW-tarief (5,5% i.p.v. 20%) op arbeid en materiaal voor energetische renovatie van woningen ouder dan 2 jaar.',
+  lokaal: 'Gemeentelijke en regionale subsidies. Vari\u00ebren sterk per locatie. Check bij uw mairie of ADIL.',
+};
+
+function InfoTooltip({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <span className="relative inline-block ml-1">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-[10px] font-bold leading-none inline-flex items-center justify-center hover:bg-primary/20 hover:text-primary transition-colors"
+        aria-label="Info"
+      >
+        i
+      </button>
+      {open && (
+        <span className="absolute z-20 left-0 top-6 w-64 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
+          {text}
+          <button type="button" onClick={() => setOpen(false)} className="block mt-1 text-primary underline text-[10px]">sluiten</button>
+        </span>
+      )}
+    </span>
+  );
+}
 
 // Subsidie-specifieke aanvraag-info voor het verdict
 const SUBSIDIE_AANVRAAG: Record<string, { aanvraagwijze: string; url: string }> = {
@@ -65,7 +96,7 @@ export function SubsidieCheck() {
                 <div className={`w-3 h-3 rounded-full ${style.dot} mt-1 shrink-0`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-semibold">{card.title}</p>
+                    <p className="text-sm font-semibold">{card.title}{SUBSIDIE_INFO[card.id] && <InfoTooltip text={SUBSIDIE_INFO[card.id]} />}</p>
                     <span className="text-xs font-medium text-gray-600 shrink-0">{card.amount}</span>
                   </div>
                   <p className={`text-xs mt-0.5 ${style.text}`}>{card.reason}</p>
