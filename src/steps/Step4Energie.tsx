@@ -242,6 +242,18 @@ export function Step4Energie() {
             <NumField id="zwembadMaanden" label="Maanden actief" value={toolState.zwembadMaanden} onChange={sf('zwembadMaanden')} min={1} max={12} />
           </div>
         )}
+        {toolState.hasZwembad === 'ja' && (
+          <SelectField
+            id="poolHeatingType" label="Verwarming zwembad"
+            value={toolState.poolHeatingType}
+            options={[
+              { value: 'electric', label: 'Elektrisch (direct)' },
+              { value: 'heatpump', label: 'Warmtepomp (PAC piscine)' },
+              { value: 'solar', label: 'Solaire (zonnecollector)' },
+            ]}
+            onChange={sf('poolHeatingType')}
+          />
+        )}
 
         <Toggle id="hasKoeling" label="Airconditioning" value={toolState.hasKoeling} onChange={sf('hasKoeling')} />
       </div>
