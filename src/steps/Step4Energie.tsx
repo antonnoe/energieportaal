@@ -279,6 +279,7 @@ export function Step4Energie() {
         )}
 
         <Toggle id="hasKoeling" label="Airconditioning" value={toolState.hasKoeling} onChange={sf('hasKoeling')} />
+        <p className="text-xs text-gray-400 -mt-1">Inclusief climatisation réversible (reversibele warmtepomp). Kan ook als bijverwarming dienen.</p>
       </div>
     </div>
   );
