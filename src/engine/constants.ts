@@ -31,6 +31,27 @@ export const DEFAULT_EFFICIENCY: Record<VerwarmingType, number> = {
   propaan: 0.90,
 };
 
+// ─── Verwarmingssubtypes met specifiek rendement ─────────────────────────────
+
+export const HEATING_SUBTYPES: Record<string, { label: string; eta: number }[]> = {
+  hout: [
+    { label: 'Open haard (foyer ouverte)', eta: 0.15 },
+    { label: 'Gesloten haard / insert (foyer fermé)', eta: 0.65 },
+    { label: 'Houtkachel (poêle à bois)', eta: 0.75 },
+    { label: 'Pelletkachel (poêle à granulés)', eta: 0.90 },
+  ],
+  gas: [
+    { label: 'Oude ketel (vóór 1990)', eta: 0.75 },
+    { label: 'Standaardketel', eta: 0.85 },
+    { label: 'HR-ketel (condensatie)', eta: 0.95 },
+  ],
+  stookolie: [
+    { label: 'Oude ketel (vóór 1990)', eta: 0.70 },
+    { label: 'Standaardketel', eta: 0.80 },
+    { label: 'HR-ketel (condensatie)', eta: 0.90 },
+  ],
+};
+
 // ─── CO₂-factoren (kgCO₂/kWh geleverde energie) ─────────────────────────────
 
 export const CO2_FACTOR: Record<VerwarmingType, number> = {
