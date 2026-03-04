@@ -347,6 +347,21 @@ export function PdfExport() {
       }
     }
 
+    // Nauwkeurigheid verbeteren
+    subtitle('Hoe verbetert u de nauwkeurigheid?');
+    doc.setFontSize(8);
+    textLine('Niveau 1 - Zelf doen (gratis): Meet de muurdikte (steen: U = ca. 3,5/dikte in m). Herken uw raamtype: enkel glas (U=5,8), oud dubbel glas (U=2,9), HR++ (U=1,3) of triple (U=0,8). Controleer dakisolatie vanuit de zolder: geen isolatie (U=3,5), 10 cm minerale wol (U=0,4), 20 cm (U=0,2). Voel tocht bij ramen en deuren: veel tocht = ACH hoger dan standaard.');
+    y += 2;
+    textLine('Niveau 2 - Thermische camera (EUR 100-200): Een infraroodsessie toont exact waar warmte weglekt. Veel RGE-installateurs bieden dit gratis aan als pre-audit. Vraag bij France Renov\' naar aanbevolen diagnostiqueurs bij u in de buurt.');
+    y += 2;
+    textLine('Niveau 3 - Audit energetique (EUR 500-1.500): De officiele route via een gecertificeerd bureau. Verplicht bij verkoop van DPE F/G woningen. France Renov\' vergoedt een deel via MaPrimeRenov\'. U ontvangt exacte U-waarden, een infiltratietest (blower door) en een renovatieplan op maat.');
+    y += 2;
+    doc.setFontSize(7);
+    doc.setTextColor(GRAY);
+    textLine('Tip: Pas uw meetresultaten aan in de EnergiePortaal-invoer en genereer een nieuw rapport voor een nauwkeuriger resultaat.');
+    doc.setTextColor('#333333');
+    doc.setFontSize(9);
+
     // ===================================================================
     // HOOFDSTUK 4: DPE-INDICATIE
     // ===================================================================
@@ -540,7 +555,14 @@ export function PdfExport() {
       alternateRowStyles: { fillColor: '#f9f5f5' },
       theme: 'grid',
     });
-    y = (doc as any).lastAutoTable.finalY + 10;
+    y = (doc as any).lastAutoTable.finalY + 5;
+
+    doc.setFontSize(7);
+    doc.setTextColor(GRAY);
+    textLine('NB: Bovenstaande kosten bevatten alleen variabele energiekosten (verbruik x prijs/kWh). Abonnementen, vastrecht, onderhoud en aansluitkosten zijn niet inbegrepen. De werkelijke energierekening ligt doorgaans 10-20% hoger.');
+    doc.setTextColor('#333333');
+    doc.setFontSize(9);
+    y += 3;
 
     kvLine('CO2-uitstoot:', `${fmt(result.co2Kg)} kg/jaar`);
 
