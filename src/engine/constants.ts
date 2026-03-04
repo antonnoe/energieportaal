@@ -51,7 +51,7 @@ export const DEFAULT_PRIJZEN: Record<VerwarmingType, number> = {
   stookolie: 0.119,   // DGEC/FioulReduc gemiddelde, mars 2026 (EUR 1,19/L / 10 kWh/L)
   warmtepomp: 0.1940, // CRE TRV Base 6kVA TTC, maart 2026 (stabiel tot aug 2026)
   elektrisch: 0.1940, // CRE TRV Base 6kVA TTC, maart 2026 (stabiel tot aug 2026)
-  hout: 0.047,        // marktgemiddelde 2025-2026 (EUR 85/stere / 1800 kWh/stere)
+  hout: 0.047,        // marktgemiddelde maart 2026 (EUR 85/stere / 1800 kWh/stere)
   propaan: 0.268,     // marktgemiddelde 2026 (EUR 1,90/L / 7,1 kWh/L)
 };
 
