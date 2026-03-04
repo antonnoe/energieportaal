@@ -155,7 +155,7 @@ export function Step3Isolatie() {
 
       {/* Oppervlakken */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">Oppervlakken (m²)</h3>
+        <div className="flex items-center gap-1"><h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">Oppervlakken (m²)</h3><AIAdviseur veld="Oppervlakken" /></div>
         <p className="text-xs text-gray-400">Geschat op basis van uw woonoppervlak en woningtype. Pas aan als u de exacte waarden kent.</p>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="muurOppervlak" label="Buitenmuren" value={toolState.muurOppervlak} unit="m²" onChange={sf('muurOppervlak')} min={0} max={2000} step={1} />
@@ -186,7 +186,7 @@ export function Step3Isolatie() {
 
       {/* Ventilatie */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">Luchtdichtheid &amp; ventilatie</h3>
+        <div className="flex items-center gap-1"><h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">Luchtdichtheid &amp; ventilatie</h3><AIAdviseur veld="Luchtdichtheid en ventilatie" /></div>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="ach" label="Luchtwisseling (ACH)" value={toolState.ach} unit="/uur" onChange={sf('ach')} min={0.1} max={2} helpText="Luchtwisselingen per uur. Oud huis: 0.6-1.0 / Nieuw huis: 0.3-0.5" />
           <NumField id="plafondHoogte" label="Plafondhoogte" value={toolState.plafondHoogte} unit="m" onChange={sf('plafondHoogte')} min={2} max={5} helpText="Standaard 2,5 m" />
