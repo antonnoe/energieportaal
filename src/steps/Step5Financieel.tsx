@@ -1,6 +1,7 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
 import { AIAdviseur } from '../components/AIAdviseur';
+import { PV_ORIENTATION_FACTOR, PV_TILT_FACTOR } from '../engine/constants';
 
 const PV_PRESETS = [
   { id: 'geen', label: 'Geen', kwp: 0 },
@@ -147,6 +148,8 @@ export function Step5Financieel() {
               <NumField id="pvVermogen" label="Vermogen" value={toolState.pvVermogen} unit="kWp" onChange={sf('pvVermogen')} min={0.5} max={50} step={0.5} />
             )}
             <NumField id="pvZelfverbruik" label="Zelfverbruik" value={toolState.pvZelfverbruik} unit="%" onChange={sf('pvZelfverbruik')} min={0} max={100} step={5} />
+            <SelectField id="pvOrientation" label="Oriëntatie panelen" value={toolState.pvOrientation} onChange={sf('pvOrientation')} options={PV_ORIENTATION_FACTOR.map(o => ({ value: o.id, label: `${o.label} (${Math.round(o.factor * 100)}%)` }))} />
+            <SelectField id="pvTilt" label="Hellingshoek" value={toolState.pvTilt} onChange={sf('pvTilt')} options={PV_TILT_FACTOR.map(t => ({ value: t.id, label: `${t.label} (${Math.round(t.factor * 100)}%)` }))} />
           </div>
         )}
       </div>
