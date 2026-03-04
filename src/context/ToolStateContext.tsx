@@ -143,7 +143,7 @@ const DEFAULT_STATE: ToolState = {
   hasKoeling: 'nee',
   koelingEER: '3.0',
 
-  // Stap 5 — Prijzen feb 2026
+  // Stap 5 — Prijzen maart 2026
   setpoint: '20',
   awaySetpoint: '16',
   daysPresent: '300',
