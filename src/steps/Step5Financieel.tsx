@@ -154,7 +154,7 @@ export function Step5Financieel() {
       {/* Energieprijzen */}
       <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
         <div className="flex items-center gap-1"><SectionTitle>Energieprijzen</SectionTitle><AIAdviseur veld="Elektriciteit" /></div>
-        <p className="text-xs text-gray-400">Standaardprijzen februari 2026. Pas aan naar uw eigen tarief.</p>
+        <p className="text-xs text-gray-400">Standaardprijzen maart 2026. Pas aan naar uw eigen tarief.</p>
         <div className="grid grid-cols-2 gap-3">
           <NumField id="prijsElektriciteit" label="Elektriciteit" value={toolState.prijsElektriciteit} unit="€/kWh" onChange={sf('prijsElektriciteit')} min={0.01} max={1} step={0.001} helpText="TRV Base 6kVA TTC" />
           <NumField id="prijsGas" label="Gas" value={toolState.prijsGas} unit="€/kWh" onChange={sf('prijsGas')} min={0.01} max={1} step={0.001} helpText="CRE Prix Repère" />
