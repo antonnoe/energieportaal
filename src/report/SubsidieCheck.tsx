@@ -165,7 +165,7 @@ export function SubsidieCheck() {
           <a href="https://france-renov.gouv.fr/annuaire-rge" target="_blank" rel="noopener noreferrer" className="text-primary underline">
             Annuaire RGE — gecertificeerde vakmensen
           </a>
-          {' '}(zoek een gecertificeerde aannemer)
+          {' '}(zoek een RGE-gecertificeerde aannemer)
         </p>
       </div>
     </section>

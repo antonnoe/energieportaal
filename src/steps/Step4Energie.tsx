@@ -145,8 +145,8 @@ export function Step4Energie() {
     const knop = VERWARMING_KNOPPEN.find(k => k.value === toolState.mainHeating);
     if (!knop) return '';
     return toolState.mainHeating === 'warmtepomp'
-      ? `Standaard SCOP: ${knop.eff} — 0 = standaard gebruiken`
-      : `Standaard rendement: ${knop.eff} — 0 = standaard gebruiken`;
+      ? `Standaard SCOP: ${knop.eff}`
+      : `Standaard rendement: ${knop.eff}`;
   })();
 
   return (

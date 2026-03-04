@@ -54,10 +54,10 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
 
     setOpen(true);
 
-    // Check cache
+    // Check cache — include result so computed changes invalidate stale answers
     const hash = getStateHash(toolState);
-    const contextHash = context ? getStateHash(context) : '';
-    const cacheKey = `${hash}:${veld}:${waarde ?? ''}:${contextHash}`;
+    const resultHash = getStateHash(result);
+    const cacheKey = `${hash}:${resultHash}:${veld}:${waarde ?? ''}:${context ?? ''}`;
     if (cache.has(cacheKey)) {
       setAnswer(cache.get(cacheKey)!);
       return;
