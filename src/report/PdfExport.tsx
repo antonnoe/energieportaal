@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useToolState } from '../context/ToolStateContext';
 import { getHuisTypeById } from '../data/huizen-matrix';
-import { getZoneById, DPE_KLASSEN } from '../engine/constants';
+import { getZoneById, DPE_KLASSEN, PRIJS_BRONNEN } from '../engine/constants';
 import { berekenSavings } from '../engine/savings';
 import { evaluateSubsidie } from '../engine/subsidie-rules';
 import { useMemo } from 'react';
@@ -432,6 +432,29 @@ export function PdfExport() {
     textLine(`Verwarming totaal (finaal): ${fmt(result.verwarmingTotaal)} kWh`);
     y += 5;
 
+    subtitle('Gehanteerde energieprijzen');
+    const prijsBody = Object.values(PRIJS_BRONNEN).map(pb => [
+      pb.label,
+      pb.prijsPerKwh,
+      pb.bron,
+    ]);
+    safeAutoTable({
+      startY: y,
+      margin: { left: margin, right: margin },
+      head: [['Energiesoort', 'Prijs (incl. BTW)', 'Bron']],
+      body: prijsBody,
+      headStyles: { fillColor: BRAND, fontSize: 8 },
+      bodyStyles: { fontSize: 7 },
+      columnStyles: {
+        0: { cellWidth: 30 },
+        1: { cellWidth: 40 },
+        2: { cellWidth: 95 },
+      },
+      alternateRowStyles: { fillColor: '#f9f5f5' },
+      theme: 'grid',
+    });
+    y = (doc as any).lastAutoTable.finalY + 10;
+
     subtitle('Verbruik per categorie');
     const verbruikBody: (string | number)[][] = [
       ['Verwarming', fmt(result.verwarmingTotaal), 'Ja'],
@@ -457,20 +480,60 @@ export function PdfExport() {
 
     subtitle('Kosten per categorie');
     const prijsElek = portaalInput.prijsElektriciteit;
-    const kostenBody: (string | number)[][] = [
-      ['Verwarming', fmtEur(result.kostenVerwarming)],
-      ['Tapwater', fmtEur(result.kostenDhw)],
-      ['Elektriciteit (basis)', fmtEur(Math.round(result.elektriciteitBasis * prijsElek))],
-    ];
-    if (result.zwembadKwh > 0) kostenBody.push(['Zwembad', fmtEur(Math.round(result.zwembadKwh * prijsElek))]);
-    if (result.koelingKwh > 0) kostenBody.push(['Koeling', fmtEur(Math.round(result.koelingKwh * prijsElek))]);
-    if (result.evKwh > 0) kostenBody.push(['EV laden', fmtEur(Math.round(result.evKwh * prijsElek))]);
-    kostenBody.push(['Totaal', fmtEur(result.kostenTotaal)]);
+
+    // Hulpfunctie: prijs per kWh voor een brandstoftype
+    const prijsVoor = (type: string): number => {
+      const map: Record<string, number> = {
+        gas: portaalInput.prijsGas,
+        stookolie: portaalInput.prijsStookolie,
+        elektriciteit: portaalInput.prijsElektriciteit,
+        elektrisch: portaalInput.prijsElektriciteit,
+        warmtepomp: portaalInput.prijsElektriciteit,
+        hout: portaalInput.prijsHout,
+        propaan: portaalInput.prijsPropaan,
+      };
+      return map[type] ?? prijsElek;
+    };
+
+    const kostenBody: (string | number)[][] = [];
+
+    // Hoofdverwarming
+    const prijsHoofd = prijsVoor(toolState.mainHeating);
+    kostenBody.push([
+      `Verwarming (${toolState.mainHeating})`,
+      fmt(result.verwarmingHoofd),
+      `${prijsHoofd.toFixed(4)}`,
+      fmtEur(Math.round(result.verwarmingHoofd * prijsHoofd)),
+    ]);
+
+    // Bijverwarming
+    if (result.verwarmingBij > 0 && toolState.auxHeating) {
+      const prijsBij = prijsVoor(toolState.auxHeating);
+      kostenBody.push([
+        `Bijverwarming (${toolState.auxHeating})`,
+        fmt(result.verwarmingBij),
+        `${prijsBij.toFixed(4)}`,
+        fmtEur(Math.round(result.verwarmingBij * prijsBij)),
+      ]);
+    }
+
+    // Tapwater
+    const dhwType = toolState.dhwSystem === '_same' ? toolState.mainHeating : toolState.dhwSystem;
+    const prijsDhw = prijsVoor(dhwType);
+    kostenBody.push(['Tapwater (DHW)', fmt(result.dhwInput), `${prijsDhw.toFixed(4)}`, fmtEur(result.kostenDhw)]);
+
+    // Elektriciteit basis
+    kostenBody.push(['Elektriciteit (basis)', fmt(result.elektriciteitBasis), `${prijsElek.toFixed(4)}`, fmtEur(Math.round(result.elektriciteitBasis * prijsElek))]);
+
+    if (result.zwembadKwh > 0) kostenBody.push(['Zwembad', fmt(result.zwembadKwh), `${prijsElek.toFixed(4)}`, fmtEur(Math.round(result.zwembadKwh * prijsElek))]);
+    if (result.koelingKwh > 0) kostenBody.push(['Koeling', fmt(result.koelingKwh), `${prijsElek.toFixed(4)}`, fmtEur(Math.round(result.koelingKwh * prijsElek))]);
+    if (result.evKwh > 0) kostenBody.push(['EV laden', fmt(result.evKwh), `${prijsElek.toFixed(4)}`, fmtEur(Math.round(result.evKwh * prijsElek))]);
+    kostenBody.push(['Totaal', fmt(result.totaalVerbruikKwh), '', fmtEur(result.kostenTotaal)]);
 
     safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
-      head: [['Categorie', 'EUR/jaar']],
+      head: [['Categorie', 'kWh/jaar', 'EUR/kWh', 'EUR/jaar']],
       body: kostenBody,
       headStyles: { fillColor: BRAND, fontSize: 8 },
       bodyStyles: { fontSize: 8 },
