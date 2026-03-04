@@ -258,9 +258,11 @@ export function compute(input: PortaalInput): PortaalResult {
   const evKwh = input.hasEV ? input.evKmPerJaar * input.evVerbruik : 0;
 
   // ── Zwembad ──
-  const zwembadKwh = input.hasZwembad
+  const zwembadThermisch = input.hasZwembad
     ? calcZwembadKwh(input.zwembadOppervlak, input.zwembadMaanden, zone.pool_temp)
     : 0;
+  const poolCop = input.poolHeatingType === 'heatpump' ? 4.0 : input.poolHeatingType === 'solar' ? 0 : 1.0;
+  const zwembadKwh = poolCop > 0 ? Math.round(zwembadThermisch / poolCop) : 0;
 
   // ── Koeling ──
   const koelingKwh = input.hasKoeling
@@ -460,6 +462,7 @@ export function createDefaultInput(): PortaalInput {
     hasZwembad: false,
     zwembadOppervlak: 32,
     zwembadMaanden: DEFAULTS.zwembadMaanden,
+    poolHeatingType: 'electric',
     hasKoeling: false,
     koelingEER: DEFAULTS.koelingEER,
     setpoint: DEFAULTS.setpoint,
