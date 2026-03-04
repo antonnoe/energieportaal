@@ -272,8 +272,15 @@ export function compute(input: PortaalInput): PortaalResult {
   // ── Totaal verbruik (alle posten) ──
   const totaalVerbruikKwh = verwarmingTotaal + dhwInput + elektriciteitBasis + evKwh + zwembadKwh + koelingKwh;
 
-  // ── F5: DPE-verbruik (ZONDER EV, zwembad, koeling) ──
-  const dpeVerbruikKwh = verwarmingTotaal + dhwInput + elektriciteitBasis;
+  // ── F5: DPE-verbruik (gestandaardiseerd: 365d, 19°C — onafhankelijk van stookgedrag) ──
+  const DPE_SETPOINT = 19; // conventionele DPE-temperatuur
+  const hddDpeStandard = calcHDDCorrected(zone.hdd, DPE_SETPOINT, zone.Tref);
+  const warmtevraagDpeStandard = hTotaal * hddDpeStandard * 24 / 1000;
+  const verwarmingDpeHoofd = warmtevraagDpeStandard * mainFrac / mainEff;
+  const verwarmingDpeBij = input.auxHeating !== 'geen'
+    ? warmtevraagDpeStandard * auxFrac / auxEff
+    : 0;
+  const dpeVerbruikKwh = verwarmingDpeHoofd + verwarmingDpeBij + dhwInput + elektriciteitBasis;
 
   // ── PV ──
   const pvProductieKwh = input.hasPV ? input.pvVermogen * zone.pv * (input.pvOrientatie ?? 1) * (input.pvHelling ?? 1) : 0;
