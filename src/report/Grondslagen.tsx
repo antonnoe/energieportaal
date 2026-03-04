@@ -107,7 +107,7 @@ export function Grondslagen() {
             {Object.entries(PRIJS_BRONNEN).map(([key, pb]) => (
               <p key={key}>{pb.label}: {pb.prijsPerKwh} &mdash; {pb.bron}</p>
             ))}
-            <p className="text-gray-500 mt-1 italic">Prijzen per feb 2026. Gebruiker kan handmatig aanpassen in Stap 5.</p>
+            <p className="text-gray-500 mt-1 italic">Prijzen per maart 2026. Gebruiker kan handmatig aanpassen in Stap 5.</p>
           </div>
 
           {/* Kostenberekening transparant */}
