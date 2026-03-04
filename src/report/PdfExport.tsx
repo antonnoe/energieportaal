@@ -293,8 +293,24 @@ export function PdfExport() {
     });
     y = (doc as any).lastAutoTable.finalY + 10;
 
+    // Bronvermelding
+    if (huisType) {
+      doc.setFontSize(7);
+      doc.setTextColor(GRAY);
+      textLine(`Standaardwaarden ${huisType.naam}: U-muur=${huisType.uMuur}, U-dak=${huisType.uDak}, U-vloer=${huisType.uVloer}, U-raam=${huisType.uRaam}, ACH=${huisType.ach}`);
+      textLine(`Bron: ADEME typologie woningen / Infofrankrijk.com huizenmatrix (${huisType.periode})`);
+      doc.setTextColor('#333333');
+      doc.setFontSize(9);
+    }
+    y += 3;
+
     subtitle('Ventilatieverlies (Hvent)');
     kvLine('Formule:', `0.34 x ${result.debug.volume} m3 x ${result.debug.achGebruikt} ACH = ${result.debug.hventVoorHRV.toFixed(1)} W/K`);
+    doc.setFontSize(7);
+    doc.setTextColor(GRAY);
+    textLine(`ACH ${result.debug.achGebruikt}: ${huisType ? `standaard ${huisType.naam} - RE2020 referentie bestaande bouw` : 'handmatig ingevoerd'}`);
+    doc.setTextColor('#333333');
+    doc.setFontSize(9);
     if (toolState.hasHRV === 'ja') {
       kvLine('WTW-correctie:', `${result.debug.hventVoorHRV.toFixed(1)} x (1 - ${(Number(toolState.hrvEfficiency) / 100).toFixed(2)}) = ${result.hventEffWK} W/K`);
     }
@@ -306,6 +322,30 @@ export function PdfExport() {
     kvLine('Aanwezig:', `${result.debug.setpoint}\xB0C (${(result.debug.fracPresent * 100).toFixed(0)}%) - HDD = ${Math.round(result.debug.hddCorrPresent)}`);
     kvLine('Afwezig:', `${result.debug.awaySetpoint}\xB0C (${(result.debug.fracAway * 100).toFixed(0)}%) - HDD = ${Math.round(result.debug.hddCorrAway)}`);
     kvLine('HDD_eff gewogen:', `${Math.round(result.debug.hddEffGewogen)} K.d`);
+    y += 5;
+
+    // Gevoeligheidsanalyse
+    subtitle('Gevoeligheid aannames');
+    {
+      const htot = result.hTotaalWK;
+      if (htot > 0) {
+        const muurAandeel = result.debug.uaMuur / htot;
+        const ventAandeel = result.hventEffWK / htot;
+        const achWaarde = result.debug.achGebruikt;
+        const uMuurWaarde = Number(toolState.uMuur);
+        const achLager = Math.max(0.2, achWaarde - 0.2);
+        const uMuurLager = Math.max(0.2, uMuurWaarde - 0.5);
+        const ventDelta = ((achLager / achWaarde - 1) * ventAandeel * 100).toFixed(0);
+        const muurDelta = ((uMuurLager / uMuurWaarde - 1) * muurAandeel * 100).toFixed(0);
+        textLine(`Muren: aandeel ${(muurAandeel * 100).toFixed(0)}% van Htot. Als U=${uMuurLager.toFixed(1)} i.p.v. ${uMuurWaarde.toFixed(1)} -> warmtevraag ${muurDelta}%`);
+        textLine(`Ventilatie: aandeel ${(ventAandeel * 100).toFixed(0)}% van Htot. Als ACH=${achLager.toFixed(1)} i.p.v. ${achWaarde.toFixed(1)} -> warmtevraag ${ventDelta}%`);
+        doc.setFontSize(7);
+        doc.setTextColor(GRAY);
+        textLine('Kleine wijzigingen in U-waarden of ACH kunnen het resultaat significant beinvloeden. Twijfelt u? Vraag een thermische audit aan.');
+        doc.setTextColor('#333333');
+        doc.setFontSize(9);
+      }
+    }
 
     // ===================================================================
     // HOOFDSTUK 4: DPE-INDICATIE
@@ -382,6 +422,15 @@ export function PdfExport() {
     // ===================================================================
     checkPage(50);
     chapterTitle(5, 'ENERGIEVERBRUIK & KOSTEN');
+
+    subtitle('Rendementsketen verwarming');
+    textLine(`Warmtevraag thermisch: ${result.hTotaalWK} W/K x ${Math.round(result.debug.hddEffGewogen)} K.d x 24h / 1000 = ${fmt(result.warmtevraagThermisch)} kWh`);
+    textLine(`Hoofdverwarming (${toolState.mainHeating}, eta=${result.debug.mainEff}, ${(result.debug.mainFrac * 100).toFixed(0)}%): ${fmt(result.warmtevraagThermisch)} x ${result.debug.mainFrac.toFixed(2)} / ${result.debug.mainEff} = ${fmt(result.verwarmingHoofd)} kWh`, 4);
+    if (result.verwarmingBij > 0) {
+      textLine(`Bijverwarming (${toolState.auxHeating}, eta=${result.debug.auxEff}, ${(result.debug.auxFrac * 100).toFixed(0)}%): ${fmt(result.warmtevraagThermisch)} x ${result.debug.auxFrac.toFixed(2)} / ${result.debug.auxEff} = ${fmt(result.verwarmingBij)} kWh`, 4);
+    }
+    textLine(`Verwarming totaal (finaal): ${fmt(result.verwarmingTotaal)} kWh`);
+    y += 5;
 
     subtitle('Verbruik per categorie');
     const verbruikBody: (string | number)[][] = [
