@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
 import { ISOLATIE_MUUR, ISOLATIE_DAK, ISOLATIE_VLOER, ISOLATIE_RAAM } from '../engine/constants';
+import { getHuisTypeById } from '../data/huizen-matrix';
 import { AIAdviseur } from '../components/AIAdviseur';
 
 function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
@@ -162,6 +163,25 @@ export function Step3Isolatie() {
           <NumField id="vloerOppervlak" label="Vloer" value={toolState.vloerOppervlak} unit="m²" onChange={sf('vloerOppervlak')} min={0} max={2000} step={1} />
           <NumField id="raamOppervlak" label="Ramen" value={toolState.raamOppervlak} unit="m²" onChange={sf('raamOppervlak')} min={0} max={500} step={1} />
         </div>
+        {(() => {
+          const huisType = getHuisTypeById(toolState.huisTypeId);
+          const opp = Number(toolState.woonoppervlak) || 100;
+          if (!huisType) return null;
+          const r = huisType.oppervlakteRatios;
+          return (
+            <details className="text-xs text-gray-400">
+              <summary className="cursor-pointer text-primary underline text-[11px]">Hoe zijn deze waarden berekend?</summary>
+              <div className="mt-2 bg-gray-50 rounded p-3 space-y-1 font-mono">
+                <p className="font-semibold text-gray-600 mb-1">Berekening voor {huisType.naam} — {opp} m² woonoppervlak:</p>
+                <p>Buitenmuren: {opp} m² × {r.muurPerM2} = {Math.round(opp * r.muurPerM2)} m²</p>
+                <p>Dak: {opp} m² × {r.dakPerM2} = {Math.round(opp * r.dakPerM2)} m²</p>
+                <p>Vloer: {opp} m² × {r.vloerPerM2} = {Math.round(opp * r.vloerPerM2)} m²</p>
+                <p>Ramen: {opp} m² × {r.raamPerM2} = {Math.round(opp * r.raamPerM2)} m²</p>
+                <p className="text-gray-400 mt-1 italic">Ratio's zijn standaardwaarden per woningtype (bron: ADEME/observatiedata). Pas de waarden hierboven aan als u de exacte oppervlakten kent.</p>
+              </div>
+            </details>
+          );
+        })()}
       </div>
 
       {/* Ventilatie */}
