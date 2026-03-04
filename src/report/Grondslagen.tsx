@@ -42,6 +42,12 @@ export function Grondslagen() {
             <p>Dak:   {toolState.uDak} ({toolState.dakOppervlak} m²)    &rarr; UA = {debug.uaDak.toFixed(1)} W/K</p>
             <p>Muren: {toolState.uMuur} ({toolState.muurOppervlak} m²)  &rarr; UA = {debug.uaMuur.toFixed(1)} W/K</p>
             <p>Vloer: {toolState.uVloer} ({toolState.vloerOppervlak} m²) &rarr; UA = {debug.uaVloer.toFixed(1)} W/K</p>
+            {huisType && (
+              <div className="mt-1 text-gray-400 border-t border-gray-200 pt-1">
+                <p>Standaardwaarden {huisType.naam}: U-muur={huisType.uMuur}, U-dak={huisType.uDak}, U-vloer={huisType.uVloer}, U-raam={huisType.uRaam} — ACH={huisType.ach}</p>
+                <p>Bron: ADEME typologie woningen / Infofrankrijk.com huizenmatrix ({huisType.periode})</p>
+              </div>
+            )}
           </div>
 
           {/* Warmteverlies */}
@@ -49,10 +55,37 @@ export function Grondslagen() {
             <p className="font-bold text-gray-700 mb-1">WARMTEVERLIES</p>
             <p>Htr:   UA = {result.uaWK} W/K</p>
             <p>Hvent: 0.34 × {debug.volume} × {debug.achGebruikt} = {debug.hventVoorHRV.toFixed(1)} W/K</p>
+            <p className="text-gray-400 text-[10px]">ACH {debug.achGebruikt}: {huisType ? `standaard ${huisType.naam} — RE2020 referentie bestaande bouw` : 'handmatig ingevoerd'}</p>
             {toolState.hasHRV === 'ja' && (
               <p>HventEff: {debug.hventVoorHRV.toFixed(1)} × (1 - {(Number(toolState.hrvEfficiency) / 100).toFixed(2)}) = {result.hventEffWK} W/K</p>
             )}
             <p>Htot:  {result.hTotaalWK} W/K</p>
+          </div>
+
+          {/* Gevoeligheidsanalyse */}
+          <div className="bg-amber-50 border border-amber-200 rounded p-2">
+            <p className="font-bold text-amber-800 mb-1">GEVOELIGHEID AANNAMES</p>
+            <p className="text-gray-500 italic mb-1">Hoe gevoelig is de warmtevraag voor de drie kritische aannames?</p>
+            {(() => {
+              const htot = result.hTotaalWK;
+              if (htot <= 0) return null;
+              const muurAandeel = debug.uaMuur / htot;
+              const dakAandeel = debug.uaDak / htot;
+              const ventAandeel = result.hventEffWK / htot;
+              const achWaarde = debug.achGebruikt;
+              const uMuurWaarde = Number(toolState.uMuur);
+              // Scenario's: wat als 20% lager?
+              const achLager = Math.max(0.2, achWaarde - 0.2);
+              const uMuurLager = Math.max(0.2, uMuurWaarde - 0.5);
+              const ventDelta = ((achLager / achWaarde - 1) * ventAandeel * 100).toFixed(0);
+              const muurDelta = ((uMuurLager / uMuurWaarde - 1) * muurAandeel * 100).toFixed(0);
+              return (<>
+                <p>Muren: aandeel {(muurAandeel * 100).toFixed(0)}% van Htot. Als U={uMuurLager.toFixed(1)} i.p.v. {uMuurWaarde.toFixed(1)} → warmtevraag <span className="font-semibold text-green-700">{muurDelta}%</span></p>
+                <p>Dak: aandeel {(dakAandeel * 100).toFixed(0)}% van Htot</p>
+                <p>Ventilatie: aandeel {(ventAandeel * 100).toFixed(0)}% van Htot. Als ACH={achLager.toFixed(1)} i.p.v. {achWaarde.toFixed(1)} → warmtevraag <span className="font-semibold text-green-700">{ventDelta}%</span></p>
+                <p className="text-gray-500 mt-1 italic">Kleine wijzigingen in U-waarden of ACH kunnen het resultaat significant beïnvloeden. Twijfelt u? Vraag een thermische audit aan.</p>
+              </>);
+            })()}
           </div>
 
           {/* HDD — C7: gewogen berekening */}
@@ -64,20 +97,28 @@ export function Grondslagen() {
             <p className="font-semibold">Gewogen HDD_eff = {Math.round(debug.hddCorrPresent)} × {debug.fracPresent.toFixed(2)} + {Math.round(debug.hddCorrAway)} × {debug.fracAway.toFixed(2)} = {Math.round(debug.hddEffGewogen)} K·d</p>
           </div>
 
-          {/* F7: Transparante energieberekening */}
+          {/* F7: Transparante energieberekening — rendementsketen */}
           <div>
-            <p className="font-bold text-gray-700 mb-1">ENERGIEVERBRUIK (kWh/jaar)</p>
-            <p>  Warmtevraag thermisch:         {result.warmtevraagThermisch.toLocaleString('nl-NL')} kWh</p>
-            <p>  Hoofdverwarming ({toolState.mainHeating}, &eta;={debug.mainEff}): {result.verwarmingHoofd.toLocaleString('nl-NL')} kWh ({(debug.mainFrac * 100).toFixed(0)}%)</p>
-            {result.verwarmingBij > 0 && (
-              <p>  Bijverwarming ({toolState.auxHeating}, &eta;={debug.auxEff}): {result.verwarmingBij.toLocaleString('nl-NL')} kWh ({(debug.auxFrac * 100).toFixed(0)}%)</p>
-            )}
-            <p>  Verwarming totaal (final):     {result.verwarmingTotaal.toLocaleString('nl-NL')} kWh</p>
-            <p>  DHW ({debug.dhwLitersPerDag} L/dag, &eta;={debug.dhwEff}): {result.dhwInput.toLocaleString('nl-NL')} kWh (therm: {result.dhwThermisch.toLocaleString('nl-NL')}){toolState.dhwSystem === 'hout' ? ' ⚠️ (ongebruikelijk — bevestigd door gebruiker)' : ''}</p>
-            <p>  Basiselektriciteit:            {result.elektriciteitBasis.toLocaleString('nl-NL')} kWh</p>
-            {result.evKwh > 0 && <p>  EV laden:                      {result.evKwh.toLocaleString('nl-NL')} kWh</p>}
-            {result.zwembadKwh > 0 && <p>  Zwembad:                       {result.zwembadKwh.toLocaleString('nl-NL')} kWh</p>}
-            {result.koelingKwh > 0 && <p>  Koeling:                       {result.koelingKwh.toLocaleString('nl-NL')} kWh</p>}
+            <p className="font-bold text-gray-700 mb-1">ENERGIEVERBRUIK — RENDEMENTSKETEN (kWh/jaar)</p>
+            <p className="text-gray-500 italic mb-2">Van warmtevraag naar werkelijk verbruik: thermisch → gedeeld door rendement → finaal</p>
+
+            <p className="font-semibold text-gray-600 mt-2">Verwarming:</p>
+            <p>  Warmtevraag thermisch: {result.hTotaalWK} W/K × {Math.round(debug.hddEffGewogen)} K·d × 24h / 1000 = {result.warmtevraagThermisch.toLocaleString('nl-NL')} kWh</p>
+            <p>  Hoofdverwarming ({toolState.mainHeating}, &eta;={debug.mainEff}, {(debug.mainFrac * 100).toFixed(0)}% aandeel):</p>
+            <p className="pl-4">{result.warmtevraagThermisch.toLocaleString('nl-NL')} × {(debug.mainFrac).toFixed(2)} / {debug.mainEff} = <span className="font-semibold">{result.verwarmingHoofd.toLocaleString('nl-NL')} kWh</span></p>
+            {result.verwarmingBij > 0 && (<>
+              <p>  Bijverwarming ({toolState.auxHeating}, &eta;={debug.auxEff}, {(debug.auxFrac * 100).toFixed(0)}% aandeel):</p>
+              <p className="pl-4">{result.warmtevraagThermisch.toLocaleString('nl-NL')} × {(debug.auxFrac).toFixed(2)} / {debug.auxEff} = <span className="font-semibold">{result.verwarmingBij.toLocaleString('nl-NL')} kWh</span></p>
+            </>)}
+            <p className="border-t border-gray-200 pt-1">  Verwarming totaal (finaal): <span className="font-semibold">{result.verwarmingTotaal.toLocaleString('nl-NL')} kWh</span></p>
+
+            <p className="font-semibold text-gray-600 mt-2">Overig verbruik:</p>
+            <p>  DHW ({debug.dhwLitersPerDag} L/dag, &eta;={debug.dhwEff}): {result.dhwThermisch.toLocaleString('nl-NL')} kWh thermisch / {debug.dhwEff} = {result.dhwInput.toLocaleString('nl-NL')} kWh{toolState.dhwSystem === 'hout' ? ' ⚠️ (ongebruikelijk)' : ''}</p>
+            <p>  Basiselektriciteit: {result.elektriciteitBasis.toLocaleString('nl-NL')} kWh</p>
+            {result.evKwh > 0 && <p>  EV laden: {result.evKwh.toLocaleString('nl-NL')} kWh</p>}
+            {result.zwembadKwh > 0 && <p>  Zwembad: {result.zwembadKwh.toLocaleString('nl-NL')} kWh</p>}
+            {result.koelingKwh > 0 && <p>  Koeling: {result.koelingKwh.toLocaleString('nl-NL')} kWh</p>}
+
             <p className="border-t border-gray-300 pt-1 font-semibold">
               TOTAAL: {result.verwarmingTotaal.toLocaleString('nl-NL')} + {result.dhwInput.toLocaleString('nl-NL')} + {result.elektriciteitBasis.toLocaleString('nl-NL')}
               {result.evKwh > 0 ? ` + ${result.evKwh.toLocaleString('nl-NL')}` : ''}
