@@ -233,3 +233,20 @@ export const ISOLATIE_RAAM: { id: string; label: string; uWaarde: number }[] = [
   { id: 'hr-plusplus', label: 'HR++', uWaarde: 1.2 },
   { id: 'triple', label: 'Triple', uWaarde: 0.7 },
 ];
+
+// ─── PV-oriëntatie correctiefactoren ─────────────────────────────────────────
+
+export const PV_ORIENTATION_FACTOR: { id: string; label: string; factor: number }[] = [
+  { id: 'zuid', label: 'Zuid', factor: 1.00 },
+  { id: 'zuidoost', label: 'Zuid-oost / Zuid-west', factor: 0.95 },
+  { id: 'oostwest', label: 'Oost / West', factor: 0.85 },
+  { id: 'noordoost', label: 'Noord-oost / Noord-west', factor: 0.70 },
+  { id: 'noord', label: 'Noord', factor: 0.55 },
+  { id: 'plat', label: 'Plat dak', factor: 0.90 },
+];
+
+export const PV_TILT_FACTOR: { id: string; label: string; factor: number }[] = [
+  { id: 'optimaal', label: 'Optimaal (30–35°)', factor: 1.00 },
+  { id: 'steil', label: 'Steil (> 45°)', factor: 0.90 },
+  { id: 'vlak', label: 'Vlak (< 15°)', factor: 0.90 },
+];
