@@ -276,7 +276,7 @@ export function compute(input: PortaalInput): PortaalResult {
   const dpeVerbruikKwh = verwarmingTotaal + dhwInput + elektriciteitBasis;
 
   // ── PV ──
-  const pvProductieKwh = input.hasPV ? input.pvVermogen * zone.pv : 0;
+  const pvProductieKwh = input.hasPV ? input.pvVermogen * zone.pv * (input.pvOrientatie ?? 1) * (input.pvHelling ?? 1) : 0;
   const pvZelfverbruikKwh = pvProductieKwh * Math.min(1, input.pvZelfverbruik);
   const pvExportKwh = pvProductieKwh - pvZelfverbruikKwh;
   const netGridKwh = Math.max(0, totaalVerbruikKwh - pvZelfverbruikKwh);
@@ -459,6 +459,8 @@ export function createDefaultInput(): PortaalInput {
     hasPV: false,
     pvVermogen: DEFAULTS.pvVermogen,
     pvZelfverbruik: DEFAULTS.pvZelfverbruik,
+    pvOrientatie: 1.0,
+    pvHelling: 1.0,
     hasZwembad: false,
     zwembadOppervlak: 32,
     zwembadMaanden: DEFAULTS.zwembadMaanden,
