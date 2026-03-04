@@ -1,6 +1,6 @@
 import { useToolState } from '../context/ToolStateContext';
 import type { ToolState } from '../context/ToolStateContext';
-import { DEFAULT_EFFICIENCY } from '../engine/constants';
+import { DEFAULT_EFFICIENCY, HEATING_SUBTYPES } from '../engine/constants';
 import { AIAdviseur } from '../components/AIAdviseur';
 
 const VERWARMING_KNOPPEN = [
@@ -129,6 +129,18 @@ export function Step4Energie() {
       setField('dhwSystem', value);
     }
     setField('mainEfficiency', '0');
+    setField('heatingSubtype', '');
+  };
+
+  const handleSubtypeSelect = (value: string) => {
+    setField('heatingSubtype', value);
+    const subtypes = HEATING_SUBTYPES[toolState.mainHeating];
+    if (subtypes) {
+      const sub = subtypes.find(s => s.label === value);
+      if (sub) {
+        setField('mainEfficiency', String(sub.eta));
+      }
+    }
   };
 
   const handleDhwSelect = (value: string) => {
@@ -164,6 +176,17 @@ export function Step4Energie() {
           selected={toolState.mainHeating}
           onSelect={handleVerwarmingSelect}
         />
+        {HEATING_SUBTYPES[toolState.mainHeating] && (
+          <SelectField
+            id="heatingSubtype" label="Type installatie"
+            value={toolState.heatingSubtype}
+            options={[
+              { value: '', label: 'Kies een type...' },
+              ...HEATING_SUBTYPES[toolState.mainHeating].map(s => ({ value: s.label, label: `${s.label} (η ${s.eta})` })),
+            ]}
+            onChange={handleSubtypeSelect}
+          />
+        )}
         <div className="flex items-center gap-1">
           <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} helpText={effLabel} />
           <AIAdviseur veld="Rendement/SCOP" />
