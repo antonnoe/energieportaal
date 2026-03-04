@@ -55,11 +55,11 @@ export function Besparingsadvies() {
       {/* Samenvatting alle maatregelen */}
       <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm">
         <p className="font-semibold text-green-800">
-          {savings.maatregelen.length} maatregelen beschikbaar — totale besparing ~\u20ac {savings.totaalBesparingEur.toLocaleString('nl-NL')}/jaar
+          {savings.maatregelen.length} maatregelen beschikbaar — totale besparing ~€ {savings.totaalBesparingEur.toLocaleString('nl-NL')}/jaar
         </p>
         {savings.dpeNaMaatregelen.letter !== result.dpe.letter && (
           <p className="text-green-700 mt-1">
-            DPE-indicatie na alle maatregelen: {result.dpe.letter} \u2192 {savings.dpeNaMaatregelen.letter} ({Math.round(savings.dpeNaMaatregelen.kwhPerM2)} kWh/m\u00b2)
+            DPE-indicatie na alle maatregelen: {result.dpe.letter} → {savings.dpeNaMaatregelen.letter} ({Math.round(savings.dpeNaMaatregelen.kwhPerM2)} kWh/m²)
           </p>
         )}
       </div>
@@ -72,7 +72,7 @@ export function Besparingsadvies() {
           </p>
           <ul className="list-disc list-inside text-gray-700 space-y-0.5">
             {savings.maatregelenVoorVolgendeDPE.map((m) => (
-              <li key={m.id}>{m.naam} (-{m.dpeReductieKwhM2} kWh/m\u00b2)</li>
+              <li key={m.id}>{m.naam} (-{m.dpeReductieKwhM2} kWh/m²)</li>
             ))}
           </ul>
         </div>
@@ -89,21 +89,21 @@ export function Besparingsadvies() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
             <div className="bg-white rounded-lg p-2">
               <p className="text-xs text-gray-500">Besparing</p>
-              <p className="text-base font-bold text-green-700">\u20ac {combinatie.besparingEurJaar.toLocaleString('nl-NL')}/jr</p>
+              <p className="text-base font-bold text-green-700">€ {combinatie.besparingEurJaar.toLocaleString('nl-NL')}/jr</p>
             </div>
             <div className="bg-white rounded-lg p-2">
               <p className="text-xs text-gray-500">DPE-indicatie</p>
               <p className="text-base font-bold">
                 <span style={{ color: combinatie.huidigeDpe.kleur }}>{combinatie.huidigeDpe.letter}</span>
-                {' \u2192 '}
+                {' → '}
                 <span style={{ color: combinatie.nieuweDpe.kleur }}>{combinatie.nieuweDpe.letter}</span>
               </p>
-              <p className="text-[10px] text-gray-400">{combinatie.nieuweDpe.kwhPerM2} kWh/m\u00b2</p>
+              <p className="text-[10px] text-gray-400">{combinatie.nieuweDpe.kwhPerM2} kWh/m²</p>
             </div>
             <div className="bg-white rounded-lg p-2">
               <p className="text-xs text-gray-500">Investering</p>
               <p className="text-sm font-bold">
-                \u20ac {combinatie.kostenSchatting.min.toLocaleString('nl-NL')}\u2013{combinatie.kostenSchatting.max.toLocaleString('nl-NL')}
+                € {combinatie.kostenSchatting.min.toLocaleString('nl-NL')}–{combinatie.kostenSchatting.max.toLocaleString('nl-NL')}
               </p>
             </div>
             <div className="bg-white rounded-lg p-2">
@@ -171,9 +171,9 @@ export function Besparingsadvies() {
                     <p className="text-xs mt-1">
                       <span className="text-gray-500">DPE-indicatie: </span>
                       <span className="font-semibold" style={{ color: result.dpe.kleur }}>{result.dpe.letter}</span>
-                      {' \u2192 '}
+                      {' → '}
                       <span className="font-semibold" style={{ color: getDPEKleur(m.dpeNaLetter) }}>{m.dpeNaLetter}</span>
-                      <span className="text-gray-400"> ({m.dpeNaKwhM2} kWh/m\u00b2)</span>
+                      <span className="text-gray-400"> ({m.dpeNaKwhM2} kWh/m²)</span>
                     </p>
                   )}
 
@@ -181,7 +181,7 @@ export function Besparingsadvies() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
                     <div className="bg-gray-50 rounded p-1.5 text-center">
                       <p className="text-[10px] text-gray-500">Besparing</p>
-                      <p className="text-sm font-bold text-green-700">\u20ac {m.besparingEurJaar}/jr</p>
+                      <p className="text-sm font-bold text-green-700">€ {m.besparingEurJaar}/jr</p>
                     </div>
                     <div className="bg-gray-50 rounded p-1.5 text-center">
                       <p className="text-[10px] text-gray-500">kWh/jaar</p>
@@ -189,7 +189,7 @@ export function Besparingsadvies() {
                     </div>
                     <div className="bg-gray-50 rounded p-1.5 text-center">
                       <p className="text-[10px] text-gray-500">Investering</p>
-                      <p className="text-xs font-bold">\u20ac {m.kostenSchatting.min.toLocaleString('nl-NL')}\u2013{m.kostenSchatting.max.toLocaleString('nl-NL')}</p>
+                      <p className="text-xs font-bold">€ {m.kostenSchatting.min.toLocaleString('nl-NL')}–{m.kostenSchatting.max.toLocaleString('nl-NL')}</p>
                     </div>
                     <div className="bg-gray-50 rounded p-1.5 text-center">
                       <p className="text-[10px] text-gray-500">Terugverdientijd</p>
