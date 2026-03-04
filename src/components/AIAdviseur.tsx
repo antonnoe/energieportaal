@@ -111,7 +111,7 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
         ?
       </button>
       {open && (
-        <div className="absolute z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
+        <div className="absolute z-50 bottom-full mb-1 right-0 w-72 max-w-[calc(100vw-2rem)] bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
           <div className="flex items-start justify-between gap-1 mb-1">
             <span className="font-semibold text-blue-700 text-[11px]">AI-adviseur: {veld}</span>
             <button
