@@ -252,10 +252,10 @@ function StappenFlow() {
   return (
     <div className="pb-20 md:pb-20">
       {/* Desktop: split layout */}
-      <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-8">
-        {/* Linker paneel: Invoer */}
-        <div>
-          <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
+      <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-8 md:items-start">
+        {/* Linker paneel: Invoer — sticky zodat het zichtbaar blijft bij lang rapport */}
+        <div className="md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto">
+          <div className="pb-3">
             <StepIndicator />
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
@@ -266,7 +266,7 @@ function StappenFlow() {
 
         {/* Rechter paneel: Rapport */}
         <div>
-          <div className="sticky top-0 z-10 bg-gray-50 pt-4 pb-3">
+          <div className="pb-3">
             <h2 className="font-heading text-sm font-bold text-gray-400 uppercase tracking-widest">Rapport</h2>
           </div>
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
