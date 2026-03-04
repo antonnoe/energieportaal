@@ -90,37 +90,18 @@ export function Step5Financieel() {
             onChange={(v) => {
               const present = Math.min(365, Math.max(0, Number(v) || 0));
               setField('daysPresent', String(present));
-              // Auto-corrigeer afwezig als totaal > 365
-              const away = Number(toolState.daysAway) || 0;
-              if (present + away > 365) {
-                setField('daysAway', String(365 - present));
-              }
+              setField('daysAway', String(365 - present));
             }}
             min={0} max={365} step={5} />
           <NumField id="daysAway" label="Dagen afwezig" value={toolState.daysAway} unit="d/jr"
             onChange={(v) => {
               const away = Math.min(365, Math.max(0, Number(v) || 0));
               setField('daysAway', String(away));
-              // Auto-corrigeer aanwezig als totaal > 365
-              const present = Number(toolState.daysPresent) || 0;
-              if (present + away > 365) {
-                setField('daysPresent', String(365 - away));
-              }
+              setField('daysPresent', String(365 - away));
             }}
             min={0} max={365} step={5} />
         </div>
-        {(() => {
-          const totaal = Number(toolState.daysPresent) + Number(toolState.daysAway);
-          if (totaal > 365) {
-            return <p className="text-xs text-red-600">Dagen aanwezig + afwezig mogen niet meer dan 365 zijn ({totaal} dagen ingevuld)</p>;
-          }
-          if (totaal < 365) {
-            const leegstand = 365 - totaal;
-            const pct = Math.round((leegstand / 365) * 100);
-            return <p className="text-xs text-amber-700">Leegstand: {leegstand} dagen/jaar ({pct}%) — geen verwarming gedurende leegstand</p>;
-          }
-          return null;
-        })()}
+        <p className="text-xs text-gray-400">Totaal: altijd 365 dagen. Bij afwezigheid wordt verwarmd op de lagere temperatuur ({toolState.awaySetpoint}°C). Zet deze op 5°C als u de verwarming volledig uitzet.</p>
       </div>
 
       {/* U1: Zonnepanelen knoppen */}
