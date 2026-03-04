@@ -163,6 +163,7 @@ export function Grondslagen() {
                 <p className="font-semibold">  Netto kosten: &euro; {result.nettoKosten.toLocaleString('nl-NL')}/jaar (&euro; {Math.round(result.nettoKosten / 12).toLocaleString('nl-NL')}/maand)</p>
               </>
             )}
+            <p className="text-gray-400 mt-1 italic text-[10px]">NB: Alleen variabele energiekosten (verbruik × prijs/kWh). Abonnementen, vastrecht, onderhoud en aansluitkosten zijn niet inbegrepen. Werkelijke energierekening ligt doorgaans 10-20% hoger.</p>
           </div>
 
           {/* PV */}
