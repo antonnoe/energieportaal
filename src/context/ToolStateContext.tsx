@@ -3,7 +3,7 @@ import type { PortaalInput, PortaalResult, SubsidieIntake } from '../engine/type
 import { compute, createDefaultInput } from '../engine/compute.ts';
 import { getZoneIdFromPostcode, getDepartementFromPostcode } from '../data/dept-zone-map.ts';
 import { getHuisTypeById } from '../data/huizen-matrix.ts';
-import { DEFAULTS, DEFAULT_PRIJZEN, DEFAULT_EXPORT_TARIEF } from '../engine/constants.ts';
+import { DEFAULTS, DEFAULT_PRIJZEN, DEFAULT_EXPORT_TARIEF, PV_ORIENTATION_FACTOR, PV_TILT_FACTOR } from '../engine/constants.ts';
 
 // ─── Globale state ───────────────────────────────────────────────────────────
 
@@ -56,6 +56,8 @@ export interface ToolState {
   pvVermogen: string;
   pvZelfverbruik: string;
   pvPreset: string;
+  pvOrientation: string;
+  pvTilt: string;
   hasZwembad: string;
   zwembadOppervlak: string;
   zwembadMaanden: string;
@@ -140,6 +142,8 @@ const DEFAULT_STATE: ToolState = {
   pvVermogen: '3',
   pvZelfverbruik: '30',
   pvPreset: 'geen',
+  pvOrientation: 'zuid',
+  pvTilt: 'optimaal',
   hasZwembad: 'nee',
   zwembadOppervlak: '32',
   zwembadMaanden: '5',
@@ -235,6 +239,8 @@ export function stateToPortaalInput(state: ToolState): PortaalInput {
     hasPV: state.hasPV === 'ja',
     pvVermogen: Number(state.pvVermogen) || DEFAULTS.pvVermogen,
     pvZelfverbruik: (Number(state.pvZelfverbruik) || 30) / 100,
+    pvOrientatie: PV_ORIENTATION_FACTOR.find(o => o.id === state.pvOrientation)?.factor ?? 1.0,
+    pvHelling: PV_TILT_FACTOR.find(t => t.id === state.pvTilt)?.factor ?? 1.0,
 
     hasZwembad: state.hasZwembad === 'ja',
     zwembadOppervlak: Number(state.zwembadOppervlak) || 32,
