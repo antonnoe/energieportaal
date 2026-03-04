@@ -36,6 +36,7 @@ export interface ToolState {
 
   // ── Stap 4: Energie ──
   mainHeating: string;
+  heatingSubtype: string;
   mainEfficiency: string;
   auxHeating: string;
   auxFraction: string;
@@ -119,6 +120,7 @@ const DEFAULT_STATE: ToolState = {
 
   // Stap 4
   mainHeating: 'gas',
+  heatingSubtype: '',
   mainEfficiency: '0',
   auxHeating: 'geen',
   auxFraction: '0',
