@@ -26,7 +26,14 @@ export function PdfExport() {
   const subsidie = useMemo(() => evaluateSubsidie({ ...portaalInput.subsidieIntake, dpeLetter: result.dpe.letter }), [portaalInput.subsidieIntake, result.dpe.letter]);
 
   const handleExport = () => {
-    const doc = new jsPDF('p', 'mm', 'a4');
+    const doc = new jsPDF({
+      orientation: 'p',
+      unit: 'mm',
+      format: 'a4',
+      encryption: {
+        userPermissions: ['print'] as ('print' | 'copy' | 'modify' | 'annot-forms')[],
+      },
+    });
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const margin = 20;
@@ -38,22 +45,53 @@ export function PdfExport() {
     // PDF-safe text: vervang Unicode die jsPDF niet aankan
     function safe(text: string): string {
       return text
+        .replace(/€/g, 'EUR ')
         .replace(/\u20ac/g, 'EUR ')
+        .replace(/≥/g, '>=')
         .replace(/\u2265/g, '>=')
+        .replace(/≤/g, '<=')
         .replace(/\u2264/g, '<=')
+        .replace(/²/g, '2')
         .replace(/\u00b2/g, '2')
+        .replace(/·/g, '.')
         .replace(/\u00b7/g, '.')
+        .replace(/°/g, ' ')
         .replace(/\u00b0/g, ' ')
+        .replace(/–/g, '-')
         .replace(/\u2013/g, '-')
+        .replace(/—/g, '-')
         .replace(/\u2014/g, '-')
         .replace(/\u2019/g, "'")
+        .replace(/'/g, "'")
+        .replace(/→/g, '->')
         .replace(/\u2192/g, '->')
+        .replace(/é/g, 'e')
         .replace(/\u00e9/g, 'e')
+        .replace(/è/g, 'e')
         .replace(/\u00e8/g, 'e')
+        .replace(/ê/g, 'e')
         .replace(/\u00ea/g, 'e')
+        .replace(/à/g, 'a')
         .replace(/\u00e0/g, 'a')
+        .replace(/ï/g, 'i')
         .replace(/\u00ef/g, 'i')
-        .replace(/\u00eb/g, 'e');
+        .replace(/ë/g, 'e')
+        .replace(/\u00eb/g, 'e')
+        .replace(/ô/g, 'o')
+        .replace(/ö/g, 'o')
+        .replace(/ü/g, 'u')
+        .replace(/ç/g, 'c');
+    }
+
+    // Wrapper: autoTable met automatische Unicode-sanitatie
+    function safeAutoTable(opts: any) {
+      if (opts.head) {
+        opts.head = opts.head.map((row: any[]) => row.map((cell: any) => safe(String(cell))));
+      }
+      if (opts.body) {
+        opts.body = opts.body.map((row: any[]) => row.map((cell: any) => safe(String(cell))));
+      }
+      autoTable(doc, opts);
     }
 
     // Helper: add header/footer to each page
@@ -85,8 +123,11 @@ export function PdfExport() {
 
     // Helper: chapter title
     function chapterTitle(nr: number, title: string) {
-      checkPage(25);
-      y += 8; // witruimte vóór nieuw hoofdstuk
+      // Als we niet bovenaan de pagina staan, ruime witruimte toevoegen
+      if (y > margin + 10) {
+        y += 14;
+      }
+      checkPage(30);
       doc.setFontSize(14);
       doc.setTextColor(BRAND);
       doc.setFont('helvetica', 'bold');
@@ -191,7 +232,7 @@ export function PdfExport() {
     }
 
     subtitle('U-waarden per bouwdeel');
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Bouwdeel', 'U-waarde (W/m2.K)', 'Oppervlak (m2)', 'UA (W/K)']],
@@ -234,7 +275,7 @@ export function PdfExport() {
     chapterTitle(3, 'ISOLATIE & WARMTEVERLIES');
 
     subtitle('Transmissieverlies (Htr)');
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Bouwdeel', 'U (W/m2.K)', 'A (m2)', 'UA = U x A (W/K)']],
@@ -329,9 +370,9 @@ export function PdfExport() {
     doc.setFontSize(8);
     doc.setTextColor(GRAY);
     textLine(
-      'Disclaimer: Indicatieve berekening op basis van uw invoer en finale energie. ' +
-      'Geen officiele DPE-audit. Een gecertificeerde DPE classificeert op dubbele drempels ' +
-      '(energie en broeikasgassen), gebruikt conventies, en rekent in primaire energie.'
+      'Disclaimer: De DPE-indicatie is een gebouwkenmerk, berekend met gestandaardiseerde bewoning ' +
+      '(365 dagen, 19 graden C setpoint). Dit is GEEN officiele DPE-audit. Een gecertificeerde DPE ' +
+      'classificeert op dubbele drempels (energie en broeikasgassen), gebruikt conventies, en rekent in primaire energie.'
     );
     doc.setTextColor('#333333');
     doc.setFontSize(9);
@@ -353,7 +394,7 @@ export function PdfExport() {
     if (result.koelingKwh > 0) verbruikBody.push(['Koeling', fmt(result.koelingKwh), 'Nee']);
     verbruikBody.push(['Totaal', fmt(result.totaalVerbruikKwh), '']);
 
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Categorie', 'kWh/jaar', 'In DPE']],
@@ -377,7 +418,7 @@ export function PdfExport() {
     if (result.evKwh > 0) kostenBody.push(['EV laden', fmtEur(Math.round(result.evKwh * prijsElek))]);
     kostenBody.push(['Totaal', fmtEur(result.kostenTotaal)]);
 
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Categorie', 'EUR/jaar']],
@@ -451,7 +492,7 @@ export function PdfExport() {
       c.reason.substring(0, 120),
     ]);
 
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Subsidie', 'Status', 'Bedrag', 'Toelichting']],
@@ -506,7 +547,7 @@ export function PdfExport() {
         `${result.dpe.letter} -> ${m.dpeNaLetter}`,
       ]);
 
-      autoTable(doc, {
+      safeAutoTable({
         startY: y,
         margin: { left: margin, right: margin },
         head: [['Maatregel', 'Besparing', 'Investering', 'Terugverdientijd', 'DPE-effect']],
@@ -529,7 +570,9 @@ export function PdfExport() {
         subtitle('Top-3 aanbevolen');
         for (let i = 0; i < Math.min(3, savings.maatregelen.length); i++) {
           const m = savings.maatregelen[i];
-          textLine(`${i + 1}. ${m.naam}: ${m.beschrijving} (besparing: ${fmtEur(m.besparingEurJaar)}/jaar, terugverdientijd: ${m.terugverdientijdJaar < 50 ? m.terugverdientijdJaar + ' jaar' : '>50 jaar'})`, 2);
+          textLine(`${i + 1}. ${m.naam}: ${m.beschrijving}`, 4);
+          textLine(`Besparing: ${fmtEur(m.besparingEurJaar)}/jaar | Terugverdientijd: ${m.terugverdientijdJaar < 50 ? m.terugverdientijdJaar + ' jaar' : '>50 jaar'}`, 8);
+          y += 3;
         }
       }
     }
@@ -566,7 +609,7 @@ export function PdfExport() {
       ['PV', 'Photovoltaique. Zonnepanelen voor elektriciteitsproductie.'],
     ];
 
-    autoTable(doc, {
+    safeAutoTable({
       startY: y,
       margin: { left: margin, right: margin },
       head: [['Begrip', 'Betekenis']],
