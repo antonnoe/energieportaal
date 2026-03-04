@@ -35,6 +35,27 @@ export function PdfExport() {
 
     const datum = new Date().toLocaleDateString('nl-NL');
 
+    // PDF-safe text: vervang Unicode die jsPDF niet aankan
+    function safe(text: string): string {
+      return text
+        .replace(/\u20ac/g, 'EUR ')
+        .replace(/\u2265/g, '>=')
+        .replace(/\u2264/g, '<=')
+        .replace(/\u00b2/g, '2')
+        .replace(/\u00b7/g, '.')
+        .replace(/\u00b0/g, ' ')
+        .replace(/\u2013/g, '-')
+        .replace(/\u2014/g, '-')
+        .replace(/\u2019/g, "'")
+        .replace(/\u2192/g, '->')
+        .replace(/\u00e9/g, 'e')
+        .replace(/\u00e8/g, 'e')
+        .replace(/\u00ea/g, 'e')
+        .replace(/\u00e0/g, 'a')
+        .replace(/\u00ef/g, 'i')
+        .replace(/\u00eb/g, 'e');
+    }
+
     // Helper: add header/footer to each page
     function addHeaderFooter() {
       const totalPages = doc.getNumberOfPages();
@@ -68,7 +89,7 @@ export function PdfExport() {
       doc.setFontSize(14);
       doc.setTextColor(BRAND);
       doc.setFont('helvetica', 'bold');
-      doc.text(`${nr}. ${title}`, margin, y);
+      doc.text(`${nr}. ${safe(title)}`, margin, y);
       y += 3;
       doc.setDrawColor(BRAND);
       doc.setLineWidth(0.5);
@@ -85,7 +106,7 @@ export function PdfExport() {
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor('#444444');
-      doc.text(text, margin, y);
+      doc.text(safe(text), margin, y);
       y += 6;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -95,7 +116,7 @@ export function PdfExport() {
     // Helper: text line
     function textLine(text: string, indent = 0) {
       checkPage(6);
-      const lines = doc.splitTextToSize(text, contentWidth - indent);
+      const lines = doc.splitTextToSize(safe(text), contentWidth - indent);
       doc.text(lines, margin + indent, y);
       y += lines.length * 4.5;
     }
@@ -103,11 +124,13 @@ export function PdfExport() {
     // Helper: key-value line
     function kvLine(key: string, value: string, indent = 0) {
       checkPage(6);
+      const sk = safe(key);
+      const sv = safe(value);
       doc.setFont('helvetica', 'bold');
-      doc.text(key, margin + indent, y);
+      doc.text(sk, margin + indent, y);
       doc.setFont('helvetica', 'normal');
-      const keyWidth = doc.getTextWidth(key + ' ');
-      doc.text(value, margin + indent + keyWidth + 1, y);
+      const keyWidth = doc.getTextWidth(sk + ' ');
+      doc.text(sv, margin + indent + keyWidth + 1, y);
       y += 5;
     }
 
