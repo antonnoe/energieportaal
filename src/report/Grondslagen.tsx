@@ -62,9 +62,6 @@ export function Grondslagen() {
             <p>Setpoint aanwezig: {debug.setpoint}°C ({(debug.fracPresent * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrPresent)}</p>
             <p>Setpoint afwezig:  {debug.awaySetpoint}°C ({(debug.fracAway * 100).toFixed(0)}% van jaar) &rarr; HDD_corr = {Math.round(debug.hddCorrAway)}</p>
             <p className="font-semibold">Gewogen HDD_eff = {Math.round(debug.hddCorrPresent)} × {debug.fracPresent.toFixed(2)} + {Math.round(debug.hddCorrAway)} × {debug.fracAway.toFixed(2)} = {Math.round(debug.hddEffGewogen)} K·d</p>
-            {debug.fracPresent + debug.fracAway < 0.999 && (
-              <p className="text-amber-700">Aanwezig: {(debug.fracPresent * 100).toFixed(0)}% | Afwezig: {(debug.fracAway * 100).toFixed(0)}% | Leegstand: {((1 - debug.fracPresent - debug.fracAway) * 100).toFixed(0)}% (geen verwarming)</p>
-            )}
           </div>
 
           {/* F7: Transparante energieberekening */}
@@ -93,12 +90,12 @@ export function Grondslagen() {
           {/* DPE-indicatie */}
           <div>
             <p className="font-bold text-gray-700 mb-1">DPE-INDICATIE</p>
-            <p>DPE-verbruik (zonder EV/zwembad/koeling): {result.dpeVerbruikKwh.toLocaleString('nl-NL')} kWh</p>
+            <p>DPE-verbruik (gestandaardiseerd 365d, 19°C): {result.dpeVerbruikKwh.toLocaleString('nl-NL')} kWh</p>
             <p>{result.dpeVerbruikKwh.toLocaleString('nl-NL')} / {toolState.woonoppervlak} m² = {Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar &rarr; {result.dpe.letter}</p>
             {result.dpe.kwhTotVolgendeKlasse > 0 && result.dpe.letter !== 'A' && (
               <p className="text-green-700">  Tot volgende klasse: nog {Math.round(result.dpe.kwhTotVolgendeKlasse)} kWh/m² besparen</p>
             )}
-            <p className="text-gray-500 mt-1 italic">Indicatieve berekening op basis van finale energie en uw invoer. Geen offici&euml;le DPE.</p>
+            <p className="text-gray-500 mt-1 italic">DPE is een gebouwkenmerk: berekend met gestandaardiseerde bewoning (365 dagen, 19°C setpoint), onafhankelijk van uw stookgedrag. Geen offici&euml;le DPE.</p>
           </div>
 
           {/* F8: Energieprijzen met bronnen */}
