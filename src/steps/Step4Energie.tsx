@@ -28,9 +28,9 @@ const VERWARMING_OPTIES = [
   { value: 'propaan', label: 'Propaan' },
 ];
 
-function NumField({ id, label, value, unit, onChange, min, max, step }: {
+function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
   id: string; label: string; value: string; unit?: string;
-  onChange: (v: string) => void; min?: number; max?: number; step?: number;
+  onChange: (v: string) => void; min?: number; max?: number; step?: number; helpText?: string;
 }) {
   return (
     <div>
@@ -43,6 +43,7 @@ function NumField({ id, label, value, unit, onChange, min, max, step }: {
         />
         {unit && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{unit}</span>}
       </div>
+      {helpText && <p className="text-xs text-gray-400 mt-0.5">{helpText}</p>}
     </div>
   );
 }
@@ -144,8 +145,8 @@ export function Step4Energie() {
     const knop = VERWARMING_KNOPPEN.find(k => k.value === toolState.mainHeating);
     if (!knop) return '';
     return toolState.mainHeating === 'warmtepomp'
-      ? `SCOP standaard: ${knop.eff}`
-      : `Rendement standaard: ${knop.eff}`;
+      ? `Standaard SCOP: ${knop.eff} — 0 = standaard gebruiken`
+      : `Standaard rendement: ${knop.eff} — 0 = standaard gebruiken`;
   })();
 
   return (
@@ -163,9 +164,8 @@ export function Step4Energie() {
           selected={toolState.mainHeating}
           onSelect={handleVerwarmingSelect}
         />
-        <p className="text-xs text-gray-400">{effLabel} &mdash; 0 = standaard gebruiken</p>
         <div className="flex items-center gap-1">
-          <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} />
+          <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} helpText={effLabel} />
           <AIAdviseur veld="Rendement/SCOP" />
         </div>
 

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useToolState } from '../context/ToolStateContext';
 import { berekenSavings } from '../engine/savings';
+import { getRapportNiveau } from '../engine/rapport-niveau';
 
 /**
  * FloatingEuro — Sticky zwevende balk die direct de financiële impact toont.
@@ -13,10 +14,8 @@ export function FloatingEuro() {
 
   const savings = useMemo(() => berekenSavings(portaalInput, result), [portaalInput, result]);
 
-  // U3: Verberg als geen geldige postcode of geen warmteverliesberekening
-  const hasPostcode = toolState.postcode.length === 5;
-  const heeftIsolatieStap = toolState.highestStepVisited >= 4;
-  if (!hasPostcode || !heeftIsolatieStap) {
+  // U3: Alleen tonen bij rapportNiveau 3 (postcode + woningtype + isolatiestap bezocht)
+  if (getRapportNiveau(toolState) < 3) {
     return null;
   }
 
