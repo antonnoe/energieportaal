@@ -1,286 +1,214 @@
+import { useState, useRef, useEffect } from 'react';
 import { useToolState } from '../context/ToolStateContext';
-import type { ToolState } from '../context/ToolStateContext';
-import { DEFAULT_EFFICIENCY, HEATING_SUBTYPES } from '../engine/constants';
-import { AIAdviseur } from '../components/AIAdviseur';
 
-const VERWARMING_KNOPPEN = [
-  { value: 'gas', label: 'Gas-ketel', eff: DEFAULT_EFFICIENCY.gas },
-  { value: 'elektrisch', label: 'Elektrisch', eff: DEFAULT_EFFICIENCY.elektrisch },
-  { value: 'stookolie', label: 'Fioul-ketel', eff: DEFAULT_EFFICIENCY.stookolie },
-  { value: 'warmtepomp', label: 'Warmtepomp', eff: DEFAULT_EFFICIENCY.warmtepomp },
-  { value: 'hout', label: 'Hout/pellet', eff: DEFAULT_EFFICIENCY.hout },
-  { value: 'propaan', label: 'Propaan', eff: DEFAULT_EFFICIENCY.propaan },
-];
-
-const DHW_KNOPPEN = [
-  { value: '_same', label: 'Zelfde als verwarming' },
-  { value: 'elektrisch', label: 'Elektrische boiler' },
-  { value: 'warmtepomp', label: 'Warmtepomp-boiler' },
-  { value: 'gas', label: 'Gasboiler' },
-];
-
-const VERWARMING_OPTIES = [
-  { value: 'gas', label: 'Gasketel' },
-  { value: 'stookolie', label: 'Stookolie (mazout)' },
-  { value: 'warmtepomp', label: 'Warmtepomp' },
-  { value: 'elektrisch', label: 'Elektrisch (direct)' },
-  { value: 'hout', label: 'Hout / Pellet' },
-  { value: 'propaan', label: 'Propaan' },
-];
-
-function NumField({ id, label, value, unit, onChange, min, max, step, helpText }: {
-  id: string; label: string; value: string; unit?: string;
-  onChange: (v: string) => void; min?: number; max?: number; step?: number; helpText?: string;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
-      <div className="relative">
-        <input
-          id={id} type="number" min={min} max={max} step={step ?? 1}
-          value={value} onChange={(e) => onChange(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-        />
-        {unit && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">{unit}</span>}
-      </div>
-      {helpText && <p className="text-xs text-gray-400 mt-0.5">{helpText}</p>}
-    </div>
-  );
+interface AIAdviseurProps {
+  veld: string;
+  waarde?: string | number;
+  context?: string;
 }
 
-function SelectField({ id, label, value, options, onChange }: {
-  id: string; label: string; value: string;
-  options: { value: string; label: string }[];
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-semibold mb-1">{label}</label>
-      <select
-        id={id} value={value} onChange={(e) => onChange(e.target.value)}
-        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-      >
-        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-    </div>
-  );
+// Cache: stateHash+veld → response text
+const cache = new Map<string, string>();
+
+let systemPromptCache: string | null = null;
+
+function getStateHash(toolState: any): string {
+  return JSON.stringify(toolState);
 }
 
-function Toggle({ id, label, value, onChange, helpText }: {
-  id: string; label: string; value: string;
-  onChange: (v: string) => void; helpText?: string;
-}) {
-  const checked = value === 'ja';
-  return (
-    <div className="flex items-center justify-between py-1">
-      <div>
-        <label htmlFor={id} className="text-sm font-semibold cursor-pointer">{label}</label>
-        {helpText && <p className="text-xs text-gray-400">{helpText}</p>}
-      </div>
-      <button
-        id={id} type="button" role="switch" aria-checked={checked}
-        onClick={() => onChange(checked ? 'nee' : 'ja')}
-        className={`relative w-11 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-gray-300'}`}
-      >
-        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${checked ? 'translate-x-5' : ''}`} />
-      </button>
-    </div>
-  );
+async function loadSystemPrompt(): Promise<string> {
+  if (systemPromptCache) return systemPromptCache;
+  const resp = await fetch('/energieportaal-ai-adviseur.md');
+  if (!resp.ok) throw new Error('Could not load system prompt');
+  systemPromptCache = await resp.text();
+  return systemPromptCache;
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="font-heading text-sm font-bold text-gray-700 uppercase tracking-wide">{children}</h3>;
+function renderSimpleMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/\n/g, '<br />');
 }
 
-function ButtonGroup({ options, selected, onSelect }: {
-  options: { value: string; label: string }[];
-  selected: string;
-  onSelect: (value: string) => void;
-}) {
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          onClick={() => onSelect(o.value)}
-          className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-            selected === o.value
-              ? 'bg-primary text-white border-primary'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-primary/50'
-          }`}
-        >
-          {o.label}
-        </button>
-      ))}
-    </div>
-  );
-}
+export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const { toolState, result } = useToolState();
 
-export function Step4Energie() {
-  const { toolState, setField } = useToolState();
-  const sf = (key: keyof ToolState) => (v: string) => setField(key, v);
-
-  const handleVerwarmingSelect = (value: string) => {
-    const oldHeating = toolState.mainHeating;
-    setField('mainHeating', value);
-    // Als DHW "meeliep" met verwarming, laat het meelopen
-    if (toolState.dhwSystem === oldHeating) {
-      setField('dhwSystem', value);
-    }
-    setField('mainEfficiency', '0');
-    setField('heatingSubtype', '');
-  };
-
-  const handleSubtypeSelect = (value: string) => {
-    setField('heatingSubtype', value);
-    const subtypes = HEATING_SUBTYPES[toolState.mainHeating];
-    if (subtypes) {
-      const sub = subtypes.find(s => s.label === value);
-      if (sub) {
-        setField('mainEfficiency', String(sub.eta));
+  // Close on click outside
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
       }
     }
-  };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [open]);
 
-  const handleDhwSelect = (value: string) => {
-    if (value === '_same') {
-      setField('dhwSystem', toolState.mainHeating);
-      setField('dhwEfficiency', '0');
-    } else {
-      setField('dhwSystem', value);
-      setField('dhwEfficiency', '0');
+  const handleClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    if (open) {
+      setOpen(false);
+      return;
+    }
+
+    setOpen(true);
+
+    // Check cache — include result so computed changes invalidate stale answers
+    const hash = getStateHash(toolState);
+    const resultHash = getStateHash(result);
+    const cacheKey = `${hash}:${resultHash}:${veld}:${waarde ?? ''}:${context ?? ''}`;
+    if (cache.has(cacheKey)) {
+      setAnswer(cache.get(cacheKey)!);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setAnswer(null);
+
+    try {
+      const systemPrompt = await loadSystemPrompt();
+      const contextPrompt = buildContextPrompt(veld, waarde, context, toolState, result);
+
+      const resp = await fetch('/api/ai-advice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system: systemPrompt,
+          prompt: contextPrompt,
+        }),
+      });
+      const data = await resp.json();
+      if (resp.ok && data.text) {
+        cache.set(cacheKey, data.text);
+        setAnswer(data.text);
+      } else {
+        throw new Error('API error');
+      }
+    } catch {
+      setError('AI-adviseur is momenteel niet beschikbaar. Probeer later opnieuw.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const effLabel = (() => {
-    const knop = VERWARMING_KNOPPEN.find(k => k.value === toolState.mainHeating);
-    if (!knop) return '';
-    return toolState.mainHeating === 'warmtepomp'
-      ? `Standaard SCOP: ${knop.eff}`
-      : `Standaard rendement: ${knop.eff}`;
-  })();
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 4: Energie</h2>
-        <p className="text-sm text-gray-500">Verwarmingssystemen, tapwater, ventilatie en optionele apparaten.</p>
-      </div>
-
-      {/* U1: Verwarming knoppen */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <div className="flex items-center gap-1"><SectionTitle>Hoofdverwarming</SectionTitle><AIAdviseur veld="Hoofdverwarming" /></div>
-        <ButtonGroup
-          options={VERWARMING_KNOPPEN.map(k => ({ value: k.value, label: k.label }))}
-          selected={toolState.mainHeating}
-          onSelect={handleVerwarmingSelect}
-        />
-        {HEATING_SUBTYPES[toolState.mainHeating] && (
-          <SelectField
-            id="heatingSubtype" label="Type installatie"
-            value={toolState.heatingSubtype}
-            options={[
-              { value: '', label: 'Kies een type...' },
-              ...HEATING_SUBTYPES[toolState.mainHeating].map(s => ({ value: s.label, label: `${s.label} (η ${s.eta})` })),
-            ]}
-            onChange={handleSubtypeSelect}
-          />
-        )}
-        <div className="flex items-center gap-1">
-          <NumField id="mainEfficiency" label="Rendement/SCOP (optioneel)" value={toolState.mainEfficiency} onChange={sf('mainEfficiency')} min={0} max={6} step={0.1} helpText={effLabel} />
-          <AIAdviseur veld="Rendement/SCOP" />
-        </div>
-
-        <SelectField
-          id="auxHeating" label="Bijverwarming"
-          value={toolState.auxHeating}
-          options={[{ value: 'geen', label: 'Geen bijverwarming' }, ...VERWARMING_OPTIES]}
-          onChange={sf('auxHeating')}
-        />
-        {toolState.auxHeating !== 'geen' && (
-          <div className="flex items-center gap-1">
-            <NumField id="auxFraction" label="Aandeel bijverwarming" value={toolState.auxFraction} unit="%" onChange={sf('auxFraction')} min={0} max={90} step={5} />
-            <AIAdviseur veld="Bijverwarming" />
+    <div className="relative inline-flex" ref={ref}>
+      <button
+        type="button"
+        onClick={handleClick}
+        aria-label={`AI-advies over ${veld}`}
+        className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold flex items-center justify-center hover:bg-blue-200 transition-colors ml-1 shrink-0"
+      >
+        ?
+      </button>
+      {open && (
+        <div className="absolute z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
+          <div className="flex items-start justify-between gap-1 mb-1">
+            <span className="font-semibold text-blue-700 text-[11px]">AI-adviseur: {veld}</span>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              className="text-gray-400 hover:text-gray-600 text-sm leading-none"
+            >
+              &times;
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Ventilatie */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <div className="flex items-center gap-1"><SectionTitle>Ventilatie</SectionTitle><AIAdviseur veld="WTW" /></div>
-        <Toggle id="hasHRV" label="WTW-ventilatie (VMC double flux)" value={toolState.hasHRV} onChange={sf('hasHRV')} helpText="Mechanische ventilatie met warmteterugwinning" />
-        {toolState.hasHRV === 'ja' && (
-          <NumField id="hrvEfficiency" label="WTW-rendement" value={toolState.hrvEfficiency} unit="%" onChange={sf('hrvEfficiency')} min={50} max={95} step={5} />
-        )}
-      </div>
-
-      {/* U1: Tapwater knoppen */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <div className="flex items-center gap-1"><SectionTitle>Tapwater</SectionTitle><AIAdviseur veld="Tapwater" /></div>
-        <ButtonGroup
-          options={DHW_KNOPPEN}
-          selected={
-            toolState.dhwSystem === toolState.mainHeating ? '_same' : toolState.dhwSystem
-          }
-          onSelect={handleDhwSelect}
-        />
-        {toolState.dhwSystem === 'hout' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-xs text-amber-800">
-            <AIAdviseur veld="DHW hout" context="Warm water via houtverwarming is ongebruikelijk in Frankrijk. Bedoelde u een elektrische boiler of warmtepompboiler? Het kan wel bij een bouilleur/poêle bouilleur." />
-            <span className="ml-1">Warm water via hout is ongebruikelijk. Bevestig uw keuze of kies een andere optie.</span>
-          </div>
-        )}
-        <div className="grid grid-cols-3 gap-3">
-          <NumField id="personen" label="Personen" value={toolState.personen} onChange={sf('personen')} min={1} max={10} />
-          <NumField id="douchesPerDag" label="Douches/dag/pp" value={toolState.douchesPerDag} onChange={sf('douchesPerDag')} min={0} max={3} step={0.5} />
-          <NumField id="literPerDouche" label="Liter/douche" value={toolState.literPerDouche} unit="L" onChange={sf('literPerDouche')} min={20} max={100} step={5} />
+          {loading && (
+            <p className="text-gray-400 italic">Even denken...</p>
+          )}
+          {error && (
+            <p className="text-red-600">{error}</p>
+          )}
+          {answer && (
+            <div dangerouslySetInnerHTML={{ __html: renderSimpleMarkdown(answer) }} />
+          )}
         </div>
-      </div>
-
-      {/* Elektriciteit */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <div className="flex items-center gap-1"><SectionTitle>Elektriciteit &amp; apparaten</SectionTitle><AIAdviseur veld="Basiselektriciteit" /></div>
-        <NumField id="basisElektriciteit" label="Basisverbruik" value={toolState.basisElektriciteit} unit="kWh/jaar" onChange={sf('basisElektriciteit')} min={0} max={20000} step={100} />
-      </div>
-
-      {/* Optionele systemen */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-        <SectionTitle>Optionele systemen</SectionTitle>
-        <div className="flex items-center gap-1">
-          <Toggle id="hasEV" label="Elektrische auto" value={toolState.hasEV} onChange={sf('hasEV')} helpText="Laadt u thuis een EV op?" />
-          <AIAdviseur veld="Elektrische auto" />
-        </div>
-        {toolState.hasEV === 'ja' && (
-          <NumField id="evKmPerJaar" label="Kilometers/jaar" value={toolState.evKmPerJaar} unit="km" onChange={sf('evKmPerJaar')} min={0} max={100000} step={1000} />
-        )}
-
-        <div className="flex items-center gap-1">
-          <Toggle id="hasZwembad" label="Zwembad (verwarmd)" value={toolState.hasZwembad} onChange={sf('hasZwembad')} />
-          <AIAdviseur veld="Zwembad" />
-        </div>
-        {toolState.hasZwembad === 'ja' && (
-          <div className="grid grid-cols-2 gap-3">
-            <NumField id="zwembadOppervlak" label="Oppervlak" value={toolState.zwembadOppervlak} unit="m²" onChange={sf('zwembadOppervlak')} min={1} max={200} step={1} />
-            <NumField id="zwembadMaanden" label="Maanden actief" value={toolState.zwembadMaanden} onChange={sf('zwembadMaanden')} min={1} max={12} />
-          </div>
-        )}
-        {toolState.hasZwembad === 'ja' && (
-          <SelectField
-            id="poolHeatingType" label="Verwarming zwembad"
-            value={toolState.poolHeatingType}
-            options={[
-              { value: 'electric', label: 'Elektrisch (direct)' },
-              { value: 'heatpump', label: 'Warmtepomp (PAC piscine)' },
-              { value: 'solar', label: 'Solaire (zonnecollector)' },
-            ]}
-            onChange={sf('poolHeatingType')}
-          />
-        )}
-
-        <Toggle id="hasKoeling" label="Airconditioning" value={toolState.hasKoeling} onChange={sf('hasKoeling')} />
-        <p className="text-xs text-gray-400 -mt-1">Inclusief climatisation réversible (reversibele warmtepomp). Kan ook als bijverwarming dienen.</p>
-      </div>
+      )}
     </div>
   );
+}
+
+function getDefaultEffLabel(type: string): string {
+  const defaults: Record<string, string> = {
+    gas: '0.90', stookolie: '0.85', warmtepomp: '3.5',
+    elektrisch: '1.0', hout: '0.75', propaan: '0.90',
+  };
+  return defaults[type] ?? '?';
+}
+
+function buildContextPrompt(
+  veld: string,
+  waarde: string | number | undefined,
+  context: string | undefined,
+  toolState: any,
+  result: any,
+): string {
+  const lines: string[] = [
+    `GEBRUIKERSSITUATIE:`,
+    `- Postcode: ${toolState.postcode || '(niet ingevuld)'}`,
+    `- Département: ${toolState.departement || '(onbekend)'}`,
+    `- Klimaatzone: ${toolState.zoneId}`,
+    `- Woningtype: ${toolState.huisTypeId}`,
+    `- Oppervlak: ${toolState.woonoppervlak} m²`,
+    ``,
+    `ISOLATIE:`,
+    `- Muur: U=${toolState.uMuur} W/m²·K (${toolState.muurOppervlak} m²)`,
+    `- Dak: U=${toolState.uDak} W/m²·K (${toolState.dakOppervlak} m²)`,
+    `- Vloer: U=${toolState.uVloer} W/m²·K (${toolState.vloerOppervlak} m²)`,
+    `- Ramen: U=${toolState.uRaam} W/m²·K (${toolState.raamOppervlak} m²)`,
+    `- Raamtype: ${toolState.isolatieNiveauRaam || 'handmatig ingevoerd'}`,
+    `- Muurniveau: ${toolState.isolatieNiveauMuur || 'handmatig'}`,
+    `- Dakniveau: ${toolState.isolatieNiveauDak || 'handmatig'}`,
+    `- Vloerniveau: ${toolState.isolatieNiveauVloer || 'handmatig'}`,
+    ``,
+    `WARMTEVERLIES:`,
+    `- Transmissie (Htr): ${result.uaWK} W/K`,
+    `- Ventilatie (Hvent_eff): ${result.hventEffWK} W/K`,
+    `- Totaal (Htot): ${result.hTotaalWK} W/K`,
+    ``,
+    `ENERGIE:`,
+    `- Hoofdverwarming: ${toolState.mainHeating} (η/SCOP=${Number(toolState.mainEfficiency) > 0 ? toolState.mainEfficiency : 'standaard (' + getDefaultEffLabel(toolState.mainHeating) + ')'})`,
+    `- Bijverwarming: ${toolState.auxHeating || 'geen'} (${toolState.auxFraction}%)`,
+    `- DHW-systeem: ${toolState.dhwSystem}`,
+    `- DHW rendement: ${toolState.dhwEfficiency}`,
+    `- WTW: ${toolState.hasHRV === 'ja' ? 'Ja (' + toolState.hrvEfficiency + ')' : 'Nee'}`,
+    `- Verwarming totaal: ${result.verwarmingTotaal} kWh/jaar`,
+    `- DHW totaal: ${result.dhwInput} kWh/jaar`,
+    `- Basiselektriciteit: ${result.elektriciteitBasis} kWh/jaar`,
+    `- EV: ${toolState.hasEV === 'ja' ? toolState.evKmPerJaar + ' km/jaar' : 'Nee'}`,
+    `- PV: ${toolState.hasPV === 'ja' ? toolState.pvVermogen + ' kWp' : 'Nee'}`,
+    `- Zwembad: ${toolState.hasZwembad === 'ja' ? toolState.zwembadOppervlak + ' m²' : 'Nee'}`,
+    ``,
+    `DPE-INDICATIE: ${result.dpe.letter} (${Math.round(result.dpe.kwhPerM2)} kWh/m²/jaar)`,
+    `KOSTEN: €${result.kostenTotaal}/jaar`,
+    ``,
+    `SUBSIDIE-CONTEXT:`,
+    `- Gebruik woning: ${toolState.subsidieUsage || '(niet ingevuld)'}`,
+    `- Fase project: ${toolState.subsidiePhase || '(niet ingevuld)'}`,
+    toolState.subsidiePhase === 'gestart' ? '⚠️ WERKEN ZIJN AL GESTART — de meeste subsidies (MPR, CEE, Éco-PTZ) moeten VÓÓR aanvang worden aangevraagd. Waarschuw de gebruiker hier expliciet over!' : '',
+    `- Woning ouder dan 2 jaar: ${toolState.subsidieOver2Years || '(niet ingevuld)'}`,
+    ``,
+    `VRAAG VAN GEBRUIKER:`,
+    `Veld/sectie: ${veld}`,
+  ];
+
+  if (waarde !== undefined) {
+    lines.push(`Huidige waarde: ${waarde}`);
+  }
+  if (context) {
+    lines.push(`Extra context: ${context}`);
+  }
+
+  lines.push('', 'Geef een kort, praktisch antwoord in maximaal 4 zinnen.');
+
+  return lines.join('\n');
 }
