@@ -58,6 +58,7 @@ export interface ToolState {
   hasZwembad: string;
   zwembadOppervlak: string;
   zwembadMaanden: string;
+  poolHeatingType: string;
   hasKoeling: string;
   koelingEER: string;
 
@@ -140,6 +141,7 @@ const DEFAULT_STATE: ToolState = {
   hasZwembad: 'nee',
   zwembadOppervlak: '32',
   zwembadMaanden: '5',
+  poolHeatingType: 'electric',
   hasKoeling: 'nee',
   koelingEER: '3.0',
 
@@ -235,6 +237,7 @@ export function stateToPortaalInput(state: ToolState): PortaalInput {
     hasZwembad: state.hasZwembad === 'ja',
     zwembadOppervlak: Number(state.zwembadOppervlak) || 32,
     zwembadMaanden: Number(state.zwembadMaanden) || DEFAULTS.zwembadMaanden,
+    poolHeatingType: (state.poolHeatingType as PortaalInput['poolHeatingType']) || 'electric',
 
     hasKoeling: state.hasKoeling === 'ja',
     koelingEER: Number(state.koelingEER) || DEFAULTS.koelingEER,
