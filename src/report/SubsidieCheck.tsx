@@ -10,12 +10,12 @@ const statusStyles = {
 };
 
 const SUBSIDIE_INFO: Record<string, string> = {
-  'mpr-geste': 'Subsidie voor een enkele maatregel (isolatie, verwarming, ventilatie). Tot \u20ac15.000 afhankelijk van inkomen en maatregel.',
-  'mpr-ampleur': 'Subsidie voor een ingrijpende renovatie met minimaal 2 sprongen op de DPE-schaal. Tot \u20ac70.000. Alleen voor DPE E, F of G.',
-  cee: 'Energiebesparingscertificaten \u2014 uw energieleverancier betaalt een premie voor besparende maatregelen. Cumuleerbaar met MPR\u2019.',
-  'eco-ptz': 'Rentevrije lening tot \u20ac50.000 voor energetische renovatie. Looptijd tot 20 jaar. Cumuleerbaar met MPR\u2019.',
+  'mpr-geste': 'Subsidie voor een enkele maatregel (isolatie, verwarming, ventilatie). Tot €15.000 afhankelijk van inkomen en maatregel.',
+  'mpr-ampleur': 'Subsidie voor een ingrijpende renovatie met minimaal 2 sprongen op de DPE-schaal. Tot €70.000. Alleen voor DPE E, F of G.',
+  cee: "Energiebesparingscertificaten — uw energieleverancier betaalt een premie voor besparende maatregelen. Cumuleerbaar met MPR'.",
+  'eco-ptz': "Rentevrije lening tot €50.000 voor energetische renovatie. Looptijd tot 20 jaar. Cumuleerbaar met MPR'.",
   tva: 'Verlaagd BTW-tarief (5,5% i.p.v. 20%) op arbeid en materiaal voor energetische renovatie van woningen ouder dan 2 jaar.',
-  lokaal: 'Gemeentelijke en regionale subsidies. Vari\u00ebren sterk per locatie. Check bij uw mairie of ADIL.',
+  lokaal: 'Gemeentelijke en regionale subsidies. Variëren sterk per locatie. Check bij uw mairie of ADIL.',
 };
 
 function InfoTooltip({ text }: { text: string }) {
@@ -47,7 +47,7 @@ const SUBSIDIE_AANVRAAG: Record<string, { aanvraagwijze: string; url: string }> 
     url: 'https://infofrankrijk.com/ma-prime-renov-in-frankrijk-voorwaarden-werking-en-aandachtspunten/',
   },
   'mpr-ampleur': {
-    aanvraagwijze: 'aanvragen via maprimerenov.gouv.fr (met Mon Accompagnateur R\u00e9nov\u2019)',
+    aanvraagwijze: "aanvragen via maprimerenov.gouv.fr (met Mon Accompagnateur Rénov')",
     url: 'https://infofrankrijk.com/ma-prime-renov-in-frankrijk-voorwaarden-werking-en-aandachtspunten/',
   },
   cee: {
@@ -55,7 +55,7 @@ const SUBSIDIE_AANVRAAG: Record<string, { aanvraagwijze: string; url: string }> 
     url: 'https://infofrankrijk.com/cee-en-primes-energie-energiebesparingspremies-in-frankrijk-uitgelegd/',
   },
   'eco-ptz': {
-    aanvraagwijze: 'alleen via uw bank \u2014 bureaucratisch maar renteloos',
+    aanvraagwijze: 'alleen via uw bank — bureaucratisch maar renteloos',
     url: 'https://infofrankrijk.com/eco-ptz-renteloze-lening-voor-energierenovatie-in-frankrijk/',
   },
   tva: {
@@ -155,7 +155,7 @@ export function SubsidieCheck() {
               </p>
               <p className="text-xs text-gray-600 mt-1">
                 Onze inschatting: {redCards.length <= 1 ? (
-                  <span className="font-semibold text-green-700">Ja, aanvragen — het loont. Begin bij France R\u00e9nov' voor gratis begeleiding.</span>
+                  <span className="font-semibold text-green-700">Ja, aanvragen — het loont. Begin bij France Rénov' voor gratis begeleiding.</span>
                 ) : (
                   <span className="font-semibold text-amber-700">Marginaal — weeg af tegen moeite. Niet alle subsidies zijn beschikbaar in uw situatie.</span>
                 )}
@@ -163,7 +163,7 @@ export function SubsidieCheck() {
             </>
           ) : (
             <p className="text-sm font-semibold text-red-700">
-              Helaas zijn er in uw huidige situatie geen subsidies beschikbaar. Controleer uw invoer of neem contact op met France R\u00e9nov'.
+              Helaas zijn er in uw huidige situatie geen subsidies beschikbaar. Controleer uw invoer of neem contact op met France Rénov'.
             </p>
           )}
         </div>
@@ -188,7 +188,7 @@ export function SubsidieCheck() {
       <div className="text-xs text-gray-500 space-y-0.5">
         <p>
           <a href="https://france-renov.gouv.fr/preparer-projet/trouver-conseiller" target="_blank" rel="noopener noreferrer" className="text-primary underline">
-            France R\u00e9nov' — vind een adviseur
+            France Rénov' — vind een adviseur
           </a>
           {' '}(zoek een gratis adviseur bij u in de buurt)
         </p>
