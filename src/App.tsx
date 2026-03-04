@@ -53,7 +53,7 @@ const STEP_LABELS = [
   { nr: 2, label: 'Woning' },
   { nr: 3, label: 'Isolatie' },
   { nr: 4, label: 'Energie' },
-  { nr: 5, label: 'Financieel' },
+  { nr: 5, label: 'Kosten' },
 ]
 
 function StepIndicator() {
@@ -61,13 +61,13 @@ function StepIndicator() {
   const current = toolState.currentStep
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-0.5 overflow-x-auto">
       {STEP_LABELS.map((s, i) => (
-        <div key={s.nr} className="flex items-center">
+        <div key={s.nr} className="flex items-center shrink-0">
           <button
             type="button"
             onClick={() => setCurrentStep(s.nr)}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`flex items-center gap-1 px-2 py-1.5 rounded-full text-xs font-medium transition-all ${
               current === s.nr
                 ? 'bg-primary text-white shadow-sm'
                 : current > s.nr
@@ -78,7 +78,7 @@ function StepIndicator() {
             <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold border border-current">
               {current > s.nr ? '\u2713' : s.nr}
             </span>
-            <span className="hidden sm:inline">{s.label}</span>
+            <span className="hidden lg:inline">{s.label}</span>
           </button>
           {i < STEP_LABELS.length - 1 && (
             <div className={`w-4 h-px mx-0.5 ${current > s.nr ? 'bg-primary/30' : 'bg-gray-200'}`} />
