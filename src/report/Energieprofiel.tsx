@@ -31,6 +31,12 @@ export function Energieprofiel() {
       {/* Warmteverlies samenvatting */}
       <div className="bg-gray-50 rounded-lg p-3 text-sm">
         <p className="font-semibold mb-1">Warmteverlies</p>
+        <p className="text-xs text-gray-400 mb-2">
+          Het warmteverlies bepaalt hoeveel energie uw woning verliest aan de buitenlucht.
+          Hoe hoger het verlies (H), hoe meer u moet stoken. Het bestaat uit transmissie
+          (via muren, dak, vloer en ramen) en ventilatie (via luchtlekken en bewuste ventilatie).
+          Een lagere U-waarde of betere luchtdichtheid verlaagt het verlies.
+        </p>
         <div className="grid grid-cols-3 gap-2 text-center">
           <div>
             <p className="text-lg font-bold text-primary">{result.uaWK}</p>
