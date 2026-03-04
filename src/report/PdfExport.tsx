@@ -378,16 +378,12 @@ export function PdfExport() {
     kvLine('Dagen aanwezig:', `${toolState.daysPresent} dagen/jaar (${(result.debug.fracPresent * 100).toFixed(0)}%)`);
     kvLine('Dagen afwezig:', `${toolState.daysAway} dagen/jaar (${(result.debug.fracAway * 100).toFixed(0)}%)`);
 
-    const leegstand = 1 - result.debug.fracPresent - result.debug.fracAway;
-    if (leegstand > 0.001) {
-      kvLine('Leegstand:', `${(leegstand * 100).toFixed(0)}% (geen verwarming)`);
-    }
     y += 5;
 
     textLine(
       'De gewogen HDD houdt rekening met uw stookgedrag: bij lagere setpoints tijdens afwezigheid ' +
-      'worden minder graaddagen meegeteld, waardoor de warmtevraag daalt. ' +
-      'Leegstandsdagen (noch aanwezig noch afwezig) worden niet verwarmd.'
+      'worden minder graaddagen meegeteld, waardoor de energiekosten dalen. ' +
+      'De DPE-indicatie is een gebouwkenmerk en wordt berekend met gestandaardiseerde bewoning (365 dagen, 19\xB0C).'
     );
 
     // ===================================================================
