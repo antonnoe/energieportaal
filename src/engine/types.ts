@@ -20,6 +20,7 @@ export interface Zone {
 export interface HuisType {
   id: string;
   naam: string;
+  categorie: string;   // voor optgroup in dropdown
   periode: string;
   uMuur: number;       // W/m²·K
   uDak: number;
@@ -31,6 +32,7 @@ export interface HuisType {
   isolatiescore: number;  // 1–10
   vochtadvies: string;
   waarschuwingen: string[];
+  verwarmtip?: string; // tip over gedeeltelijke bewoning (château, manoir, etc.)
   oppervlakteRatios: {
     muurPerM2: number;   // m² muur per m² woonoppervlak
     dakPerM2: number;
