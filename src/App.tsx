@@ -364,17 +364,17 @@ function StickyToolbar({ activePanel, setActivePanel }: {
 
 function CompactHeader() {
   return (
-    <header className="relative overflow-hidden" style={{ backgroundColor: 'rgba(128, 0, 0, 0.88)' }}>
+    <header className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-3 py-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <img src="/infofrankrijk-logo.png" alt="Infofrankrijk.com" className="h-6 brightness-0 invert" />
-          <span className="text-white/30">|</span>
-          <span className="font-heading font-semibold text-xs text-white tracking-wide">EnergiePortaal</span>
+          <img src="/infofrankrijk-logo.png" alt="Infofrankrijk.com" className="h-6" />
+          <span className="text-gray-300">|</span>
+          <span className="font-heading font-semibold text-xs text-[#800000] tracking-wide">EnergiePortaal</span>
         </div>
         <a
           href="https://infofrankrijk.com/?s=energie&et_pb_searchform_submit=et_search_proccess&et_pb_include_posts=yes&et_pb_include_pages=yes"
           target="_top"
-          className="text-white/60 hover:text-white text-xs transition-colors"
+          className="text-gray-400 hover:text-[#800000] text-xs transition-colors"
         >
           ← Infofrankrijk
         </a>
