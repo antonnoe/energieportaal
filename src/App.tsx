@@ -231,12 +231,12 @@ function SwipePanel({ activePanel, setActivePanel }: {
     <div
       ref={containerRef}
       className="overflow-y-auto"
-      style={{ height: 'calc(100vh - 56px)' }}
+      style={{ height: 'calc(100vh - 100px)' }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="px-3 py-3">
+      <div className="px-3 py-3 pb-6">
         {activePanel === 'invoer' ? (
           <>
             <div className="pb-2">
