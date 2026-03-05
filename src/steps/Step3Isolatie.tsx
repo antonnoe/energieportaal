@@ -100,7 +100,7 @@ export function Step3Isolatie() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 3: Isolatie</h2>
+        <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 2: Isolatie</h2>
         <p className="text-sm text-gray-500">Kies het isolatieniveau per bouwdeel. De U-waarden worden automatisch ingevuld op basis van uw woningtype.</p>
       </div>
 
