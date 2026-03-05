@@ -190,14 +190,14 @@ export function compute(input: PortaalInput): PortaalResult {
     validationErrors.push('Maximaal 1000 m² voor een betrouwbare berekening');
   }
 
-  // ── V8: Validatie fracties ──
+  // ── V8: Validatie fracties (waarschuwing alleen, geen leeg resultaat — clamping handelt dit af) ──
   const fracCheck = input.daysPresent / 365 + input.daysAway / 365;
   if (fracCheck > 1.001) {
     validationErrors.push('Dagen aanwezig + afwezig mogen niet meer dan 365 zijn');
   }
 
-  // Bij ongeldige oppervlak of overtredende fracties: return nul-resultaat
-  if (input.woonoppervlak < 20 || input.woonoppervlak > 1000 || fracCheck > 1.001) {
+  // Bij ongeldig oppervlak: return nul-resultaat (fracCheck niet meer blocking)
+  if (input.woonoppervlak < 20 || input.woonoppervlak > 1000) {
     return createEmptyResult(zone, input, validationErrors);
   }
 
