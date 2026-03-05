@@ -14,7 +14,6 @@ import { DPESchatting } from './report/DPESchatting'
 import { Besparingsadvies } from './report/Besparingsadvies'
 import { SubsidieCheck } from './report/SubsidieCheck'
 import { Grondslagen } from './report/Grondslagen'
-import { FloatingEuro } from './report/FloatingEuro'
 import { Disclaimer } from './report/Disclaimer'
 import { PdfExport } from './report/PdfExport'
 import { DossierKnop } from './report/DossierKnop'
@@ -277,27 +276,23 @@ function SwipePanel({ activePanel, setActivePanel }: {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div
-        className="flex transition-transform duration-300 ease-in-out"
-        style={{ transform: activePanel === 'invoer' ? 'translateX(0)' : 'translateX(-100%)' }}
-      >
-        {/* Panel 1: Invoer */}
-        <div className="w-full shrink-0 px-3 pb-4">
-          <div className="py-2">
-            <StepIndicator />
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-            <CurrentStep />
-            <StepNavButtons />
-          </div>
-        </div>
-
-        {/* Panel 2: Rapport */}
-        <div className="w-full shrink-0 px-3 pb-4">
+      {/* Only render active panel to avoid height issues in iframe */}
+      <div className="px-3 pb-4">
+        {activePanel === 'invoer' ? (
+          <>
+            <div className="py-2">
+              <StepIndicator />
+            </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+              <CurrentStep />
+              <StepNavButtons />
+            </div>
+          </>
+        ) : (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
             <Rapport />
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
@@ -309,51 +304,77 @@ function StickyToolbar({ activePanel, setActivePanel }: {
   activePanel: 'invoer' | 'rapport'
   setActivePanel: (p: 'invoer' | 'rapport') => void
 }) {
-  const { toolState } = useToolState()
+  const { toolState, result } = useToolState()
   const rapportNiveau = getRapportNiveau(toolState)
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.06)]">
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-3 py-2">
-        {/* Panel switcher */}
-        <div className="flex bg-gray-100 rounded-lg p-0.5">
-          <button
-            type="button"
-            onClick={() => setActivePanel('invoer')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activePanel === 'invoer'
-                ? 'bg-white text-primary shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            ✏️ Invoer
-          </button>
-          <button
-            type="button"
-            onClick={() => setActivePanel('rapport')}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
-              activePanel === 'rapport'
-                ? 'bg-white text-primary shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            📊 Rapport
-          </button>
-        </div>
+    <div className="sticky bottom-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_8px_rgba(0,0,0,0.08)]">
+      <div className="max-w-7xl mx-auto px-3 py-2">
+        {/* Key metrics row — alleen bij niveau 3 */}
+        {rapportNiveau === 3 && (
+          <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+            {/* DPE badge */}
+            <div className="flex items-center gap-1.5">
+              <div
+                className="w-7 h-7 rounded flex items-center justify-center text-white text-sm font-bold"
+                style={{ backgroundColor: result.dpe.kleur }}
+              >
+                {result.dpe.letter}
+              </div>
+              <span className="text-[10px] text-gray-500">{Math.round(result.dpe.kwhPerM2)} kWh/m²</span>
+            </div>
 
-        {/* Swipe hint */}
-        <span className="text-[10px] text-gray-300 hidden sm:inline">
-          ← swipe →
-        </span>
+            {/* Kosten */}
+            <div className="text-center">
+              <p className="text-sm font-bold text-primary">
+                € {result.nettoKosten.toLocaleString('nl-NL')}<span className="text-[10px] font-normal text-gray-400">/jaar</span>
+              </p>
+            </div>
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-2">
-          {rapportNiveau === 3 && (
-            <>
-              <PdfExport />
-              <DossierKnop />
-            </>
-          )}
+            {/* CO2 */}
+            <div className="text-right">
+              <p className="text-[10px] text-gray-500">{result.co2Kg.toLocaleString('nl-NL')} kg CO₂</p>
+            </div>
+          </div>
+        )}
+
+        {/* Controls row */}
+        <div className="flex items-center justify-between">
+          {/* Panel switcher */}
+          <div className="flex bg-gray-100 rounded-lg p-0.5">
+            <button
+              type="button"
+              onClick={() => setActivePanel('invoer')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                activePanel === 'invoer'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              ✏️ Invoer
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePanel('rapport')}
+              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${
+                activePanel === 'rapport'
+                  ? 'bg-white text-primary shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              📊 Rapport
+            </button>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex items-center gap-2">
+            {rapportNiveau === 3 && (
+              <>
+                <PdfExport />
+                <DossierKnop />
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -362,26 +383,6 @@ function StickyToolbar({ activePanel, setActivePanel }: {
 
 // ─── Header (compact, for iframe) ────────────────────────────────────────────
 
-function CompactHeader() {
-  return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-3 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <img src="/infofrankrijk-logo.png" alt="Infofrankrijk.com" className="h-6" />
-          <span className="text-gray-300">|</span>
-          <span className="font-heading font-semibold text-xs text-[#800000] tracking-wide">EnergiePortaal</span>
-        </div>
-        <a
-          href="https://infofrankrijk.com/?s=energie&et_pb_searchform_submit=et_search_proccess&et_pb_include_posts=yes&et_pb_include_pages=yes"
-          target="_top"
-          className="text-gray-400 hover:text-[#800000] text-xs transition-colors"
-        >
-          ← Infofrankrijk
-        </a>
-      </div>
-    </header>
-  )
-}
 
 // ─── Main app ────────────────────────────────────────────────────────────────
 
@@ -392,10 +393,8 @@ function AppContent() {
   useIframeAutoHeight()
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-14">
-      <CompactHeader />
+    <div className="min-h-screen bg-gray-50">
       <SwipePanel activePanel={activePanel} setActivePanel={setMobilePanel} />
-      <FloatingEuro />
       <StickyToolbar activePanel={activePanel} setActivePanel={setMobilePanel} />
     </div>
   )
