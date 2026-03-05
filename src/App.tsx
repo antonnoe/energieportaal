@@ -230,8 +230,7 @@ function SwipePanel({ activePanel, setActivePanel }: {
   return (
     <div
       ref={containerRef}
-      className="overflow-y-auto"
-      style={{ height: 'calc(100vh - 100px)' }}
+      className="h-full overflow-y-auto"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -358,7 +357,7 @@ function AppContent() {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden h-full">
         <SwipePanel activePanel={activePanel} setActivePanel={setMobilePanel} />
       </div>
       <FloatingToolbar activePanel={activePanel} setActivePanel={setMobilePanel} />
