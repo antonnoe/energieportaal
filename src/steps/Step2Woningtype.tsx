@@ -1,5 +1,5 @@
 import { useToolState } from '../context/ToolStateContext';
-import { HUIZEN_MATRIX } from '../data/huizen-matrix';
+import { HUIZEN_MATRIX, HUISTYPE_CATEGORIEEN } from '../data/huizen-matrix';
 import { AIAdviseur } from '../components/AIAdviseur';
 
 export function Step2Woningtype() {
@@ -14,45 +14,43 @@ export function Step2Woningtype() {
         <p className="text-sm text-gray-500">Selecteer uw woningtype voor automatische standaardwaarden.</p>
       </div>
 
-      {/* Woningtype kaarten */}
-      <div className="grid grid-cols-1 gap-3">
-        {HUIZEN_MATRIX.map((h) => (
-          <button
-            key={h.id}
-            type="button"
-            onClick={() => setHuisType(h.id)}
-            className={`text-left w-full border rounded-lg p-3 transition-all ${
-              toolState.huisTypeId === h.id
-                ? 'border-primary bg-primary/5 ring-2 ring-primary/20'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="font-semibold text-sm">{h.naam}</p>
-                <p className="text-xs text-gray-500">{h.periode}</p>
-              </div>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 10 }, (_, i) => (
-                  <div
-                    key={i}
-                    className={`w-1.5 h-3 rounded-sm ${
-                      i < h.isolatiescore ? 'bg-green-500' : 'bg-gray-200'
-                    }`}
-                  />
-                ))}
-              </div>
-            </div>
-            <p className="text-xs text-gray-600 mt-1 line-clamp-2">{h.beschrijving}</p>
-          </button>
-        ))}
+      {/* Woningtype dropdown met optgroups */}
+      <div>
+        <label htmlFor="huistype" className="flex items-center text-sm font-semibold mb-1">
+          Woningtype <span className="text-red-500">*</span>
+          <AIAdviseur veld="Woningtype" waarde={toolState.huisTypeId} />
+        </label>
+        <select
+          id="huistype"
+          value={toolState.huisTypeId}
+          onChange={(e) => setHuisType(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+        >
+          {HUISTYPE_CATEGORIEEN.map((cat) => (
+            <optgroup key={cat} label={cat}>
+              {HUIZEN_MATRIX.filter((h) => h.categorie === cat).map((h) => (
+                <option key={h.id} value={h.id}>
+                  {h.naam} ({h.periode})
+                </option>
+              ))}
+            </optgroup>
+          ))}
+        </select>
       </div>
+
+      {/* Verwarmtip bij grote panden */}
+      {selected?.verwarmtip && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
+          <p className="font-semibold mb-1">Let op: gedeeltelijke bewoning</p>
+          <p>{selected.verwarmtip}</p>
+        </div>
+      )}
 
       {/* Oppervlak & verdiepingen */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label htmlFor="woonoppervlak" className="flex items-center text-sm font-semibold mb-1">
-            Woonoppervlakte <span className="text-red-500">*</span>
+            {selected?.verwarmtip ? 'Verwarmd woonoppervlak' : 'Woonoppervlakte'} <span className="text-red-500">*</span>
             <AIAdviseur veld="Woonoppervlakte" waarde={toolState.woonoppervlak} />
           </label>
           <div className="relative">
@@ -64,7 +62,6 @@ export function Step2Woningtype() {
               value={toolState.woonoppervlak}
               onChange={(e) => {
                 setField('woonoppervlak', e.target.value);
-                // Herbereken oppervlakken bij wijziging
                 if (selected) {
                   const opp = Number(e.target.value) || 100;
                   setField('muurOppervlak', String(Math.round(opp * selected.oppervlakteRatios.muurPerM2)));
@@ -100,6 +97,30 @@ export function Step2Woningtype() {
             ))}
           </select>
         </div>
+      </div>
+
+      {/* Plafond hoogte — altijd tonen, extra uitleg bij hoge plafonds */}
+      <div>
+        <label htmlFor="plafondHoogte" className="flex items-center text-sm font-semibold mb-1">
+          Plafondhoogte
+          <AIAdviseur veld="Plafondhoogte" waarde={toolState.plafondHoogte} />
+        </label>
+        <div className="relative">
+          <input
+            id="plafondHoogte"
+            type="number"
+            min={2.0}
+            max={6.0}
+            step={0.1}
+            value={toolState.plafondHoogte}
+            onChange={(e) => setField('plafondHoogte', e.target.value)}
+            className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">m</span>
+        </div>
+        {Number(toolState.plafondHoogte) >= 3.0 && (
+          <p className="text-xs text-amber-700 mt-1">Hoge plafonds verhogen het te verwarmen volume aanzienlijk. Dit is meegenomen in de berekening.</p>
+        )}
       </div>
 
       {/* Info over geselecteerd type */}
