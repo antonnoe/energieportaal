@@ -76,7 +76,7 @@ export function Step5Financieel() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 5: Financieel</h2>
+        <h2 className="font-heading text-xl font-bold text-primary mb-1">Stap 4: Kosten</h2>
         <p className="text-sm text-gray-500">Stookgedrag, zonnepanelen, energieprijzen en subsidie-parameters.</p>
       </div>
 
