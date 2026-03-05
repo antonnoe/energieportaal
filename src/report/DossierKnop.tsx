@@ -22,7 +22,7 @@ export function DossierKnop() {
     const lines: string[] = [];
 
     const kv = (label: string, value: string | number) =>
-      lines.push(`  ${label.padEnd(26)} ${value}`);
+      lines.push(`  ${label} ${value}`);
     const sectie = (titel: string) => {
       lines.push('');
       lines.push(titel.toUpperCase());
