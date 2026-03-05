@@ -1,336 +1,245 @@
 /**
- * types.ts — Centrale TypeScript types voor de rekenmotor.
- * Alle invoer- en resultaatobjecten voor het EnergiePortaal.
+ * huizen-matrix.ts — 16 Franse woningtypes met standaard U-waarden, ACH,
+ * oppervlakte-ratio's, thermische massa, isolatiescore en vochtadvies.
+ *
+ * Bron: infofrankrijk.com/de-isolatie-van-het-franse-huis/
  */
 
-// ─── Klimaatzone ──────────────────────────────────────────────────────────────
+import type { HuisType } from '../engine/types.ts';
 
-export interface Zone {
-  id: string;
-  name: string;
-  hdd: number;       // Heating Degree Days (basis 18 °C)
-  cdd: number;       // Cooling Degree Days
-  pv: number;        // PV-opbrengst kWh/kWp/jaar
-  pool_temp: number;  // gemiddelde zwembadtemperatuur °C
-  Tref: number;       // referentie buitentemperatuur °C
-}
+export const HUIZEN_MATRIX: HuisType[] = [
+  // ═══ HISTORISCH STEEN (vóór 1948) ═══
+  {
+    id: 'longere',
+    naam: 'La Longère / Le Mas',
+    categorie: 'Historisch steen (vóór 1948)',
+    periode: 'Vóór 1948',
+    uMuur: 2.5, uDak: 3.5, uVloer: 1.5, uRaam: 5.8, ach: 0.9,
+    beschrijving: 'Traditioneel langgerekt stenen huis, dikke muren, geen of minimale isolatie. Vaak vochtproblemen door capillaire opstijging.',
+    thermischeMassa: 'hoog', isolatiescore: 2,
+    vochtadvies: 'Ventileer voldoende — oude stenen muren moeten kunnen ademen. Vermijd dampgesloten isolatie aan de binnenzijde.',
+    waarschuwingen: ['Zeer hoog warmteverlies via dak en ramen','Capillaire vocht door stenen muren — kies ademende isolatie','Enkel glas is de zwakste schakel'],
+    oppervlakteRatios: { muurPerM2: 1.5, dakPerM2: 0.6, vloerPerM2: 0.6, raamPerM2: 0.12 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'pierre',
+    naam: 'Maison en Pierre',
+    categorie: 'Historisch steen (vóór 1948)',
+    periode: 'Vóór 1948',
+    uMuur: 2.0, uDak: 2.5, uVloer: 1.2, uRaam: 4.5, ach: 0.6,
+    beschrijving: 'Traditioneel stenen huis (calcaire, graniet of schiste). Dikke muren (40-80 cm) met hoge thermische massa.',
+    thermischeMassa: 'hoog', isolatiescore: 3,
+    vochtadvies: 'Natuursteen moet kunnen ademen. Gebruik alleen dampopen isolatie (houtvezel, kalkhemp).',
+    waarschuwingen: ['Dampgesloten isolatie veroorzaakt condensatie in de muur','Bij beschermd monument: ABF-toestemming vereist','Vocht door capillaire opstijging — controleer drainage'],
+    oppervlakteRatios: { muurPerM2: 1.4, dakPerM2: 0.65, vloerPerM2: 0.65, raamPerM2: 0.11 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'chateau',
+    naam: 'Château / Manoir',
+    categorie: 'Historisch steen (vóór 1948)',
+    periode: 'Vóór 1900',
+    uMuur: 1.8, uDak: 3.5, uVloer: 1.5, uRaam: 5.8, ach: 1.0,
+    beschrijving: 'Groot historisch pand met zeer dikke stenen muren (60-100 cm), hoge plafonds (3,5-4,5 m) en grote raampartijen. Vaak slechts gedeeltelijk bewoond.',
+    thermischeMassa: 'hoog', isolatiescore: 2,
+    vochtadvies: 'Dikke muren bufferen vocht maar drogen traag. Vermijd dampgesloten isolatie. Controleer dak en goten.',
+    waarschuwingen: ['Hoge plafonds = groot volume = hoge verwarmingskosten','Vaak slechts een deel verwarmd — vul alleen het verwarmde oppervlak in','Monument historique: ABF-toestemming voor gevelwijzigingen','Enorme raampartijen zijn vaak de grootste warmtelek'],
+    verwarmtip: 'De meeste châteaux en manoirs worden slechts gedeeltelijk bewoond en verwarmd. Vul hieronder alleen het verwarmde woonoppervlak in — niet het totale gebouw. Een château van 600 m² waarvan u 200 m² verwarmt: vul 200 m² in.',
+    oppervlakteRatios: { muurPerM2: 2.0, dakPerM2: 0.5, vloerPerM2: 0.5, raamPerM2: 0.18 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'maitre',
+    naam: 'Maison de Maître / Bourgeoise',
+    categorie: 'Historisch steen (vóór 1948)',
+    periode: 'Vóór 1930',
+    uMuur: 2.0, uDak: 2.5, uVloer: 1.2, uRaam: 4.5, ach: 0.7,
+    beschrijving: 'Statig herenhuis, vaak 19e-eeuws, met dikke stenen muren, hoge plafonds (3-3,5 m), grote ramen en sierlijke gevelelementen.',
+    thermischeMassa: 'hoog', isolatiescore: 3,
+    vochtadvies: 'Vergelijkbaar met maison en pierre. Oude stuclagen kunnen vocht opsluiten.',
+    waarschuwingen: ['Hoge plafonds verhogen het te verwarmen volume','Siergevels vaak beschermd — buitenisolatie kan onmogelijk zijn','Grote raampartijen met enkel glas zijn een fors warmtelek'],
+    verwarmtip: 'Bij een groot herenhuis met meerdere verdiepingen: verwarmt u het hele pand, of alleen de begane grond en eerste étage? Vul het werkelijk verwarmde oppervlak in.',
+    oppervlakteRatios: { muurPerM2: 1.7, dakPerM2: 0.55, vloerPerM2: 0.55, raamPerM2: 0.15 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'moulin',
+    naam: 'Moulin (Watermolen)',
+    categorie: 'Historisch steen (vóór 1948)',
+    periode: 'Vóór 1900',
+    uMuur: 2.5, uDak: 3.0, uVloer: 2.0, uRaam: 5.8, ach: 1.0,
+    beschrijving: 'Verbouwde watermolen met dikke stenen muren, nabijheid van water en extreme vochtbelasting.',
+    thermischeMassa: 'hoog', isolatiescore: 1,
+    vochtadvies: 'Vocht is het grootste probleem. Investeer in drainage, ventilatie en vochtwering vóór u aan isolatie denkt.',
+    waarschuwingen: ['Extreme vochtbelasting door nabijheid van water','Vloer vaak in direct contact met vochtige grond: U-vloer is hoog','Hoge ACH door onregelmatige constructie','Vaak slechts gedeeltelijk bewoonbaar/verwarmd'],
+    verwarmtip: 'Watermolens zijn zelden volledig omgebouwd. Vul alleen het verwarmde woongedeelte in, niet de voormalige maalruimte of opslagdelen.',
+    oppervlakteRatios: { muurPerM2: 1.6, dakPerM2: 0.6, vloerPerM2: 0.6, raamPerM2: 0.10 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-// ─── Woningtype (uit huizenmatrix) ────────────────────────────────────────────
+  // ═══ VAKWERK & HOUT ═══
+  {
+    id: 'colombage',
+    naam: 'Colombage / Vakwerk',
+    categorie: 'Vakwerk & hout',
+    periode: 'Vóór ~1900',
+    uMuur: 1.5, uDak: 2.5, uVloer: 1.2, uRaam: 5.8, ach: 0.7,
+    beschrijving: 'Vakwerkhuis met houten skelet en invulling van leem, baksteen of steen.',
+    thermischeMassa: 'midden', isolatiescore: 3,
+    vochtadvies: 'Leem- en houtvullingen zijn vochtgevoelig. Kies isolatie die vocht kan bufferen.',
+    waarschuwingen: ['Hout-leemconstructie vereist zorgvuldige isolatie-aanpak','Enkel glas is een groot warmtelek','Controleer houtskelet op houtrot'],
+    oppervlakteRatios: { muurPerM2: 1.3, dakPerM2: 0.7, vloerPerM2: 0.7, raamPerM2: 0.14 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'chalet',
+    naam: 'Chalet (Houtbouw)',
+    categorie: 'Vakwerk & hout',
+    periode: 'Divers',
+    uMuur: 0.8, uDak: 1.5, uVloer: 1.0, uRaam: 3.0, ach: 0.8,
+    beschrijving: 'Houten woning, typisch voor berggebieden (Alpen, Vogezen, Jura). Hout isoleert redelijk maar krimpt/zet uit.',
+    thermischeMassa: 'laag', isolatiescore: 5,
+    vochtadvies: 'Hout moet ademen — geen dampgesloten folies. Controleer onderzijde op vocht.',
+    waarschuwingen: ['Luchtlekkage door krimp/uitzetting van hout','Brandveiligheid: controleer schoorsteendoorvoeren','In berggebieden: sneeuwlast kan dakisolatie samendrukken'],
+    oppervlakteRatios: { muurPerM2: 1.2, dakPerM2: 0.7, vloerPerM2: 0.7, raamPerM2: 0.15 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-export interface HuisType {
-  id: string;
-  naam: string;
-  categorie: string;   // voor optgroup in dropdown
-  periode: string;
-  uMuur: number;       // W/m²·K
-  uDak: number;
-  uVloer: number;
-  uRaam: number;
-  ach: number;         // luchtwisselingen per uur
-  beschrijving: string;
-  thermischeMassa: 'laag' | 'midden' | 'hoog';
-  isolatiescore: number;  // 1–10
-  vochtadvies: string;
-  waarschuwingen: string[];
-  verwarmtip?: string; // tip over gedeeltelijke bewoning (château, manoir, etc.)
-  oppervlakteRatios: {
-    muurPerM2: number;   // m² muur per m² woonoppervlak
-    dakPerM2: number;
-    vloerPerM2: number;
-    raamPerM2: number;
-  };
-  bron: string;
-}
+  // ═══ VERBOUWD / BIJZONDER ═══
+  {
+    id: 'grange',
+    naam: 'Grange / Verbouwde schuur',
+    categorie: 'Verbouwd / bijzonder',
+    periode: 'Divers (verbouwd)',
+    uMuur: 1.5, uDak: 0.8, uVloer: 0.8, uRaam: 2.0, ach: 0.6,
+    beschrijving: 'Voormalige schuur omgebouwd tot woning. Oud skelet behouden, maar dak/vloer/ramen meestal modern geïsoleerd.',
+    thermischeMassa: 'hoog', isolatiescore: 5,
+    vochtadvies: 'Hangt af van verbouwingskwaliteit. Controleer dampscherm bij dakisolatie.',
+    waarschuwingen: ['Kwaliteit varieert enorm — afhankelijk van de verbouwer','Oude stenen muren vaak niet geïsoleerd','Groot volume bij hoge nok — bovenruimte verwarmen is kostbaar'],
+    verwarmtip: 'Verbouwde granges hebben vaak een zeer hoge nok. Verwarmt u de hele hoogte of alleen de begane grond? Het verwarmde volume bepaalt de kosten.',
+    oppervlakteRatios: { muurPerM2: 1.6, dakPerM2: 0.7, vloerPerM2: 0.7, raamPerM2: 0.13 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'loft',
+    naam: 'Loft / Atelier industriel',
+    categorie: 'Verbouwd / bijzonder',
+    periode: 'Divers (verbouwd)',
+    uMuur: 2.5, uDak: 3.5, uVloer: 1.5, uRaam: 3.5, ach: 0.8,
+    beschrijving: 'Verbouwd industrieel pand met metalen dak, grote glaspartijen en open ruimtes.',
+    thermischeMassa: 'midden', isolatiescore: 2,
+    vochtadvies: 'Metalen dakplaten condenseren snel — zorg voor ventilatie en dampscherm.',
+    waarschuwingen: ['Metalen dak zonder isolatie = extreem warmteverlies','Grote glaspartijen: veel licht maar ook veel warmteverlies','Open ruimtes zijn moeilijk zone-gewijs te verwarmen'],
+    oppervlakteRatios: { muurPerM2: 1.0, dakPerM2: 0.9, vloerPerM2: 0.9, raamPerM2: 0.25 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-// ─── Verwarmingstype ──────────────────────────────────────────────────────────
+  // ═══ NAOORLOGS (1950–2012) ═══
+  {
+    id: 'pavillon',
+    naam: 'Pavillon Parpaing',
+    categorie: 'Naoorlogs (1950–2012)',
+    periode: '1950–1975',
+    uMuur: 2.8, uDak: 3.0, uVloer: 1.2, uRaam: 4.0, ach: 0.8,
+    beschrijving: 'Betonblok-woning (parpaing) zonder of met minimale isolatie.',
+    thermischeMassa: 'midden', isolatiescore: 2,
+    vochtadvies: 'Parpaing isoleert slecht en kan condensatie veroorzaken. Buitenisolatie is de beste optie.',
+    waarschuwingen: ['Betonblokken zonder isolatie geven hoog warmteverlies','Thermische bruggen bij ramen en vloer-muur aansluiting','Oud dubbel glas presteert vaak als enkel glas'],
+    oppervlakteRatios: { muurPerM2: 1.2, dakPerM2: 0.8, vloerPerM2: 0.8, raamPerM2: 0.15 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'placo',
+    naam: 'Maison Placo (1975–1990)',
+    categorie: 'Naoorlogs (1950–2012)',
+    periode: '1975–1990',
+    uMuur: 0.8, uDak: 1.0, uVloer: 0.8, uRaam: 2.9, ach: 0.6,
+    beschrijving: 'Post-oliecrisis woning met eerste generatie isolatie: gipsplaat op polystyreen.',
+    thermischeMassa: 'laag', isolatiescore: 5,
+    vochtadvies: 'Placo-polystyrène kan loskomen van de muur. Controleer op vochtplekken.',
+    waarschuwingen: ['Eerste generatie isolatie — vaak onvoldoende dik','Placo-polystyrène kan loskomen na 30+ jaar','Thermische bruggen bij balkon- en vloerplaten'],
+    oppervlakteRatios: { muurPerM2: 1.1, dakPerM2: 0.8, vloerPerM2: 0.8, raamPerM2: 0.16 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'traditioneel-plus',
+    naam: 'Maison Traditionnelle',
+    categorie: 'Naoorlogs (1950–2012)',
+    periode: '1990–2012',
+    uMuur: 0.4, uDak: 0.3, uVloer: 0.4, uRaam: 1.8, ach: 0.5,
+    beschrijving: 'Woning conform RT1988/RT2000/RT2005. Goede basisisolatie.',
+    thermischeMassa: 'midden', isolatiescore: 7,
+    vochtadvies: 'Doorgaans weinig vochtproblemen. Let op VMC-onderhoud.',
+    waarschuwingen: ['Isolatie voldoet aan normen uit die periode, niet aan huidige eisen','Ramen (dubbel glas, jaren 90) kunnen aan vervanging toe zijn'],
+    oppervlakteRatios: { muurPerM2: 1.0, dakPerM2: 0.8, vloerPerM2: 0.8, raamPerM2: 0.17 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-export type VerwarmingType = 'gas' | 'stookolie' | 'warmtepomp' | 'elektrisch' | 'hout' | 'propaan';
+  // ═══ MODERN (vanaf 2012) ═══
+  {
+    id: 'rt2012',
+    naam: 'RT2012 / RE2020',
+    categorie: 'Modern (vanaf 2012)',
+    periode: 'Vanaf 2012',
+    uMuur: 0.2, uDak: 0.15, uVloer: 0.2, uRaam: 1.2, ach: 0.3,
+    beschrijving: 'Modern conform RT2012/RE2020 met strenge energie-eisen en luchtdichtheid.',
+    thermischeMassa: 'midden', isolatiescore: 9,
+    vochtadvies: 'Goed geïsoleerd en luchtdicht. VMC moet altijd functioneren.',
+    waarschuwingen: ['Weinig verbeteringspotentieel — al goed geïsoleerd','VMC-onderhoud is essentieel'],
+    oppervlakteRatios: { muurPerM2: 1.0, dakPerM2: 0.8, vloerPerM2: 0.8, raamPerM2: 0.18 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-// ─── Subsidie types ───────────────────────────────────────────────────────────
+  // ═══ APPARTEMENTEN ═══
+  {
+    id: 'appartement-oud',
+    naam: 'Appartement (vóór 1975)',
+    categorie: 'Appartementen',
+    periode: 'Vóór 1975',
+    uMuur: 2.0, uDak: 0.5, uVloer: 0.5, uRaam: 4.0, ach: 0.6,
+    beschrijving: 'Oud appartement. Alleen buitenmuren en ramen zijn relevant.',
+    thermischeMassa: 'hoog', isolatiescore: 3,
+    vochtadvies: 'Oude flats hebben vaak ventilatieprobleem. Controleer VMC.',
+    waarschuwingen: ['Buitenisolatie alleen mogelijk als VvE meewerkt','Hoge warmteverliezen via ramen en buitenmuren','Individuele eigenaar kan alleen ramen en binnenisolatie aanpakken'],
+    oppervlakteRatios: { muurPerM2: 0.6, dakPerM2: 0.0, vloerPerM2: 0.0, raamPerM2: 0.15 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+  {
+    id: 'appartement-recent',
+    naam: 'Appartement (na 1975)',
+    categorie: 'Appartementen',
+    periode: 'Na 1975',
+    uMuur: 0.6, uDak: 0.3, uVloer: 0.3, uRaam: 2.0, ach: 0.5,
+    beschrijving: 'Recenter appartement met basisisolatie.',
+    thermischeMassa: 'midden', isolatiescore: 6,
+    vochtadvies: 'Doorgaans acceptabel. Controleer VMC-onderhoud.',
+    waarschuwingen: ['Verbeteringspotentieel beperkt tot ramen en binnenisolatie muren','VvE-besluit nodig voor gevelisolatie'],
+    oppervlakteRatios: { muurPerM2: 0.5, dakPerM2: 0.0, vloerPerM2: 0.0, raamPerM2: 0.16 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
 
-export type UsageType = 'rp' | 'secondaire' | 'verhuur' | 'onbekend';
-export type AgeType = 'ja' | 'nee' | 'onbekend';
-export type StageType = 'voor' | 'offertes' | 'getekend' | 'gestart';
-export type WorkType = 'envelop' | 'ventilatie' | 'verwarming' | 'combo' | 'onbekend';
-export type MprPath = 'geste' | 'ampleur' | 'onbekend';
-export type StoplichtStatus = 'green' | 'amber' | 'red';
+  // ═══ OVERIG ═══
+  {
+    id: 'overig',
+    naam: 'Overig / Handmatig invoeren',
+    categorie: 'Overig',
+    periode: 'Onbekend',
+    uMuur: 1.5, uDak: 1.5, uVloer: 1.0, uRaam: 3.0, ach: 0.6,
+    beschrijving: 'Uw woning past niet in de standaardtypes? Kies dit en pas alle waarden handmatig aan in stap 3.',
+    thermischeMassa: 'midden', isolatiescore: 5,
+    vochtadvies: 'Geen specifiek advies — raadpleeg een professional bij twijfel.',
+    waarschuwingen: ['Standaardwaarden zijn een startpunt — pas ze aan op basis van uw situatie','Controleer alle U-waarden in stap 3'],
+    oppervlakteRatios: { muurPerM2: 1.2, dakPerM2: 0.7, vloerPerM2: 0.7, raamPerM2: 0.14 },
+    bron: 'https://infofrankrijk.com/de-isolatie-van-het-franse-huis/',
+  },
+];
 
-export interface SubsidieIntake {
-  usage: UsageType;
-  ageGt2: AgeType;
-  stage: StageType;
-  workType: WorkType;
-  mprPath: MprPath;
-  heatlossDone: boolean;
-  dpeLetter?: string;
-}
+/** Alle unieke categorieën in volgorde */
+export const HUISTYPE_CATEGORIEEN: string[] = [
+  ...new Set(HUIZEN_MATRIX.map(h => h.categorie)),
+];
 
-export interface SubsidieCard {
-  id: string;
-  title: string;
-  shortTitle: string;
-  status: StoplichtStatus;
-  reason: string;
-  amount: string;
-  url: string;
-  eligible: boolean;
-}
-
-export interface SubsidieResult {
-  cards: SubsidieCard[];
-  actionPlan: string[];
-}
-
-// ─── Bron ─────────────────────────────────────────────────────────────────────
-
-export interface Bron {
-  id: string;
-  titel: string;
-  url: string;
-  beschrijving: string;
-}
-
-// ─── Hoofdinvoer voor de rekenmotor ───────────────────────────────────────────
-
-export interface PortaalInput {
-  // ── Stap 1: Locatie ──
-  postcode: string;
-  departement: string;
-  zoneId: string;
-
-  // ── Stap 2: Woningtype ──
-  huisTypeId: string;
-
-  // ── Stap 3: Verfijning ──
-  woonoppervlak: number;        // m²
-  verdiepingen: number;
-  plafondHoogte: number;        // m (standaard 2.5)
-
-  uMuur: number;                // W/m²·K
-  uDak: number;
-  uVloer: number;
-  uRaam: number;
-
-  oppervlakMuur: number;        // m²
-  oppervlakDak: number;
-  oppervlakVloer: number;
-  oppervlakRaam: number;
-
-  ach: number;                  // luchtwisselingen/uur
-
-  // ── Stap 4: Energie ──
-  // Verwarming
-  mainHeating: VerwarmingType;
-  mainEfficiency: number;       // SCOP of η (0 = gebruik standaard)
-  auxHeating: VerwarmingType | 'geen';
-  auxFraction: number;          // 0–0.9
-  auxEfficiency: number;        // 0 = gebruik standaard
-
-  // Ventilatie
-  hasHRV: boolean;              // WTW aanwezig
-  hrvEfficiency: number;        // 0–1
-
-  // Tapwater (DHW)
-  personen: number;
-  douchesPerDag: number;
-  literPerDouche: number;
-  dhwSystem: VerwarmingType;
-  dhwEfficiency: number;        // 0 = gebruik standaard
-
-  // Elektriciteit
-  basisElektriciteit: number;   // kWh/jaar
-
-  // Elektrische auto
-  hasEV: boolean;
-  evKmPerJaar: number;
-  evVerbruik: number;           // kWh/km (standaard 0.20)
-
-  // Zonnepanelen
-  hasPV: boolean;
-  pvVermogen: number;           // kWp
-  pvZelfverbruik: number;       // fractie 0–1
-  pvOrientatie: number;         // correctiefactor oriëntatie (0.55–1.0)
-  pvHelling: number;            // correctiefactor helling (0.90–1.0)
-
-  // Zwembad
-  hasZwembad: boolean;
-  zwembadOppervlak: number;     // m²
-  zwembadMaanden: number;       // maanden actief
-  poolHeatingType: 'electric' | 'heatpump' | 'solar';
-
-  // Koeling
-  hasKoeling: boolean;
-  koelingEER: number;           // standaard 3.0
-
-  // ── Stap 5: Financieel ──
-  // Stookgedrag
-  setpoint: number;             // °C (standaard 20)
-  awaySetpoint: number;         // °C (standaard 16)
-  daysPresent: number;          // dagen/jaar aanwezig
-  daysAway: number;             // dagen/jaar afwezig
-
-  // Energieprijzen (€/kWh)
-  prijsGas: number;
-  prijsStookolie: number;
-  prijsElektriciteit: number;
-  prijsHout: number;
-  prijsPropaan: number;
-  exportTarief: number;         // PV-export €/kWh
-
-  // Subsidie
-  subsidieIntake: SubsidieIntake;
-}
-
-// ─── DPE-resultaat ────────────────────────────────────────────────────────────
-
-export interface DPEResultaat {
-  letter: string;               // A–G
-  kwhPerM2: number;             // kWh/m²/jaar
-  kleur: string;                // hex kleur
-  maxKwhVoorKlasse: number;     // bovengrens van huidige klasse
-  kwhTotVolgendeKlasse: number; // hoeveel besparen om 1 stap omhoog
-  kwhTotLagereKlasse: number;   // hoeveel meer tot 1 stap omlaag
-  verhuurverbod: VerhuurverbodInfo | null;
-}
-
-export interface VerhuurverbodInfo {
-  verboden: boolean;
-  sindsJaar: number;
-  beschrijving: string;
-}
-
-// ─── Hoofdresultaat van de rekenmotor ─────────────────────────────────────────
-
-export interface PortaalResult {
-  // Warmteverlies
-  uaWK: number;                 // transmissie UA [W/K]
-  hventWK: number;              // ventilatie [W/K]
-  hventEffWK: number;           // ventilatie na WTW [W/K]
-  hTotaalWK: number;            // totaal H [W/K]
-
-  // HDD
-  hddPresent: number;
-  hddAway: number;
-
-  // Energieverbruik per categorie (kWh/jaar)
-  warmtevraagThermisch: number; // thermische warmtevraag
-  verwarmingHoofd: number;      // hoofd-verwarming na SCOP/η
-  verwarmingBij: number;        // bijverwarming na SCOP/η
-  verwarmingTotaal: number;     // hoofd + bij
-  dhwThermisch: number;         // thermische tapwatervraag
-  dhwInput: number;             // tapwater na rendement
-  elektriciteitBasis: number;
-  evKwh: number;
-  zwembadKwh: number;
-  koelingKwh: number;
-  totaalVerbruikKwh: number;
-  dpeVerbruikKwh: number;       // verwarming + DHW + basis elektriciteit (zonder EV/zwembad/koeling)
-
-  // PV
-  pvProductieKwh: number;
-  pvZelfverbruikKwh: number;
-  pvExportKwh: number;
-  netGridKwh: number;
-
-  // DPE
-  dpe: DPEResultaat;
-
-  // CO₂
-  co2Kg: number;
-
-  // Kosten (€/jaar)
-  kostenVerwarming: number;
-  kostenDhw: number;
-  kostenElektriciteit: number;
-  kostenTotaal: number;
-  pvBesparing: number;
-  nettoKosten: number;
-
-  // Debug — elke tussenstap
-  debug: DebugInfo;
-
-  // Validatiefouten (leeg als alles ok)
-  validationErrors: string[];
-}
-
-export interface DebugInfo {
-  zone: Zone;
-  huisType: string;
-
-  // U-waarden × oppervlakken
-  uaMuur: number;
-  uaDak: number;
-  uaVloer: number;
-  uaRaam: number;
-
-  // Volume & ventilatie
-  volume: number;
-  achGebruikt: number;
-  hventVoorHRV: number;
-
-  // HDD-berekening
-  setpoint: number;
-  awaySetpoint: number;
-  Tref: number;
-  hddBasis: number;
-  hddCorrPresent: number;
-  hddCorrAway: number;
-  hddEffGewogen: number;
-  fracPresent: number;
-  fracAway: number;
-
-  // Verwarming
-  mainFrac: number;
-  mainEff: number;
-  auxFrac: number;
-  auxEff: number;
-
-  // DHW
-  dhwLitersPerDag: number;
-  dhwDeltaT: number;
-  dhwEff: number;
-
-  // PV
-  pvYieldZone: number;
-
-  // Prijzen
-  prijzen: Record<string, number>;
-}
-
-// ─── Maatregel / besparing ────────────────────────────────────────────────────
-
-export type MaatregelCategorie = 'isolatie' | 'verwarming' | 'ventilatie' | 'hernieuwbaar';
-
-export interface Maatregel {
-  id: string;
-  naam: string;
-  beschrijving: string;
-  categorie: MaatregelCategorie;
-  kostenSchatting: { min: number; max: number };  // €
-  besparingKwhJaar: number;
-  besparingEurJaar: number;
-  terugverdientijdJaar: number;
-  dpeReductieKwhM2: number;                       // kWh/m² reductie
-  dpeNaLetter: string;                            // DPE-letter na maatregel
-  dpeNaKwhM2: number;                             // kWh/m² na maatregel
-  co2ReductieKg: number;
-  bron: string;
-}
-
-export interface CombinatieResult {
-  geselecteerdeMaatregelen: string[];
-  besparingKwhJaar: number;
-  besparingEurJaar: number;
-  kostenSchatting: { min: number; max: number };
-  terugverdientijdJaar: number;
-  huidigeDpe: DPEResultaat;
-  nieuweDpe: DPEResultaat;
-}
-
-export interface SavingsResult {
-  maatregelen: Maatregel[];
-  totaalBesparingKwh: number;
-  totaalBesparingEur: number;
-  dpeNaMaatregelen: DPEResultaat;
-  maatregelenVoorVolgendeDPE: Maatregel[];
+export function getHuisTypeById(id: string): HuisType | undefined {
+  return HUIZEN_MATRIX.find((h) => h.id === id);
 }
