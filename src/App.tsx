@@ -357,7 +357,9 @@ function AppContent() {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 relative">
+    <div className="h-screen flex flex-col relative" style={{ backgroundColor: '#f7f3f3' }}>
+      {/* Bordeaux top-balk — visuele grens met WP-pagina */}
+      <div style={{ height: '6px', backgroundColor: '#800000', flexShrink: 0 }} />
       <div className="flex-1 overflow-hidden h-full">
         <SwipePanel activePanel={activePanel} setActivePanel={setMobilePanel} />
       </div>
