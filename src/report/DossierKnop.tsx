@@ -109,7 +109,7 @@ export function DossierKnop() {
       lines.push('  Geen subsidies van toepassing op basis van opgegeven gegevens.');
     } else {
       for (const card of subsidie.cards) {
-        lines.push(`  • ${card.naam}: ${card.bedrag ? 'EUR ' + card.bedrag.toLocaleString('nl-NL') : card.omschrijving}`);
+        lines.push(`  • ${card.title}: ${card.amount || card.reason}`);
       }
     }
 
@@ -120,7 +120,7 @@ export function DossierKnop() {
     } else {
       for (const m of savings.maatregelen.slice(0, 5)) {
         lines.push(`  • ${m.naam}`);
-        lines.push(`    Besparing: EUR ${Math.round(m.besparingEur).toLocaleString('nl-NL')}/jaar | Investering: EUR ${Math.round(m.investering).toLocaleString('nl-NL')} | Terugverdien: ${m.terugverdienJaar.toFixed(1)} jaar`);
+        lines.push(`    Besparing: EUR ${Math.round(m.besparingEurJaar).toLocaleString('nl-NL')}/jaar | Investering: EUR ${Math.round(m.kostenSchatting.min).toLocaleString('nl-NL')}–${Math.round(m.kostenSchatting.max).toLocaleString('nl-NL')} | Terugverdien: ${m.terugverdientijdJaar.toFixed(1)} jaar`);
       }
     }
 
