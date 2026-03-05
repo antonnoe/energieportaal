@@ -101,7 +101,7 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
   };
 
   return (
-    <span className="inline-flex items-center" ref={ref}>
+    <div className="relative inline-flex" ref={ref}>
       <button
         type="button"
         onClick={handleClick}
@@ -111,34 +111,29 @@ export function AIAdviseur({ veld, waarde, context }: AIAdviseurProps) {
         ?
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/20" onClick={() => setOpen(false)}>
-          <div
-            className="bg-white border border-gray-200 rounded-t-xl sm:rounded-xl shadow-xl p-4 w-full sm:w-80 max-h-[70vh] overflow-y-auto text-xs text-gray-700 leading-relaxed mx-2 mb-0 sm:mb-0"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-1 mb-2">
-              <span className="font-semibold text-blue-700 text-[11px]">AI-adviseur: {veld}</span>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="text-gray-400 hover:text-gray-600 text-sm leading-none"
-              >
-                &times;
-              </button>
-            </div>
-            {loading && (
-              <p className="text-gray-400 italic">Even denken...</p>
-            )}
-            {error && (
-              <p className="text-red-600">{error}</p>
-            )}
-            {answer && (
-              <div dangerouslySetInnerHTML={{ __html: renderSimpleMarkdown(answer) }} />
-            )}
+        <div className="absolute z-50 bottom-full mb-1 left-0 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700 leading-relaxed">
+          <div className="flex items-start justify-between gap-1 mb-1">
+            <span className="font-semibold text-blue-700 text-[11px]">AI-adviseur: {veld}</span>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+              className="text-gray-400 hover:text-gray-600 text-sm leading-none"
+            >
+              &times;
+            </button>
           </div>
+          {loading && (
+            <p className="text-gray-400 italic">Even denken...</p>
+          )}
+          {error && (
+            <p className="text-red-600">{error}</p>
+          )}
+          {answer && (
+            <div dangerouslySetInnerHTML={{ __html: renderSimpleMarkdown(answer) }} />
+          )}
         </div>
       )}
-    </span>
+    </div>
   );
 }
 
