@@ -3,6 +3,37 @@ import { ZONES } from '../engine/constants';
 import { HUIZEN_MATRIX, HUISTYPE_CATEGORIEEN } from '../data/huizen-matrix';
 import { AIAdviseur } from '../components/AIAdviseur';
 
+// Emoji per categorie
+const CATEGORIE_ICON: Record<string, string> = {
+  'Historisch steen (vóór 1948)': '🏰',
+  'Vakwerk & hout': '🪵',
+  'Verbouwd / bijzonder': '🔨',
+  'Naoorlogs (1950–2012)': '🏘️',
+  'Modern (vanaf 2012)': '🏗️',
+  'Appartementen': '🏢',
+  'Overig': '⚙️',
+};
+
+// Isolatiescore balk — standaard typewaarden, geen aanname over huidige staat
+function IsolatieBalk({ score }: { score: number }) {
+  const blokjes = [1, 2, 3, 4, 5];
+  const colors = ['#c0392b', '#e67e22', '#f1c40f', '#27ae60', '#1abc9c'];
+  return (
+    <div>
+      <p className="text-[10px] text-gray-400 mb-0.5">Standaard isolatiewaarden</p>
+      <div className="flex gap-0.5">
+        {blokjes.map((b) => (
+          <div
+            key={b}
+            className="h-1.5 flex-1 rounded-sm"
+            style={{ backgroundColor: b <= score ? colors[score - 1] : '#e5e7eb' }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Step1Locatie() {
   const { toolState, setPostcode, setField, setHuisType } = useToolState();
 
@@ -50,30 +81,53 @@ export function Step1Locatie() {
         </div>
       )}
 
-      {/* Woningtype — pas tonen na geldige postcode */}
+      {/* Woningtype tegels — pas tonen na geldige postcode */}
       {hasPostcode && (
         <>
           <div>
-            <label htmlFor="huistype" className="flex items-center text-sm font-semibold mb-1">
-              Woningtype <span className="text-red-500">*</span>
+            <div className="flex items-center text-sm font-semibold mb-2">
+              Woningtype <span className="text-red-500 ml-0.5">*</span>
               <AIAdviseur veld="Woningtype" waarde={toolState.huisTypeId} />
-            </label>
-            <select
-              id="huistype"
-              value={toolState.huisTypeId}
-              onChange={(e) => setHuisType(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-base bg-white focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-            >
-              {HUISTYPE_CATEGORIEEN.map((cat) => (
-                <optgroup key={cat} label={cat}>
-                  {HUIZEN_MATRIX.filter((h) => h.categorie === cat).map((h) => (
-                    <option key={h.id} value={h.id}>
-                      {h.naam} ({h.periode})
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
+            </div>
+
+            <div className="space-y-3">
+              {HUISTYPE_CATEGORIEEN.map((cat) => {
+                const types = HUIZEN_MATRIX.filter((h) => h.categorie === cat);
+                return (
+                  <div key={cat}>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1.5">
+                      {CATEGORIE_ICON[cat] ?? '🏠'} {cat}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {types.map((h) => {
+                        const isSelected = toolState.huisTypeId === h.id;
+                        return (
+                          <button
+                            key={h.id}
+                            type="button"
+                            onClick={() => setHuisType(h.id)}
+                            className={`text-left rounded-lg border p-2.5 transition-all ${
+                              isSelected
+                                ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/30'
+                                : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            <p className={`text-xs font-semibold leading-tight mb-0.5 ${isSelected ? 'text-primary' : 'text-gray-800'}`}>
+                              {h.naam}
+                            </p>
+                            <p className="text-[10px] text-gray-400 mb-1.5">{h.periode}</p>
+                            <p className="text-[10px] text-gray-500 leading-snug mb-2 line-clamp-2">
+                              {h.beschrijving}
+                            </p>
+                            <IsolatieBalk score={h.isolatiescore} />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Verwarmtip bij grote panden */}
