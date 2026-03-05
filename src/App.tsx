@@ -235,7 +235,7 @@ function SwipePanel({ activePanel, setActivePanel }: {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <div className="px-3 py-3 pb-6">
+      <div className="px-3 py-3 pb-28">
         {activePanel === 'invoer' ? (
           <>
             <div className="pb-2">
@@ -264,13 +264,14 @@ function FloatingToolbar({ activePanel, setActivePanel }: {
 }) {
   const { toolState, result } = useToolState()
   const rapportNiveau = getRapportNiveau(toolState)
-  const isComplete = rapportNiveau === 3 && toolState.currentStep >= 4
+  const isComplete = rapportNiveau === 3 && toolState.highestStepVisited >= 4
+  const showKpi = toolState.currentStep >= 3 && rapportNiveau >= 2
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl mx-auto px-3 py-1.5">
-        {/* KPI row — alleen bij rapportNiveau 3 */}
-        {rapportNiveau === 3 && (
+    <div className="absolute bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.1)]">
+      <div className="px-3 py-1.5">
+        {/* KPI row — zichtbaar vanaf stap 3 Energie */}
+        {showKpi && (
           <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-gray-100">
             <div className="flex items-center gap-1.5">
               <div
@@ -292,10 +293,10 @@ function FloatingToolbar({ activePanel, setActivePanel }: {
           </div>
         )}
 
-        {/* Controls row */}
-        <div className="flex items-center justify-between">
+        {/* Controls row — horizontaal scrollbaar op kleine schermen */}
+        <div className="flex items-center gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {/* Panel switcher */}
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
+          <div className="flex bg-gray-100 rounded-lg p-0.5 shrink-0">
             <button
               type="button"
               onClick={() => setActivePanel('invoer')}
@@ -320,8 +321,8 @@ function FloatingToolbar({ activePanel, setActivePanel }: {
             </button>
           </div>
 
-          {/* Action buttons — greyed out until step 4 */}
-          <div className="flex items-center gap-2">
+          {/* Action buttons — actief na stap 4 Kosten */}
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             <div className={isComplete ? '' : 'opacity-30 pointer-events-none'}>
               <PdfExport />
             </div>
@@ -356,7 +357,7 @@ function AppContent() {
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className="h-screen flex flex-col bg-gray-50 relative">
       <div className="flex-1 overflow-hidden h-full">
         <SwipePanel activePanel={activePanel} setActivePanel={setMobilePanel} />
       </div>
