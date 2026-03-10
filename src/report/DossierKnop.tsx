@@ -141,7 +141,7 @@ export function DossierKnop() {
     };
 
     if (window.parent !== window) {
-      window.parent.postMessage(data, '*');
+      window.parent.postMessage(data, 'https://infofrankrijk.com');
     } else {
       alert('Deze functie werkt alleen binnen InfoFrankrijk.com\n\nGa naar infofrankrijk.com om deze tool te gebruiken.');
     }
