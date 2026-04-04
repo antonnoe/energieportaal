@@ -1,18 +1,844 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="nl">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23800000'/><text y='.9em' font-size='70' x='10'>⚡</text></svg>" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="EnergiePortaal — energieadvies, warmteverlies en subsidies voor uw woning in één moderne tool." />
-    <meta name="robots" content="index, follow" />
-    <meta property="og:title" content="EnergiePortaal" />
-    <meta property="og:description" content="Energieadvies, warmteverlies-calculator en subsidie checker in één tool." />
-    <meta property="og:type" content="website" />
-    <title>EnergiePortaal — Energieadvies & DPE indicator</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EnergiePortaal | Infofrankrijk.com</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="wizard.css">
+</head>
+<body>
+
+<!-- ============================================================
+     WIZARD
+     ============================================================ -->
+<div id="wizard" class="wizard visible">
+
+  <!-- Step indicator -->
+  <nav class="wizard-nav">
+    <div class="wizard-nav-inner">
+      <div class="step-item active" data-section="1"><span class="step-num">🏠</span><span class="step-label">Start</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="2"><span class="step-num">1</span><span class="step-label">Locatie</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="3"><span class="step-num">2</span><span class="step-label">Woning</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="4"><span class="step-num">3</span><span class="step-label">Isolatie</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="5"><span class="step-num">4</span><span class="step-label">Verwarming</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="6"><span class="step-num">5</span><span class="step-label">Water</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="7"><span class="step-num">6</span><span class="step-label">Elektra</span></div>
+      <div class="step-connector"></div>
+      <div class="step-item" data-section="8"><span class="step-num">✓</span><span class="step-label">Resultaat</span></div>
+    </div>
+  </nav>
+
+  <!-- Slides -->
+  <div class="slide-viewport">
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 1: WELKOM
+         ══════════════════════════════════════════════ -->
+    <div class="slide active" data-section="1" data-phase="main">
+      <div class="slide-content slide-center">
+        <div class="welcome-icon">⚡</div>
+        <h1 class="slide-title">EnergiePortaal</h1>
+        <p class="slide-intro">Bereken in 6 stappen wat uw Franse woning kost aan energie. Van isolatie tot zonnepanelen — met uitleg bij elke stap.</p>
+
+        <div class="welcome-features">
+          <div class="welcome-feat">
+            <div class="feat-icon">📍</div>
+            <div class="feat-title">Klimaatzone</div>
+            <div class="feat-desc">Aangepast aan uw regio in Frankrijk</div>
+          </div>
+          <div class="welcome-feat">
+            <div class="feat-icon">🧱</div>
+            <div class="feat-title">Isolatie & Warmteverlies</div>
+            <div class="feat-desc">Muren, dak, vloer en ramen</div>
+          </div>
+          <div class="welcome-feat">
+            <div class="feat-icon">💶</div>
+            <div class="feat-title">Jaarlijkse Kosten</div>
+            <div class="feat-desc">Per verwarmingstype en brandstof</div>
+          </div>
+        </div>
+
+        <div class="explain-tip" style="max-width:480px;margin:16px auto;text-align:left">
+          <strong>Wat hebt u nodig?</strong><br>
+          Uw laatste energierekening, het DPE-rapport van uw woning (indien beschikbaar), en een globaal idee van de oppervlaktes van muren, dak en vloer. Geen zorgen — bij elke stap leggen wij uit wat gevraagd wordt.
+        </div>
+
+        <div class="slide-nav" style="justify-content:center">
+          <button class="btn-primary" data-go="2-explain">Beginnen →</button>
+        </div>
+
+        <div class="sources" style="max-width:480px;margin:20px auto 0">
+          <strong>Bronnen:</strong> Infofrankrijk.com (Rob van der Meulen), Météo France (HDD/CDD), ADEME, Ministère de la Transition Écologique. Alle berekeningen zijn transparant en worden onder het resultaat toegelicht.
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 2: LOCATIE & KLIMAAT
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="2" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 1 · Uw locatie en klimaat</h2>
+        <p class="slide-intro">Frankrijk kent grote klimaatverschillen. Een huis aan de Middellandse Zee heeft een heel andere warmtebehoefte dan een huis in de Elzas of de bergen.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>In welke klimaatzone uw woning staat, welke binnentemperatuur u prettig vindt, en hoeveel dagen per jaar u aanwezig bent. Bij een vakantiehuis is dat laatste belangrijk: u stookt minder als u er niet bent.</p>
+        </div>
+
+        <div class="explain-card">
+          <h3>Waarom is dit belangrijk?</h3>
+          <p>Het verschil tussen de buitentemperatuur en uw gewenste binnentemperatuur bepaalt hoeveel energie uw verwarmingssysteem nodig heeft. Hoe kouder de regio, hoe meer u stookt. Het aantal graaddagen (Heating Degree Days) per zone is gebaseerd op langjarige klimaatgegevens van Météo France.</p>
+          <div class="explain-source">Bron: Météo France, klimaatnormalen. Infofrankrijk.com/klussen/verwarming</div>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Documenten:</strong> Voor deze stap hebt u geen documenten nodig. Als u uw postcode of departement kent, kunt u de juiste zone kiezen.
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="1-main">← Terug</button>
+          <button class="btn-primary" data-go="2-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="2" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 1 · Vul uw gegevens in</h2>
+
+        <div class="field-group">
+          <div class="field-row">
+            <div class="field">
+              <label>In welke klimaatzone staat uw woning?</label>
+              <select id="zone">
+                <option value="med">Middellandse Zeekust (zacht, Provence, Languedoc)</option>
+                <option value="ouest">Zuid-West en Atlantische kust (Aquitaine, Bretagne)</option>
+                <option value="paris" selected>Noord-Frankrijk en Parijs (Île-de-France)</option>
+                <option value="centre">Centraal Frankrijk (Bourgogne, Loire, Auvergne)</option>
+                <option value="est">Oost-Frankrijk (Elzas, Lotharingen, Jura)</option>
+                <option value="mont">Berggebied (Alpen, Pyreneeën, Massif Central hoog)</option>
+              </select>
+              <div class="help">Kies de zone die het beste bij uw regio past. Bij twijfel: kies de koudere optie.</div>
+            </div>
+          </div>
+
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Gewenste binnentemperatuur <span class="unit">(°C)</span></label>
+              <input type="number" id="setpoint" value="20" min="10" max="30" step="0.5">
+              <div class="help">De meeste mensen kiezen 19–21°C. Elke graad hoger kost circa 7% meer energie.</div>
+            </div>
+            <div class="field">
+              <label>Temperatuur bij afwezigheid <span class="unit">(°C)</span></label>
+              <input type="number" id="awaySetpoint" value="12" min="5" max="20" step="1">
+              <div class="help">Vorstbescherming: minimaal 7°C. Bij vakantiehuis vaak 10–12°C.</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Hoeveel dagen per jaar bent u aanwezig?</label>
+              <input type="number" id="presentDays" value="260" min="0" max="365" step="1">
+              <div class="help">Permanent wonen: circa 340. Vakantiehuis: 30–120. Halftijds: 180.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="2-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="2-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="2" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 1 · Controleer uw invoer</h2>
+        <p class="slide-intro">Klopt het onderstaande? U kunt altijd terug om te wijzigen.</p>
+        <div id="confirm-2" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="2-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="3-explain">Bevestigen, door naar stap 2 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 3: UW WONING
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="3" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 2 · Uw woning</h2>
+        <p class="slide-intro">Het volume van uw verwarmde ruimte en de manier waarop uw huis geventileerd wordt, bepalen samen een groot deel van het warmteverlies.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>Het verwarmde volume van uw woning (in kubieke meters) en het type ventilatie. Onverwarmde ruimtes zoals een zolder of garage tellen niet mee.</p>
+        </div>
+
+        <div class="explain-card">
+          <h3>Hoe berekent u het volume?</h3>
+          <p>Neem het totale vloeroppervlak van de verwarmde ruimtes en vermenigvuldig dat met de plafondhoogte. Voorbeeld: een huis met 80 m² woonoppervlak en 2,5 meter hoge plafonds heeft een volume van 80 × 2,5 = 200 m³. Bij een woning met hoge plafonds (veel oude Franse huizen) kan dit aanzienlijk meer zijn.</p>
+          <div class="explain-source">Bron: Infofrankrijk.com, "De isolatie van het Franse huis"</div>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Tip:</strong> Het volume staat soms vermeld in uw DPE-rapport of taxe foncière. Bij twijfel: vloeroppervlak × 2,5 m plafondhoogte is een redelijke schatting.
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="2-confirm">← Terug</button>
+          <button class="btn-primary" data-go="3-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="3" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 2 · Vul uw woninggegevens in</h2>
+
+        <div class="field-group">
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Verwarmd volume <span class="unit">(m³)</span></label>
+              <input type="number" id="volume" value="250" min="20" max="5000" step="10">
+              <div class="help">Vloeroppervlak × plafondhoogte. Typisch Frans huis: 150–400 m³.</div>
+            </div>
+            <div class="field">
+              <label>Type ventilatie</label>
+              <select id="ventType">
+                <option value="natural" selected>Natuurlijke ventilatie (ramen, kieren)</option>
+                <option value="mech">Mechanische ventilatie (afzuiging)</option>
+                <option value="hrv">Ventilatie met warmteterugwinning</option>
+              </select>
+              <div class="help">De meeste oude Franse huizen hebben natuurlijke ventilatie.</div>
+            </div>
+          </div>
+
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Luchtwisseling per uur</label>
+              <input type="number" id="ach" value="0.5" min="0.1" max="5" step="0.1">
+              <div class="help">Hoe vaak per uur de lucht in uw huis ververst wordt. Goed geïsoleerd: 0,3–0,5. Oud en tochtig: 1,0–2,0.</div>
+            </div>
+            <div class="field field-conditional" id="hrvWrap">
+              <label>Rendement warmteterugwinning</label>
+              <input type="number" id="hrvEta" value="0.75" min="0" max="0.95" step="0.05">
+              <div class="help">Meestal 0,70–0,90. Staat op het typeplaatje van uw installatie.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="3-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="3-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="3" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 2 · Controleer uw invoer</h2>
+        <p class="slide-intro">Klopt het onderstaande?</p>
+        <div id="confirm-3" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="3-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="4-explain">Bevestigen, door naar stap 3 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 4: ISOLATIE
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="4" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 3 · De isolatie van uw woning</h2>
+        <p class="slide-intro">De isolatie is het hart van deze berekening. Hoe beter geïsoleerd, hoe minder warmte verloren gaat door muren, dak, vloer en ramen.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>Per onderdeel (muren, dak, vloer, ramen) vragen wij twee dingen: de oppervlakte in vierkante meters, en hoe goed het geïsoleerd is. U hoeft geen technische waarden te kennen — wij bieden keuzemogelijkheden in gewone taal.</p>
+        </div>
+
+        <div class="explain-card">
+          <h3>Wat is een U-waarde?</h3>
+          <p>De U-waarde geeft aan hoeveel warmte er per vierkante meter door een constructiedeel verloren gaat. Hoe lager de U-waarde, hoe beter de isolatie. Een ongeïsoleerde stenen muur heeft een U-waarde rond 2,0. Een goed geïsoleerde muur zit rond 0,25–0,40.</p>
+          <p style="margin-top:6px">De R-waarde (warmteweerstand) is het omgekeerde: hoe hoger, hoe beter. U-waarde = 1 / R-waarde. U hoeft dit niet zelf om te rekenen — wij doen dat voor u.</p>
+          <div class="explain-source">Bron: Infofrankrijk.com, "De isolatie van het Franse huis" (Rob van der Meulen)</div>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Documenten:</strong> Uw DPE-rapport vermeldt vaak de staat van de isolatie. Als u dat niet hebt: kijk of er isolatiemateriaal zichtbaar is op de zolder, achter gipsplaten, of onder de vloer. Bij twijfel: kies de optie die het beste bij het bouwjaar van uw huis past.
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="3-confirm">← Terug</button>
+          <button class="btn-primary" data-go="4-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="4" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 3 · Vul de isolatiegegevens in</h2>
+        <p class="slide-intro">Klik op een beschrijving om de bijbehorende waarde automatisch in te vullen, of vul zelf een waarde in.</p>
+
+        <!-- Muren -->
+        <div class="field-group">
+          <h3>Buitenmuren</h3>
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Totale muuroppervlakte <span class="unit">(m²)</span></label>
+              <input type="number" id="wallA" value="120" min="0" max="2000" step="5">
+              <div class="help">Alle buitenmuren samen. Aftrekken: ramen en deuren.</div>
+            </div>
+            <div class="field">
+              <label>Isolatiewaarde muren <span class="unit">(U-waarde)</span></label>
+              <input type="number" id="wallU" value="0.5" min="0.05" max="6" step="0.05">
+            </div>
+          </div>
+          <div class="presets" id="wallPresets"></div>
+        </div>
+
+        <!-- Dak -->
+        <div class="field-group">
+          <h3>Dak of zolderplafond</h3>
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Dakoppervlakte <span class="unit">(m²)</span></label>
+              <input type="number" id="roofA" value="100" min="0" max="2000" step="5">
+              <div class="help">Bij een onbewoonde zolder: oppervlakte van het plafond eronder.</div>
+            </div>
+            <div class="field">
+              <label>Isolatiewaarde dak <span class="unit">(U-waarde)</span></label>
+              <input type="number" id="roofU" value="0.25" min="0.05" max="6" step="0.05">
+            </div>
+          </div>
+          <div class="presets" id="roofPresets"></div>
+        </div>
+
+        <!-- Vloer -->
+        <div class="field-group">
+          <h3>Vloer / begane grond</h3>
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Vloeroppervlakte <span class="unit">(m²)</span></label>
+              <input type="number" id="floorA" value="100" min="0" max="2000" step="5">
+            </div>
+            <div class="field">
+              <label>Isolatiewaarde vloer <span class="unit">(U-waarde)</span></label>
+              <input type="number" id="floorU" value="0.35" min="0.05" max="6" step="0.05">
+            </div>
+          </div>
+          <div class="presets" id="floorPresets"></div>
+        </div>
+
+        <!-- Ramen -->
+        <div class="field-group">
+          <h3>Ramen en deuren met glas</h3>
+          <div class="field-row two-col">
+            <div class="field">
+              <label>Totale glasoppervlakte <span class="unit">(m²)</span></label>
+              <input type="number" id="winA" value="20" min="0" max="500" step="1">
+              <div class="help">Tel alle ramen en glasdeuren bij elkaar op.</div>
+            </div>
+            <div class="field">
+              <label>Type beglazing <span class="unit">(U-waarde)</span></label>
+              <input type="number" id="winU" value="1.6" min="0.5" max="6" step="0.1">
+            </div>
+          </div>
+          <div class="presets" id="winPresets"></div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="4-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="4-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="4" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 3 · Controleer uw isolatiegegevens</h2>
+        <p class="slide-intro">Klopt het onderstaande?</p>
+        <div id="confirm-4" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="4-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="5-explain">Bevestigen, door naar stap 4 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 5: VERWARMING
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="5" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 4 · Uw verwarmingssysteem</h2>
+        <p class="slide-intro">Het type verwarmingssysteem en het rendement ervan bepalen hoeveel brandstof of elektriciteit u verbruikt om uw woning warm te houden.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>Welk type hoofdverwarming u gebruikt (gasketel, warmtepomp, houtkachel, etc.) en of u een bijverwarming hebt. Veel huizen in Frankrijk combineren bijvoorbeeld een houtkachel in de woonkamer met elektrische kachels in de slaapkamers.</p>
+        </div>
+
+        <div class="explain-card">
+          <h3>Rendementen en wat ze betekenen</h3>
+          <p>Een gasketel zet ongeveer 90% van de brandstof om in warmte — de rest gaat verloren via de schoorsteen. Een houtkachel haalt 50–70%. Een warmtepomp is anders: die haalt warmte uit de buitenlucht en levert gemiddeld 3 keer zoveel warmte als de elektriciteit die hij verbruikt.</p>
+          <div class="explain-source">Bron: Infofrankrijk.com, "De keuze van het verwarmingssysteem" (Rob van der Meulen / Aat de Kwaasteniet)</div>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Documenten:</strong> Het typeplaatje van uw ketel of warmtepomp vermeldt het vermogen en soms het rendement. Bij twijfel: de standaardwaarden die wij invullen zijn representatief voor gangbare installaties in Frankrijk.
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="4-confirm">← Terug</button>
+          <button class="btn-primary" data-go="5-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="5" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 4 · Vul uw verwarmingsgegevens in</h2>
+
+        <div class="field-group">
+          <h3>Hoofdverwarming</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Type hoofdverwarming</label>
+              <select id="mainType"></select>
+            </div>
+          </div>
+          <div class="field-row two-col">
+            <div class="field field-conditional" id="mainScopWrap">
+              <label>Seizoensrendement warmtepomp <span class="unit">(SCOP)</span></label>
+              <input type="number" id="mainScop" value="3.2" min="1" max="7" step="0.1">
+              <div class="help">Staat op het energielabel van de warmtepomp. Gemiddeld: 3,0–3,5.</div>
+            </div>
+            <div class="field field-conditional" id="mainEtaWrap">
+              <label>Rendement ketel of kachel</label>
+              <input type="number" id="mainEta" value="0.9" min="0.5" max="1" step="0.05">
+              <div class="help">HR-ketel: 0,95–1,07. Gewone ketel: 0,85–0,90. Houtkachel: 0,50–0,70.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h3>Bijverwarming (optioneel)</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Type bijverwarming</label>
+              <select id="auxType"></select>
+            </div>
+          </div>
+          <div class="field-conditional" id="auxDetailsWrap">
+            <div class="field-row two-col">
+              <div class="field">
+                <label>Hoe vaak gebruikt u de bijverwarming?</label>
+                <select id="auxSharePreset">
+                  <option value="10">Incidenteel (circa 10% van de warmte)</option>
+                  <option value="25" selected>Regelmatig (circa 25%)</option>
+                  <option value="50">Vaak (circa 50%)</option>
+                  <option value="70">Bijna dagelijks (circa 70%)</option>
+                  <option value="custom">Zelf een percentage invullen</option>
+                </select>
+              </div>
+              <div class="field field-conditional" id="auxShareCustomWrap">
+                <label>Eigen percentage <span class="unit">(%)</span></label>
+                <input type="number" id="auxShareCustom" value="25" min="0" max="90" step="5">
+              </div>
+            </div>
+            <div class="field-row two-col">
+              <div class="field field-conditional" id="auxScopWrap">
+                <label>Seizoensrendement bijverwarming <span class="unit">(SCOP)</span></label>
+                <input type="number" id="auxScop" value="3.2" min="1" max="7" step="0.1">
+              </div>
+              <div class="field field-conditional" id="auxEtaWrap">
+                <label>Rendement bijverwarming</label>
+                <input type="number" id="auxEta" value="0.85" min="0.5" max="1" step="0.05">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="5-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="5-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="5" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 4 · Controleer uw verwarmingsgegevens</h2>
+        <p class="slide-intro">Klopt het onderstaande?</p>
+        <div id="confirm-5" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="5-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="6-explain">Bevestigen, door naar stap 5 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 6: WARM WATER & HUISHOUDEN
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="6" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 5 · Warm water en huishouden</h2>
+        <p class="slide-intro">Naast verwarming is warm water een belangrijke energiepost. Het verwarmen van water voor douchen, afwassen en schoonmaken kan 15–25% van uw totale energieverbruik uitmaken.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>Het aantal personen in uw huishouden, hoeveel u doucht, en welk type warmwatersysteem u hebt (elektrische boiler, gasgeiser, warmtepompboiler, of zonneboiler).</p>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Tip:</strong> De meest voorkomende warmwaterinstallatie in Frankrijk is een elektrische boiler (chauffe-eau électrique). Deze verbruikt relatief veel stroom maar is goedkoop in aanschaf en onderhoud.
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="5-confirm">← Terug</button>
+          <button class="btn-primary" data-go="6-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="6" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 5 · Vul uw gegevens in</h2>
+
+        <div class="field-group">
+          <h3>Huishouden</h3>
+          <div class="field-row three-col">
+            <div class="field">
+              <label>Aantal personen</label>
+              <input type="number" id="persons" value="2" min="1" max="10" step="1">
+            </div>
+            <div class="field">
+              <label>Douches per persoon per dag</label>
+              <input type="number" id="showersPerPerson" value="1" min="0" max="5" step="0.5">
+            </div>
+            <div class="field">
+              <label>Liters per douche</label>
+              <input type="number" id="litersPer" value="55" min="20" max="150" step="5">
+              <div class="help">Gemiddeld 40–60 liter. Regendouche: 80–100 liter.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <h3>Warmwatersysteem</h3>
+          <div class="field-row">
+            <div class="field">
+              <label>Type warmwatersysteem</label>
+              <select id="dhwType"></select>
+            </div>
+          </div>
+          <div class="field-row two-col">
+            <div class="field field-conditional" id="dhwScopWrap">
+              <label>Rendement warmtepompboiler <span class="unit">(SCOP)</span></label>
+              <input type="number" id="dhwScop" value="2.5" min="1" max="5" step="0.1">
+              <div class="help">Gemiddeld 2,0–3,0. Staat op het energielabel.</div>
+            </div>
+            <div class="field field-conditional" id="dhwEtaWrap">
+              <label>Rendement ketel/geiser</label>
+              <input type="number" id="dhwEta" value="0.9" min="0.5" max="1" step="0.05">
+            </div>
+          </div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="6-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="6-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="6" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 5 · Controleer uw invoer</h2>
+        <p class="slide-intro">Klopt het onderstaande?</p>
+        <div id="confirm-6" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="6-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="7-explain">Bevestigen, door naar stap 6 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 7: ELEKTRA & EXTRA'S
+         ══════════════════════════════════════════════ -->
+    <!-- EXPLAIN -->
+    <div class="slide" data-section="7" data-phase="explain">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 6 · Elektra, zonnepanelen en extra's</h2>
+        <p class="slide-intro">In deze laatste invoerstap vragen wij naar uw overige elektraverbruik: zonnepanelen, huishoudelijke apparaten, en optioneel een elektrische auto, airconditioning of zwembad.</p>
+
+        <div class="explain-card">
+          <h3>Wat gaan wij vragen?</h3>
+          <p>Of u zonnepanelen hebt (en zo ja, hoeveel), een overzicht van uw huishoudelijke apparaten (met standaardwaarden ingevuld), en de actuele energieprijzen. Voor de prijzen vullen wij gangbare Franse tarieven in die u kunt aanpassen aan uw eigen situatie.</p>
+        </div>
+
+        <div class="explain-tip">
+          <strong>Documenten:</strong> Uw laatste energierekening voor de actuele kWh-prijs. Voor zonnepanelen: het vermogen in kWp (staat op het contract of de factuur van de installateur).
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="6-confirm">← Terug</button>
+          <button class="btn-primary" data-go="7-input">Invullen →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="slide" data-section="7" data-phase="input">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 6 · Vul uw gegevens in</h2>
+
+        <!-- PV -->
+        <div class="field-group">
+          <h3>Zonnepanelen</h3>
+          <div class="field-row three-col">
+            <div class="field">
+              <label>Vermogen <span class="unit">(kWp)</span></label>
+              <input type="number" id="pvKwp" value="0" min="0" max="50" step="0.5">
+              <div class="help">Geen panelen? Laat op 0 staan.</div>
+            </div>
+            <div class="field field-conditional" id="pvSelfWrap">
+              <label>Eigenverbruik <span class="unit">(%)</span></label>
+              <input type="number" id="pvSelfUse" value="60" min="0" max="100" step="5">
+              <div class="help">Hoeveel % verbruikt u zelf? Typisch 30–70%.</div>
+            </div>
+            <div class="field field-conditional" id="pvExportWrap">
+              <label>Teruglevering</label>
+              <select id="pvExportMode">
+                <option value="nvt" selected>Niet van toepassing</option>
+                <option value="vente">Vente du surplus (EDF OA)</option>
+                <option value="custom">Eigen tarief invullen</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row field-conditional" id="pvExportTariffWrap">
+            <div class="field">
+              <label>Teruglevertarief <span class="unit">(€/kWh)</span></label>
+              <input type="number" id="pvExportTariff" value="0.04" min="0" max="0.50" step="0.01">
+            </div>
+          </div>
+        </div>
+
+        <!-- Apparaten -->
+        <div class="field-group">
+          <h3>Huishoudelijke apparaten</h3>
+          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">Standaardwaarden ingevuld. Pas aan of schakel uit wat niet van toepassing is.</p>
+          <div id="appliances"></div>
+        </div>
+
+        <!-- EV -->
+        <div class="field-group">
+          <h3>Elektrische auto (optioneel)</h3>
+          <div class="field-row three-col">
+            <div class="field">
+              <label>Kilometers per week</label>
+              <input type="number" id="evKmWeek" value="0" min="0" max="5000" step="10">
+              <div class="help">Geen EV? Laat op 0 staan.</div>
+            </div>
+            <div class="field">
+              <label>Verbruik <span class="unit">(kWh/100km)</span></label>
+              <input type="number" id="evKwh100" value="18" min="5" max="50" step="1">
+            </div>
+            <div class="field">
+              <label>Laadverlies <span class="unit">(%)</span></label>
+              <input type="number" id="evLoss" value="10" min="0" max="30" step="1">
+            </div>
+          </div>
+        </div>
+
+        <!-- AC -->
+        <div class="field-group">
+          <h3>Airconditioning (optioneel)</h3>
+          <div class="toggle-row">
+            <input type="checkbox" id="acOn">
+            <label for="acOn">Ik gebruik airconditioning in de zomer</label>
+          </div>
+          <div class="field-conditional" id="seerWrap">
+            <div class="field-row">
+              <div class="field">
+                <label>Seizoensrendement koeling <span class="unit">(SEER)</span></label>
+                <input type="number" id="seer" value="4.0" min="2.5" max="10" step="0.5">
+                <div class="help">Gemiddeld 3,5–5,0. Staat op het energielabel van de airco.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zwembad -->
+        <div class="field-group">
+          <h3>Zwembad (optioneel)</h3>
+          <div class="toggle-row">
+            <input type="checkbox" id="poolHas">
+            <label for="poolHas">Ik heb een zwembad</label>
+          </div>
+          <div class="field-conditional" id="poolInputs">
+            <div class="field-row four-col">
+              <div class="field">
+                <label>Volume <span class="unit">(m³)</span></label>
+                <input type="number" id="poolVol" value="30" min="1" max="500" step="5">
+              </div>
+              <div class="field">
+                <label>Doeltemperatuur <span class="unit">(°C)</span></label>
+                <input type="number" id="poolTargetT" value="27" min="15" max="35" step="1">
+              </div>
+              <div class="field">
+                <label>Seizoen <span class="unit">(maanden)</span></label>
+                <input type="number" id="poolSeason" value="5" min="1" max="12" step="1">
+              </div>
+              <div class="field">
+                <label>Verwarming zwembad</label>
+                <select id="poolHeatType"></select>
+              </div>
+            </div>
+            <div class="field-row four-col">
+              <div class="field field-conditional" id="poolScopWrap">
+                <label>SCOP zwembadpomp</label>
+                <input type="number" id="poolHpScop" value="4" min="1" max="8" step="0.5">
+              </div>
+              <div class="field">
+                <label>Pompvermogen <span class="unit">(W)</span></label>
+                <input type="number" id="poolPumpW" value="450" min="50" max="5000" step="50">
+              </div>
+              <div class="field">
+                <label>Pompuren per dag</label>
+                <input type="number" id="poolPumpH" value="8" min="0" max="24" step="1">
+              </div>
+              <div class="field">
+                <label>Afdekking?</label>
+                <select id="poolCover">
+                  <option value="true" selected>Ja (halveert warmteverlies)</option>
+                  <option value="false">Nee</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Energieprijzen -->
+        <div class="field-group">
+          <h3>Energieprijzen</h3>
+          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">Gangbare Franse tarieven ingevuld. Pas aan op basis van uw eigen factuur.</p>
+          <div id="prices" class="field-row four-col"></div>
+        </div>
+
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="7-explain">← Uitleg</button>
+          <button class="btn-primary btn-confirm-step" data-go="7-confirm">Controleren →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRM -->
+    <div class="slide" data-section="7" data-phase="confirm">
+      <div class="slide-content">
+        <h2 class="slide-title">Stap 6 · Controleer uw invoer</h2>
+        <p class="slide-intro">Laatste controle voordat wij het resultaat berekenen.</p>
+        <div id="confirm-7" class="confirm-grid"></div>
+        <div class="slide-nav">
+          <button class="btn-secondary" data-go="7-input">← Wijzigen</button>
+          <button class="btn-primary" data-go="8-main">Bereken het resultaat →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════
+         SECTION 8: RESULTAAT
+         ══════════════════════════════════════════════ -->
+    <div class="slide" data-section="8" data-phase="main">
+      <div class="slide-content">
+        <div class="result-hero">
+          <h2 class="slide-title">Uw Energierapport</h2>
+          <div class="big-number" id="totalCost">€ —</div>
+          <div class="sub">Geschatte jaarlijkse energiekosten · <span id="perMonth">€ —</span> per maand</div>
+        </div>
+
+        <!-- Kostenopbouw -->
+        <div class="result-card">
+          <h3>Kostenopbouw</h3>
+          <div id="costBreakdown"></div>
+        </div>
+
+        <!-- Energiebalans -->
+        <div class="result-card">
+          <h3>Energiebalans (kWh per jaar)</h3>
+          <div id="energyBalance"></div>
+        </div>
+
+        <!-- Visueel -->
+        <div class="result-card">
+          <h3>Verdeling energiekosten</h3>
+          <div id="costBars" class="bar-chart"></div>
+        </div>
+
+        <!-- Grondslagen -->
+        <div class="result-card">
+          <h3>Berekeningsgrondslagen</h3>
+          <div id="grondslagen" style="font-size:.88em;line-height:1.7;color:var(--text)"></div>
+        </div>
+
+        <!-- Bronnen -->
+        <div class="sources">
+          <strong>Bronnen en verantwoording:</strong><br>
+          Klimaatgegevens: Météo France (langjarige normalen HDD/CDD).<br>
+          Isolatiewaarden en warmteverliesberekening: Infofrankrijk.com, "De isolatie van het Franse huis" (Rob van der Meulen).<br>
+          Verwarmingssystemen en rendementen: Infofrankrijk.com, "De keuze van het verwarmingssysteem" (Rob van der Meulen / Aat de Kwaasteniet).<br>
+          DPE-methodiek: ADEME, Ministère de la Transition Écologique.<br>
+          Energieprijzen: gemiddelden EDF/Engie (heures pleines), GrDF, consumentenprijzen 2025/2026.<br>
+          <br>
+          <strong>Disclaimer:</strong> Dit is een schattingstool bedoeld om inzicht te geven. De uitkomsten zijn indicatief en vervangen geen professioneel energieadvies of officieel DPE-rapport.
+        </div>
+
+        <div class="slide-nav" style="margin-top:16px">
+          <button class="btn-secondary" data-go="1-main">← Opnieuw beginnen</button>
+          <button class="btn-primary" onclick="window.print()">Afdrukken / PDF</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /slide-viewport -->
+</div><!-- /wizard -->
+
+<!-- Scripts: engine first (data + calc), then wizard (nav), then app (UI logic) -->
+<script src="engine/tool-spec.js"></script>
+<script src="engine/engine.js"></script>
+<script src="wizard.js"></script>
+<script src="app.js"></script>
+</body>
 </html>
