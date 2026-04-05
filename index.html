@@ -77,7 +77,7 @@
         </div>
 
         <div class="sources" style="max-width:480px;margin:20px auto 0">
-          <strong>Bronnen:</strong> Infofrankrijk.com (Rob van der Meulen), Météo France (HDD/CDD), ADEME, Ministère de la Transition Écologique. Alle berekeningen zijn transparant en worden onder het resultaat toegelicht.
+          <strong>Bronnen:</strong> Infofrankrijk.com, Méthode 3CL-DPE 2021, Météo France, ADEME, Ministère de la Transition Écologique. Alle berekeningen zijn transparant en worden onder het resultaat toegelicht.
         </div>
       </div>
     </div>
@@ -813,16 +813,100 @@
           <div id="grondslagen" style="font-size:.88em;line-height:1.7;color:var(--text)"></div>
         </div>
 
+        <!-- AI Uitleg -->
+        <div class="result-card" style="background:rgba(0,102,204,0.04);border-color:rgba(0,102,204,0.2)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span class="btn-ai" style="cursor:default;width:28px;height:28px;font-size:.7em">ai</span>
+            <h3 style="margin:0">Wat betekent dit voor mij?</h3>
+          </div>
+          <p style="font-size:.88em;color:var(--text-light);margin-bottom:10px">Klik hieronder voor een persoonlijke uitleg van uw resultaten in gewone taal.</p>
+          <button class="btn-primary" id="aiExplainBtn" style="background:#0066cc;font-size:.9em;padding:10px 20px" onclick="requestAIExplanation()">Leg mijn resultaten uit →</button>
+          <div id="aiExplanation" style="display:none;margin-top:12px;padding:14px;background:#fff;border-radius:8px;border:1px solid rgba(0,102,204,0.15);font-size:.9em;line-height:1.7"></div>
+        </div>
+
+        <!-- Natuurkundige onderbouwing -->
+        <div class="result-card">
+          <h3>Natuurkundige onderbouwing</h3>
+          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">De berekeningen in deze tool zijn gebaseerd op fundamentele warmteleer. Hieronder de volledige onderbouwing.</p>
+
+          <details class="physics-accordion">
+            <summary>Wet van Fourier — warmtegeleiding (1822)</summary>
+            <div class="physics-content">
+              <p>De warmtestroom door een materiaal is evenredig met het temperatuurverschil en het oppervlak, en omgekeerd evenredig met de dikte:</p>
+              <p class="formula">q = λ · A · ΔT / d</p>
+              <p>Hieruit volgt de <strong>warmteweerstand</strong> R = d / λ (m²·K/W) en de <strong>warmtedoorgangscoëfficiënt</strong> U = 1 / R<sub>totaal</sub> (W/m²·K). Hoe lager de U-waarde, hoe beter de isolatie.</p>
+            </div>
+          </details>
+
+          <details class="physics-accordion">
+            <summary>Transmissieverlies — Fourier op gebouwniveau</summary>
+            <div class="physics-content">
+              <p>Het totale warmteverlies door de gebouwschil is de som over alle constructiedelen:</p>
+              <p class="formula">H<sub>tr</sub> = Σ(U<sub>i</sub> × A<sub>i</sub>) [W/K]</p>
+              <p>Elk constructiedeel (muur, dak, vloer, ramen) draagt bij naar rato van zijn oppervlakte en isolatiewaarde. Dit is dezelfde methode als de officiële Méthode 3CL-DPE 2021.</p>
+            </div>
+          </details>
+
+          <details class="physics-accordion">
+            <summary>Ventilatieverlies — warmte meegevoerd met lucht</summary>
+            <div class="physics-content">
+              <p>Luchtverversing kost warmte. Het ventilatieverlies hangt af van het luchtvolume en de luchtwisselingssnelheid:</p>
+              <p class="formula">H<sub>vent</sub> = ρ · c<sub>p</sub> / 3600 × n × V = 0,34 × n × V [W/K]</p>
+              <p>De constante 0,34 volgt uit: dichtheid lucht (1,2 kg/m³) × soortelijke warmte (1.005 J/kg·K) / 3600 s/uur ≈ 0,335, afgerond 0,34.</p>
+              <p>Bij warmteterugwinning (VMC double flux): H<sub>vent,eff</sub> = H<sub>vent</sub> × (1 − η), waarbij η het rendement van de warmtewisselaar is.</p>
+            </div>
+          </details>
+
+          <details class="physics-accordion">
+            <summary>Graaddagenmethode — van vermogen naar jaarverbruik</summary>
+            <div class="physics-content">
+              <p>Het verliescoëfficiënt H (W/K) geeft het vermogen per graad temperatuurverschil. Om het jaarverbruik te berekenen gebruiken we graaddagen (HDD — Heating Degree Days):</p>
+              <p class="formula">E = H × HDD × 24 / 1000 [kWh/jaar]</p>
+              <p>HDD-waarden per klimaatzone zijn gebaseerd op langjarige klimaatnormalen van Météo France. De tool past de HDD aan naar de gekozen binnentemperatuur en weegt voor aanwezigheid/afwezigheid.</p>
+            </div>
+          </details>
+
+          <details class="physics-accordion">
+            <summary>Warmtepomp en Carnot — theoretische grenzen</summary>
+            <div class="physics-content">
+              <p>Het maximale rendement van een warmtepomp volgt uit de Carnotcyclus (1824):</p>
+              <p class="formula">COP<sub>max</sub> = T<sub>warm</sub> / (T<sub>warm</sub> − T<sub>koud</sub>)</p>
+              <p>In de praktijk haalt een warmtepomp 30–50% van dit theoretisch maximum. De SCOP (Seasonal COP) is het seizoensgemiddelde en houdt rekening met wisselende buitentemperaturen.</p>
+              <p>Voorbeeld: bij T<sub>warm</sub> = 35°C (308K) en T<sub>koud</sub> = 5°C (278K) is COP<sub>max</sub> = 308/30 ≈ 10. Een reële SCOP van 3,5 is dan 35% van Carnot — realistisch.</p>
+            </div>
+          </details>
+
+          <details class="physics-accordion">
+            <summary>Tapwater — basisthermodynamica</summary>
+            <div class="physics-content">
+              <p>De energie om water te verwarmen volgt uit:</p>
+              <p class="formula">Q = m × c × ΔT</p>
+              <p>Met: m = massa water (kg), c = 4,186 kJ/kg·K (soortelijke warmte water), ΔT = gewenste temperatuur (40°C) − koud water (12°C) = 28K.</p>
+              <p>Het werkelijke verbruik is hoger door het rendement van het warmwatersysteem (boiler, geiser, warmtepompboiler).</p>
+            </div>
+          </details>
+        </div>
+
         <!-- Bronnen -->
         <div class="sources">
           <strong>Bronnen en verantwoording:</strong><br>
-          Klimaatgegevens: Météo France (langjarige normalen HDD/CDD).<br>
-          Isolatiewaarden en warmteverliesberekening: Infofrankrijk.com, "De isolatie van het Franse huis" (Rob van der Meulen).<br>
-          Verwarmingssystemen en rendementen: Infofrankrijk.com, "De keuze van het verwarmingssysteem" (Rob van der Meulen / Aat de Kwaasteniet).<br>
-          DPE-methodiek: ADEME, Ministère de la Transition Écologique.<br>
-          Energieprijzen: gemiddelden EDF/Engie (heures pleines), GrDF, consumentenprijzen 2025/2026.<br>
+          Méthode 3CL-DPE 2021 — Arrêté du 31 mars 2021, Ministère de la Transition Écologique (warmteverliesberekening, U-waarden)<br>
+          ADEME — Agence de l'Environnement et de la Maîtrise de l'Énergie (referentiewaarden, Observatoire DPE)<br>
+          Météo France — langjarige klimaatnormalen (graaddagen HDD/CDD per zone)<br>
+          RE2020 / Règles Th-U — thermische regelgeving (referentie U-waarden materialen)<br>
+          Infofrankrijk.com — redactionele vertaling en praktische context voor Nederlandse doelgroep<br>
+          Energieprijzen: CRE, EDF/Engie tarieven 2025/2026<br>
           <br>
-          <strong>Disclaimer:</strong> Dit is een schattingstool bedoeld om inzicht te geven. De uitkomsten zijn indicatief en vervangen geen professioneel energieadvies of officieel DPE-rapport.
+          <strong>Verificatie:</strong> Het IF-voorbeeldhuis (156 m³, ongeïsoleerd) geeft in deze tool 14.133 W piekvermogen vs. 13.260 W in het IF-artikel (vuistregelmethode). Verschil 6,6% — binnen de marge van de vereenvoudigde vuistregelmethode.<br>
+          <br>
+          <strong>Disclaimer:</strong> Dit is een schattingstool bedoeld om inzicht te geven. De uitkomsten zijn indicatief (±15–25% bandbreedte) en vervangen geen professioneel energieadvies of officieel DPE-rapport.
+        </div>
+
+        <!-- Opslaan in DossierFrankrijk -->
+        <div class="result-card" style="text-align:center;background:var(--primary-light)">
+          <h3>Rapport opslaan</h3>
+          <p style="font-size:.88em;color:var(--text-light);margin-bottom:12px">Sla dit energierapport op in uw persoonlijk dossier op DossierFrankrijk.</p>
+          <button class="btn-primary" id="dfSaveBtn" onclick="saveToDF()">Opslaan in DossierFrankrijk →</button>
         </div>
 
         <div class="slide-nav" style="margin-top:16px">

@@ -18,11 +18,11 @@ setpoint:{text:'<strong>Binnentemperatuur</strong> — De temperatuur die u pret
 awaySetpoint:{text:'<strong>Vorstbescherming</strong> — Minimaal 7°C om bevriezing van leidingen te voorkomen. Vakantiehuis dat maandenlang leegstaat: 10–12°C.'},
 presentDays:{text:'<strong>Aanwezigheidsdagen</strong> — Hoeveel dagen per jaar u het huis bewoont en verwarmt.<br><br>🏠 Permanent: 330–350 dagen<br>🏡 Halftijds: 150–200 dagen<br>🌴 Vakantie: 30–120 dagen'},
 volume:{text:'<strong>Verwarmd volume</strong> — Alle verwarmde ruimtes samen. Onverwarmde zolders, garages en kelders telt u niet mee.<br><br><strong>Berekening:</strong> vloeroppervlak × plafondhoogte per kamer, alles optellen.<br>Voorbeeld: woonkamer 35m²×2,7m + 2 slaapkamers 12m²×2,5m + keuken 15m²×2,5m = 192 m³.',source:'Infofrankrijk.com, "De isolatie van het Franse huis"'},
-ventType:{text:'<strong>Type ventilatie</strong><br><br>🪟 <strong>Natuurlijk:</strong> Via ramen, kieren, roosters. Meeste oude Franse huizen.<br>🔄 <strong>Mechanisch (VMC):</strong> Ventilator zuigt lucht af. Standaard in nieuwere woningen.<br>♻️ <strong>Met warmteterugwinning (VMC double flux):</strong> Bespaart 15–25% op verwarmingskosten.',source:'Infofrankrijk.com (Aat de Kwaasteniet)'},
+ventType:{text:'<strong>Type ventilatie</strong><br><br>🪟 <strong>Natuurlijk:</strong> Via ramen, kieren, roosters. Meeste oude Franse huizen.<br>🔄 <strong>Mechanisch (VMC):</strong> Ventilator zuigt lucht af. Standaard in nieuwere woningen.<br>♻️ <strong>Met warmteterugwinning (VMC double flux):</strong> Bespaart 15–25% op verwarmingskosten.',source:'Infofrankrijk.com'},
 ach:{text:'<strong>Luchtwisseling per uur</strong> — Hoe vaak per uur alle lucht ververst wordt.<br><br>🏚️ Oud en tochtig: 1,0–2,0<br>🏠 Gemiddeld met kieren: 0,5–0,8<br>🏗️ Goed afgedicht: 0,3–0,5<br><br>Bij twijfel: kies 0,6.'},
 hrvEta:{text:'<strong>Rendement warmteterugwinning</strong> — Staat op het typeplaatje van uw VMC double flux. Goede systemen: 80–90%.'},
 wallA:{text:'<strong>Muuroppervlakte</strong> — Alle buitenmuren samen, <em>exclusief</em> ramen en deuren.<br><br>Voorbeeld: huis 10×8m, hoogte 2,7m → omtrek 36m × 2,7 = 97 m². Min 15 m² ramen = 82 m².'},
-wallU:{text:'<strong>Isolatiewaarde muren (U-waarde)</strong> — Hoe lager, hoe beter.<br><br>🧱 Dikke stenen muur (>50cm), ongeïsoleerd: U ≈ 1,5–2,5<br>🧱 + 4–5cm isolatie: U ≈ 0,6–0,8<br>🧱 Goed geïsoleerd (10–15cm): U ≈ 0,25–0,40<br><br>R-waarde = 1/U-waarde. R=2,5 → U=0,40.',source:'Infofrankrijk.com, "De isolatie van het Franse huis" (Rob van der Meulen)'},
+wallU:{text:'<strong>Isolatiewaarde muren (U-waarde)</strong> — Hoe lager, hoe beter.<br><br>🧱 Dikke stenen muur (>50cm), ongeïsoleerd: U ≈ 1,5–2,5<br>🧱 + 4–5cm isolatie: U ≈ 0,6–0,8<br>🧱 Goed geïsoleerd (10–15cm): U ≈ 0,25–0,40<br><br>R-waarde = 1/U-waarde. R=2,5 → U=0,40.',source:'Infofrankrijk.com · Méthode 3CL-DPE 2021'},
 roofA:{text:'<strong>Dakoppervlakte</strong> — Onbewoonde zolder: oppervlakte plafond eronder. Bewoonde zolder: oppervlakte schuine dak zelf.'},
 roofU:{text:'<strong>Isolatiewaarde dak</strong> — Het dak is vaak de grootste bron van warmteverlies (tot 30%).<br><br>🏚️ Ongeïsoleerd (pannen+latten): U ≈ 2,5–3,5<br>📦 Laag stro of 5–10cm: U ≈ 0,5–0,8<br>✅ 20cm minerale wol: U ≈ 0,20–0,25<br>⭐ 30cm+: U ≈ 0,12–0,15',source:'Infofrankrijk.com, "Zolders zijn niet meer wat ze waren"'},
 floorA:{text:'<strong>Vloeroppervlakte</strong> — Alleen de vloer direct op de grond of boven kruipruimte/kelder.'},
@@ -62,7 +62,8 @@ winU:{title:'Raam-assistent',desc:'Welk type beglazing hebt u?',type:'select',op
 ['1.6','Modern dubbel glas (HR)'],['1.1','Modern HR+ glas'],['0.9','Triple glas (HR++)']]},
 mainScop:{title:'SCOP-assistent',desc:'Welk type warmtepomp?',type:'select',opts:[
 ['2.8','Lucht/lucht (split airco, ouder)'],['3.5','Lucht/lucht (inverter, modern)'],
-['3.0','Lucht/water (standaard)'],['3.8','Lucht/water (inverter, premium)'],['4.2','Bodem/water (geothermisch)']]}
+['3.0','Lucht/water (standaard)'],['3.8','Lucht/water (inverter, premium)'],['4.2','Bodem/water (geothermisch)']]},
+pvKwp:{title:'Zonnepanelen-assistent',desc:'Vul het aantal panelen, de leeftijd en oriëntatie in. Ik bereken het vermogen.',type:'pv'}
 };
 
 /* ═══ INIT ═══ */
@@ -114,6 +115,23 @@ function injectAIHelpers(){
       html+='<select id="'+pid+'_sel"><option value="">— Kies —</option>';
       h.opts.forEach(function(o){html+='<option value="'+o[0]+'">'+o[1]+'</option>'});
       html+='</select><div class="ai-result" id="'+pid+'_res" style="display:none"></div>';
+    } else if(h.type==='pv'){
+      html+='<div style="display:grid;gap:8px">'+
+        '<div><label style="font-size:.85em;font-weight:600">Aantal panelen</label><input type="number" id="'+pid+'_count" placeholder="bijv. 10" min="0" max="100" style="width:100%;padding:8px;border:1.5px solid #b0c4de;border-radius:6px;font-size:.9em"></div>'+
+        '<div><label style="font-size:.85em;font-weight:600">Leeftijd panelen</label><select id="'+pid+'_age" style="width:100%;padding:8px;border:1.5px solid #b0c4de;border-radius:6px;font-size:.9em">'+
+          '<option value="1.0">Nieuw (0–3 jaar)</option>'+
+          '<option value="0.95">Recent (3–8 jaar)</option>'+
+          '<option value="0.88" selected>Gemiddeld (8–15 jaar)</option>'+
+          '<option value="0.80">Ouder (15–20 jaar)</option>'+
+          '<option value="0.70">Oud (>20 jaar)</option></select></div>'+
+        '<div><label style="font-size:.85em;font-weight:600">Ori\u00EBntatie panelen</label><select id="'+pid+'_ori" style="width:100%;padding:8px;border:1.5px solid #b0c4de;border-radius:6px;font-size:.9em">'+
+          '<option value="1.0">Zuid (optimaal)</option>'+
+          '<option value="0.95">Zuid-Oost of Zuid-West</option>'+
+          '<option value="0.85">Oost of West</option>'+
+          '<option value="0.65">Noord-Oost of Noord-West</option>'+
+          '<option value="0.50">Noord (ongunstig)</option></select></div>'+
+        '<button type="button" class="ai-apply-btn" id="'+pid+'_calc" style="margin-top:4px">Bereken kWp \u2192</button>'+
+        '<div class="ai-result" id="'+pid+'_res" style="display:none"></div></div>';
     }
     panel.innerHTML=html;
     field.appendChild(panel);
@@ -132,11 +150,10 @@ function injectAIHelpers(){
           var container=document.getElementById(pid+'_rooms');
           var row=document.createElement('div');
           row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px';
-          row.innerHTML='<input type="text" placeholder="Kamer '+rc+'" style="flex:2;padding:6px 8px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em">'+
-            '<input type="number" placeholder="m\u00B2" class="'+pid+'_a" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em">'+
-            '<input type="number" placeholder="hoogte" value="2.5" class="'+pid+'_h" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em">';
+          row.innerHTML='<span style="flex:2;padding:6px 8px;font-size:.85em;font-weight:600;color:var(--primary)">Kamer '+rc+'</span>'+
+            '<input type="number" placeholder="m\u00B2" class="'+pid+'_a" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">'+
+            '<input type="number" placeholder="hoogte" value="2.5" class="'+pid+'_h" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">';
           container.appendChild(row);
-          // Bind recalc
           row.querySelectorAll('input[type="number"]').forEach(function(inp2){
             inp2.addEventListener('input',function(){calcVol(pid,fid)});
           });
@@ -155,6 +172,29 @@ function injectAIHelpers(){
             document.getElementById(fid).value=sel.value;
             this.textContent='\u2713 Ingevuld!'; this.disabled=true;
           });
+        });
+      } else if(h.type==='pv'){
+        var pvCalcBtn=document.getElementById(pid+'_calc');
+        if(pvCalcBtn)pvCalcBtn.addEventListener('click',function(){
+          var count=num(document.getElementById(pid+'_count').value,0);
+          var ageFactor=num(document.getElementById(pid+'_age').value,0.88);
+          var oriFactor=num(document.getElementById(pid+'_ori').value,1.0);
+          if(count<=0)return;
+          var wpPerPanel=400*ageFactor;
+          var effectiveKwp=(count*wpPerPanel/1000)*oriFactor;
+          var res=document.getElementById(pid+'_res');
+          if(res){
+            res.style.display='block';
+            var ageLabel=document.getElementById(pid+'_age').options[document.getElementById(pid+'_age').selectedIndex].text;
+            var oriLabel=document.getElementById(pid+'_ori').options[document.getElementById(pid+'_ori').selectedIndex].text;
+            res.innerHTML='<strong>Effectief vermogen: '+effectiveKwp.toFixed(1)+' kWp</strong><br>'+
+              '<span style="font-size:.85em;color:#555">'+count+' panelen \u00D7 400Wp \u00D7 '+Math.round(ageFactor*100)+'% ('+ageLabel+') \u00D7 '+Math.round(oriFactor*100)+'% ('+oriLabel+')</span><br>'+
+              '<button type="button" class="ai-apply-btn" id="'+pid+'_apply2">Overnemen \u2192</button>';
+            document.getElementById(pid+'_apply2').addEventListener('click',function(){
+              document.getElementById(fid).value=effectiveKwp.toFixed(1);
+              this.textContent='\u2713 Ingevuld!';this.disabled=true;
+            });
+          }
         });
       }
     },50);
@@ -322,9 +362,88 @@ window.computeAndRender=function(){
       '<p><strong>Totaal:</strong> H = '+fmt1(r.debug.H)+' W/K</p>'+
       '<p><strong>Zone:</strong> '+z.name+' \u00B7 '+z.hdd+' graaddagen</p>'+
       '<p><strong>Warmtevraag:</strong> '+fmt0(r.heatDemand)+' kWh/j</p>'+
-      '<p style="margin-top:10px;font-size:.85em;color:var(--text-light)">Bron: Infofrankrijk.com (Rob van der Meulen)</p>';
+      '<p style="margin-top:10px;font-size:.85em;color:var(--text-light)">Bron: Méthode 3CL-DPE 2021 · Infofrankrijk.com · Météo France</p>';
   }
+  // Store for AI and DF
+  window._lastState=s; window._lastResult=r;
 };
 function rw(l,val){return'<div class="result-row"><span class="label">'+l+'</span><span class="val">'+val+'</span></div>'}
+
+/* ═══ AI EXPLANATION ═══ */
+window.requestAIExplanation=function(){
+  var btn=$('#aiExplainBtn');
+  var div=$('#aiExplanation');
+  if(!btn||!div)return;
+  var s=window._lastState, r=window._lastResult;
+  if(!s||!r){btn.textContent='Bereken eerst het resultaat';return}
+  btn.textContent='Even geduld...';btn.disabled=true;
+  div.style.display='block';
+  div.innerHTML='<em>De AI-assistent analyseert uw resultaten...</em>';
+
+  fetch('/api/explain',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      zone:s.zone,totalCost:r.totalCost,perMonth:r.perMonth,
+      heatDemand:r.heatDemand,mainType:s.mainType,auxType:s.auxType,
+      wallU:s.wallU,roofU:s.roofU,floorU:s.floorU,winU:s.winU,
+      volume:s.volume,presentDays:s.presentDays,
+      costs:r.costs,verbruik:r.verbruik,debug:r.debug
+    })
+  }).then(function(resp){return resp.json()})
+  .then(function(data){
+    div.innerHTML=data.explanation||data.error||'Geen uitleg beschikbaar.';
+    btn.textContent='Opnieuw uitleggen';btn.disabled=false;
+  }).catch(function(){
+    div.innerHTML='<p>De AI-assistent is momenteel niet beschikbaar. Hieronder een samenvatting op basis van uw invoer:</p>'+buildFallbackExplanation(s,r);
+    btn.textContent='Opnieuw proberen';btn.disabled=false;
+  });
+};
+
+function buildFallbackExplanation(s,r){
+  var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
+  var ht={hp:'warmtepomp',elec:'elektrische verwarming',gas:'gasketel',fioul:'stookolieketel',pellet:'pelletketel',wood:'houtkachel'};
+  var biggest='verwarming';var bigVal=r.costs.verwarming;
+  if(r.costs.tapwater>bigVal){biggest='warm water';bigVal=r.costs.tapwater}
+  if(r.costs.apparaten>bigVal){biggest='apparaten';bigVal=r.costs.apparaten}
+  return'<p>Uw woning in de zone <strong>'+( zn[s.zone]||s.zone)+'</strong> met een verwarmd volume van <strong>'+s.volume+' m\u00B3</strong> en <strong>'+(ht[s.mainType]||s.mainType)+'</strong> als hoofdverwarming kost naar schatting <strong>'+eur(r.totalCost)+'</strong> per jaar aan energie.</p>'+
+    '<p>De grootste kostenpost is <strong>'+biggest+'</strong> ('+eur(bigVal)+'/jaar). '+
+    (s.winU>3?'<strong>Opvallend:</strong> uw ramen hebben een hoge U-waarde ('+s.winU+'). Dubbel glas zou hier al een groot verschil maken. ':'')+
+    (s.roofU>1?'<strong>Tip:</strong> uw dak is matig geïsoleerd (U='+s.roofU+'). Dakisolatie is vaak de meest rendabele investering. ':'')+
+    '</p><p style="font-size:.85em;color:var(--text-light)">Dit is een automatische samenvatting. Voor een uitgebreidere analyse, stel uw vraag aan Caf\u00E9 Claude op Infofrankrijk.com.</p>';
+}
+
+/* ═══ DOSSIERFRANRKIJK SAVE ═══ */
+window.saveToDF=function(){
+  var s=window._lastState, r=window._lastResult;
+  if(!s||!r){alert('Bereken eerst het resultaat.');return}
+  var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
+  var ht={hp:'Warmtepomp',elec:'Elektrisch',gas:'Gasketel',fioul:'Stookolie',pellet:'Pelletketel',wood:'Houtkachel'};
+
+  var titel='EnergiePortaal rapport — '+eur(r.totalCost)+'/jaar';
+  var inhoud='<h2>Energierapport</h2>'+
+    '<p><strong>Geschatte jaarkosten:</strong> '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)</p>'+
+    '<p><strong>Klimaatzone:</strong> '+(zn[s.zone]||s.zone)+'</p>'+
+    '<p><strong>Volume:</strong> '+s.volume+' m\u00B3 | <strong>Aanwezig:</strong> '+s.presentDays+' d/j</p>'+
+    '<p><strong>Verwarming:</strong> '+(ht[s.mainType]||s.mainType)+'</p>'+
+    '<h3>Kostenopbouw</h3>'+
+    '<p>Verwarming: '+eur(r.costs.verwarming)+'<br>Warm water: '+eur(r.costs.tapwater)+'<br>Apparaten: '+eur(r.costs.apparaten)+'</p>'+
+    '<h3>Isolatie</h3>'+
+    '<p>Muren: '+s.wallA+'m\u00B2, U='+s.wallU+' | Dak: '+s.roofA+'m\u00B2, U='+s.roofU+' | Vloer: '+s.floorA+'m\u00B2, U='+s.floorU+' | Ramen: '+s.winA+'m\u00B2, U='+s.winU+'</p>'+
+    '<h3>Berekening</h3>'+
+    '<p>Transmissie H='+fmt1(r.debug.UA)+' W/K | Ventilatie '+fmt1(r.debug.HventEff)+' W/K | Totaal H='+fmt1(r.debug.H)+' W/K</p>'+
+    '<p>Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar</p>'+
+    '<details><summary>Natuurkundige onderbouwing</summary>'+
+    '<p>Transmissieverlies: H_tr = \u03A3(U\u00D7A) — Wet van Fourier (1822)</p>'+
+    '<p>Ventilatieverlies: H_vent = 0,34 \u00D7 n \u00D7 V — \u03C1_lucht \u00D7 c_p / 3600</p>'+
+    '<p>Warmtevraag: E = H \u00D7 HDD \u00D7 24 / 1000 — graaddagenmethode</p>'+
+    '<p>Tapwater: Q = m \u00D7 c \u00D7 \u0394T — basisthermodynamica</p>'+
+    '<p>Warmtepomp: COP_max = T_warm / (T_warm \u2212 T_koud) — Carnotcyclus (1824)</p>'+
+    '</details>'+
+    '<p style="font-size:.85em;color:#666">Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com</p>';
+
+  var url='https://dossierfrankrijk.nl/nieuw?titel='+encodeURIComponent(titel)+'&inhoud='+encodeURIComponent(inhoud);
+  window.open(url,'_blank');
+};
 
 })();

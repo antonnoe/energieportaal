@@ -163,6 +163,16 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
 .ai-apply-btn{background:#0066cc;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:.88em;font-family:'Poppins',sans-serif;font-weight:600;cursor:pointer;margin-top:6px}
 .ai-apply-btn:hover{background:#004c99}
 
+/* ===== PHYSICS ACCORDION ===== */
+.physics-accordion{margin-bottom:8px;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.physics-accordion summary{padding:12px 16px;cursor:pointer;font-weight:600;font-size:.9em;color:var(--primary);background:var(--primary-light);list-style:none;display:flex;align-items:center;gap:8px}
+.physics-accordion summary::before{content:'▸';transition:transform .2s}
+.physics-accordion[open] summary::before{transform:rotate(90deg)}
+.physics-accordion summary::-webkit-details-marker{display:none}
+.physics-content{padding:14px 16px;font-size:.88em;line-height:1.7;background:var(--card)}
+.physics-content p{margin-bottom:8px}
+.formula{font-family:'Courier New',monospace;background:rgba(128,0,0,0.05);border:1px solid var(--border);border-radius:6px;padding:8px 14px;margin:8px 0;font-size:.95em;color:var(--primary);font-weight:600}
+
 /* ===== RESPONSIVE ===== */
 @media(max-width:600px){
     .field-row.two-col,.field-row.three-col,.field-row.four-col{grid-template-columns:1fr}
