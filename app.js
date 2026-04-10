@@ -696,7 +696,11 @@ window.generatePDF=function(){
 
 function doPrint(btn){
   setTimeout(function(){
+    // Tijdelijk titel aanpassen zodat browser "Energierapport — Infofrankrijk.com" toont ipv de URL
+    var origTitle=document.title;
+    document.title='Energierapport \u2014 Infofrankrijk.com';
     window.print();
+    document.title=origTitle;
     if(btn){btn.textContent='Rapport genereren (PDF) \u2192';btn.disabled=false}
   },300);
 }

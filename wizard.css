@@ -188,12 +188,14 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
 .screen-hide{display:none}
 
 @media print{
-    html,body{height:auto!important;overflow:visible!important}
-    .wizard{height:auto!important;overflow:visible!important;display:block!important}
+    /* Reset ALLE layout-beperkingen */
+    html,body{height:auto!important;width:auto!important;overflow:visible!important}
+    .wizard{display:block!important;height:auto!important;width:auto!important;overflow:visible!important}
     .wizard-nav,.slide-nav{display:none!important}
-    .slide{position:static!important;display:block!important;overflow:visible!important}
+    .slide-viewport{display:block!important;position:static!important;height:auto!important;overflow:visible!important;flex:none!important}
+    .slide{position:static!important;display:block!important;overflow:visible!important;height:auto!important;inset:auto!important}
     .slide:not([data-section="8"]){display:none!important}
-    .slide-viewport{overflow:visible!important;height:auto!important;position:static!important}
+    .slide-content{max-width:none!important;padding:0!important;overflow:visible!important}
     .dpe-modal-overlay{display:none!important}
     #dpeDetailBtn{display:none!important}
     #dpeCompactCard{display:none!important}
@@ -213,6 +215,8 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     #aiExplainBtn,#aiExplanation,.btn-ai,.btn-info,.field-header-btns{display:none!important}
     .result-card[style*="0066cc"]{display:none!important}
     a{color:inherit;text-decoration:none}
+    /* Verberg URL in footer */
+    @page{margin:15mm 10mm}
 }
 
 /* ═══ DPE MODAL ═══ */
