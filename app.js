@@ -772,60 +772,55 @@ window.saveToDF=function(){
 
   var titel='EnergiePortaal rapport \u2014 '+eur(r.totalCost)+'/jaar';
 
-  // Platte tekst (leesbaar in DF zonder HTML-rendering)
+  // Markdown formaat (DF rendert via ReactMarkdown + remarkGfm)
   var nl='\n';
-  var inhoud='ENERGIERAPPORT'+nl+
-    '══════════════════════════════════════'+nl+nl+
-    'Geschatte jaarkosten: '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)'+nl+
-    'Klimaatzone: '+(zn[s.zone]||s.zone)+nl+
-    'Volume: '+s.volume+' m\u00B3'+nl+
-    'Aanwezig: '+s.presentDaysWinter+' d winter (okt\u2013apr) + '+s.presentDaysSummer+' d zomer (mei\u2013sep)'+nl+
-    'Verwarming: '+(ht[s.mainType]||s.mainType)+nl+nl+
-    'KOSTENOPBOUW'+nl+
-    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
-    'Verwarming:  '+eur(r.costs.verwarming)+nl+
-    'Warm water:  '+eur(r.costs.tapwater)+nl+
-    'Apparaten:   '+eur(r.costs.apparaten)+nl;
-  if(Math.abs(r.costs.koeling)>1) inhoud+='Koeling:     '+eur(r.costs.koeling)+nl;
-  if(Math.abs(r.costs.ev)>1) inhoud+='EV:          '+eur(r.costs.ev)+nl;
-  if(Math.abs(r.costs.zwembad)>1) inhoud+='Zwembad:     '+eur(r.costs.zwembad)+nl;
-  if(Math.abs(r.costs.pvWaarde)>1) inhoud+='PV besparing: '+eur(r.costs.pvWaarde)+nl;
-  inhoud+=nl+
-    'ISOLATIE'+nl+
-    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
-    'Muren: '+s.wallA+'m\u00B2, U='+s.wallU+nl+
-    'Dak:   '+s.roofA+'m\u00B2, U='+s.roofU+nl+
-    'Vloer: '+s.floorA+'m\u00B2, U='+s.floorU+nl+
-    'Ramen: '+s.winA+'m\u00B2, U='+s.winU+nl+nl+
-    'BEREKENING'+nl+
-    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
-    'Transmissie: H = '+fmt1(r.debug.UA)+' W/K'+nl+
-    'Ventilatie:  H = '+fmt1(r.debug.HventEff)+' W/K'+nl+
-    'Totaal:      H = '+fmt1(r.debug.H)+' W/K'+nl+
-    'Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar'+nl+nl+
-    'DPE-INDICATIE'+nl+
-    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
-    'Energielabel: '+dpe2.letter+' ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)'+nl;
+  var inhoud='# Energierapport'+nl+nl+
+    '**Geschatte jaarkosten:** '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)'+nl+nl+
+    '| | |'+nl+'|---|---|'+nl+
+    '| Klimaatzone | '+(zn[s.zone]||s.zone)+' |'+nl+
+    '| Volume | '+s.volume+' m\u00B3 |'+nl+
+    '| Aanwezig | '+s.presentDaysWinter+' d winter + '+s.presentDaysSummer+' d zomer |'+nl+
+    '| Verwarming | '+(ht[s.mainType]||s.mainType)+' |'+nl+nl+
+    '## Kostenopbouw'+nl+nl+
+    '| Post | Bedrag |'+nl+'|---|---|'+nl+
+    '| Verwarming | '+eur(r.costs.verwarming)+' |'+nl+
+    '| Warm water | '+eur(r.costs.tapwater)+' |'+nl+
+    '| Apparaten | '+eur(r.costs.apparaten)+' |'+nl;
+  if(Math.abs(r.costs.koeling)>1) inhoud+='| Koeling | '+eur(r.costs.koeling)+' |'+nl;
+  if(Math.abs(r.costs.ev)>1) inhoud+='| EV | '+eur(r.costs.ev)+' |'+nl;
+  if(Math.abs(r.costs.zwembad)>1) inhoud+='| Zwembad | '+eur(r.costs.zwembad)+' |'+nl;
+  if(Math.abs(r.costs.pvWaarde)>1) inhoud+='| PV besparing | '+eur(r.costs.pvWaarde)+' |'+nl;
+  inhoud+='| **Totaal/jaar** | **'+eur(r.totalCost)+'** |'+nl+nl+
+    '## Isolatie'+nl+nl+
+    '| Onderdeel | Oppervlak | U-waarde |'+nl+'|---|---|---|'+nl+
+    '| Muren | '+s.wallA+' m\u00B2 | '+s.wallU+' |'+nl+
+    '| Dak | '+s.roofA+' m\u00B2 | '+s.roofU+' |'+nl+
+    '| Vloer | '+s.floorA+' m\u00B2 | '+s.floorU+' |'+nl+
+    '| Ramen | '+s.winA+' m\u00B2 | '+s.winU+' |'+nl+nl+
+    '## Berekening'+nl+nl+
+    '- Transmissie: H = '+fmt1(r.debug.UA)+' W/K'+nl+
+    '- Ventilatie: H = '+fmt1(r.debug.HventEff)+' W/K'+nl+
+    '- Totaal: H = '+fmt1(r.debug.H)+' W/K'+nl+
+    '- Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar'+nl+nl+
+    '## DPE-indicatie'+nl+nl+
+    '**Energielabel: '+dpe2.letter+'** ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)'+nl+nl;
   var ban4=VERHUURVERBODEN.find(function(v){return v.letter===dpe2.letter});
-  if(ban4) inhoud+='\u26A0 Verhuurverbod: '+ban4.tekst+nl;
+  if(ban4) inhoud+='\u26A0\uFE0F **Verhuurverbod:** '+ban4.tekst+nl+nl;
   if(dpe2.index>0){
     var better=DPE_KLASSEN[dpe2.index-1];
-    inhoud+='Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.'+nl;
+    inhoud+='Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.'+nl+nl;
   }
-  inhoud+=nl+
-    'Dit is een indicatieve DPE op basis van finale energie.'+nl+
-    'Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.'+nl+nl;
+  inhoud+='> \u26D6\uFE0F Dit is een simulatie-instrument. In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et R\u00E9silience, Arr\u00EAt\u00E9 du 31 mars 2021).'+nl+nl;
 
   // Besparingskansen toevoegen aan DF export
   var savingsEl=$('#savingsList');
   if(savingsEl&&savingsEl.children.length>0){
-    inhoud+='BESPARINGSKANSEN'+nl+
-      '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl;
+    inhoud+='## Besparingskansen'+nl+nl;
     var totalEl=$('#savingsTotal');
-    if(totalEl) inhoud+=totalEl.textContent+nl+nl;
+    if(totalEl) inhoud+='**'+totalEl.textContent+'**'+nl+nl;
   }
 
-  inhoud+='Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com';
+  inhoud+='---'+nl+'*Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com*';
 
   // Stuur via pending API (zoals Café Claude)
   var btn=$('#dfSaveBtn');
