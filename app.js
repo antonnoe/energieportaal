@@ -446,4 +446,119 @@ window.saveToDF=function(){
   window.open(url,'_blank');
 };
 
+/* ═══ DPE INDICATIE ═══ */
+var DPE_KLASSEN=[
+  {letter:'A',max:70,  kleur:'#009B4D'},
+  {letter:'B',max:110, kleur:'#52B74B'},
+  {letter:'C',max:180, kleur:'#C8D400'},
+  {letter:'D',max:250, kleur:'#FFED00'},
+  {letter:'E',max:330, kleur:'#F5A623'},
+  {letter:'F',max:420, kleur:'#E95D0F'},
+  {letter:'G',max:Infinity,kleur:'#E3001B'}
+];
+var VERHUURVERBODEN=[
+  {letter:'G',sinds:'1 januari 2025',tekst:'Woningen met label G mogen sinds 1 januari 2025 niet meer verhuurd worden met een nieuw huurcontract.'},
+  {letter:'F',sinds:'1 januari 2028',tekst:'Woningen met label F mogen vanaf 1 januari 2028 niet meer verhuurd worden met een nieuw huurcontract.'},
+  {letter:'E',sinds:'1 januari 2034',tekst:'Woningen met label E mogen vanaf 1 januari 2034 niet meer verhuurd worden met een nieuw huurcontract.'}
+];
+
+function getDPE(kwhM2){
+  for(var i=0;i<DPE_KLASSEN.length;i++){
+    if(kwhM2<=DPE_KLASSEN[i].max) return{letter:DPE_KLASSEN[i].letter,kleur:DPE_KLASSEN[i].kleur,index:i,kwhM2:kwhM2};
+  }
+  return{letter:'G',kleur:'#E3001B',index:6,kwhM2:kwhM2};
+}
+
+window.renderDPE=function(){
+  var noData=$('#dpeNoData'),content=$('#dpeContent');
+  if(!noData||!content)return;
+  var s=window._lastState,r=window._lastResult;
+  if(!s||!r){noData.style.display='block';content.style.display='none';return}
+  noData.style.display='none';content.style.display='block';
+
+  // Bereken oppervlak en kWh/m²
+  var floorA=Math.max(1,s.floorA||100);
+  // Totale finale energie: verwarming + tapwater + koeling + apparaten + EV + zwembad (bruto, vóór PV)
+  var totaalKwh=r.verbruik.heatMain+r.verbruik.heatAux+r.verbruik.tapwater+r.verbruik.brutoElec;
+  // Vermijd dubbeltellingen: brutoElec bevat al de elektra-component van verwarming/tapwater
+  // Dus: niet-elektra verwarming + niet-elektra tapwater + brutoElec
+  var mainDef=HEAT_MAIN_DEF.find(function(x){return x.key===s.mainType});
+  var auxDef=HEAT_AUX_DEF.find(function(x){return x.key===s.auxType})||{priceKey:null};
+  var dhwDef=DHW_TYPES_DEF.find(function(x){return x.key===s.dhwType})||{priceKey:null};
+  var nonElecHeat=(mainDef&&mainDef.priceKey!=='elec'?r.verbruik.heatMain:0)+(auxDef.priceKey!=='elec'?r.verbruik.heatAux:0);
+  var nonElecDhw=(dhwDef.priceKey!=='elec'?r.verbruik.tapwater:0);
+  totaalKwh=nonElecHeat+nonElecDhw+r.verbruik.brutoElec;
+  var kwhM2=totaalKwh/floorA;
+  var dpe=getDPE(kwhM2);
+
+  // Big letter
+  var bigEl=$('#dpeBigLetter');
+  if(bigEl){bigEl.textContent=dpe.letter;bigEl.style.backgroundColor=dpe.kleur}
+  var kwhEl=$('#dpeKwhM2');
+  if(kwhEl)kwhEl.textContent=Math.round(kwhM2)+' kWh/m²';
+
+  // DPE scale bars
+  var scaleEl=$('#dpeScale');
+  if(scaleEl){
+    var html='';
+    for(var i=0;i<DPE_KLASSEN.length;i++){
+      var k=DPE_KLASSEN[i];
+      var isCurrent=i===dpe.index;
+      var w=35+i*9;
+      var maxLabel=k.max===Infinity?'> 420':'\\u2264 '+k.max;
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+
+        '<div style="height:32px;width:'+w+'%;border-radius:0 8px 8px 0;background:'+k.kleur+';display:flex;align-items:center;padding:0 10px;color:#fff;font-weight:700;font-size:.85em;'+
+        (isCurrent?'box-shadow:0 0 0 3px #333,0 0 0 5px rgba(0,0,0,.15);':'opacity:.7;')+'">'+
+        k.letter+'<span style="margin-left:auto;font-size:.75em;font-weight:400;opacity:.9">'+maxLabel+'</span></div>'+
+        (isCurrent?'<span style="font-weight:700;font-size:.9em">◄ '+Math.round(kwhM2)+' kWh/m²</span>':'')+
+        '</div>';
+    }
+    scaleEl.innerHTML=html;
+  }
+
+  // Distance to next class
+  var distEl=$('#dpeDistance');
+  var distCard=$('#dpeDistanceCard');
+  if(distEl&&distCard){
+    var txt='';
+    if(dpe.index>0){
+      var betterClass=DPE_KLASSEN[dpe.index-1];
+      var needed=Math.round(kwhM2-betterClass.max);
+      txt+='<strong>Klasse '+betterClass.letter+' bereiken:</strong> u moet nog <strong>'+needed+' kWh/m²</strong> besparen (dat is '+Math.round(needed*floorA)+' kWh/jaar totaal).';
+    }else{
+      txt+='Uw woning valt in de beste energieklasse (A). Uitstekend!';
+    }
+    if(dpe.index<DPE_KLASSEN.length-1){
+      var worseClass=DPE_KLASSEN[dpe.index];
+      var margin=Math.round(worseClass.max-kwhM2);
+      if(dpe.index>0) txt+='<br><br>';
+      txt+='<strong>Marge tot klasse '+(DPE_KLASSEN[dpe.index+1]?DPE_KLASSEN[dpe.index+1].letter:'')+':</strong> u zit '+margin+' kWh/m² onder de grens van '+worseClass.max+' kWh/m².';
+    }
+    distEl.innerHTML=txt;
+    distCard.style.display='block';
+  }
+
+  // Rental ban
+  var rentalCard=$('#dpeRentalCard');
+  var rentalText=$('#dpeRentalText');
+  if(rentalCard&&rentalText){
+    var ban=VERHUURVERBODEN.find(function(v){return v.letter===dpe.letter});
+    if(ban){
+      rentalCard.style.display='block';
+      rentalText.innerHTML='<strong>'+ban.tekst+'</strong><br><br>Dit geldt voor de <em>passoires thermiques</em> (energielekken) volgens de Loi Climat et Résilience (2021). Als u uw woning verhuurt of wilt verhuren, is renovatie naar minimaal klasse E (vóór 2034: klasse D) vereist.';
+    }else if(dpe.letter==='D'||dpe.letter==='E'){
+      rentalCard.style.display='block';
+      rentalCard.style.background='rgba(245,166,35,0.08)';
+      rentalCard.style.borderColor='rgba(245,166,35,0.3)';
+      rentalCard.querySelector('h3').style.color='#F5A623';
+      rentalCard.querySelector('h3').innerHTML='⚠ Aandachtspunt verhuur';
+      rentalText.innerHTML=dpe.letter==='E'?
+        'Woningen met label E mogen vanaf <strong>1 januari 2034</strong> niet meer verhuurd worden met een nieuw huurcontract. U hebt nog tijd om te renoveren, maar plan vooruit.':
+        'Uw woning valt in klasse D. Momenteel is er geen verhuurverbod, maar de trend is dalend. Overweeg verbeteringen om waardevermindering te voorkomen.';
+    }else{
+      rentalCard.style.display='none';
+    }
+  }
+};
+
 })();
