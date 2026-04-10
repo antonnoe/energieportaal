@@ -802,7 +802,7 @@
         <div class="result-hero">
           <h2 class="slide-title">Uw Energierapport</h2>
           <div class="big-number" id="totalCost">€ —</div>
-          <div class="sub">Geschatte jaarlijkse energiekosten · <span id="perMonth">€ —</span> per maand</div>
+          <div class="sub">Geschatte jaarlijkse energiekosten · <span id="perMonth">€ —</span></div>
         </div>
 
         <!-- Kostenopbouw -->
@@ -854,8 +854,8 @@
           <div id="grondslagen" style="font-size:.88em;line-height:1.7;color:var(--text)"></div>
         </div>
 
-        <!-- AI Uitleg -->
-        <div class="result-card" style="background:rgba(0,102,204,0.04);border-color:rgba(0,102,204,0.2)">
+        <!-- AI Uitleg (verborgen in print — AI-analyse staat in print-blok) -->
+        <div class="result-card print-hide" style="background:rgba(0,102,204,0.04);border-color:rgba(0,102,204,0.2)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <span class="btn-ai" style="cursor:default;width:28px;height:28px;font-size:.7em">ai</span>
             <h3 style="margin:0">Wat betekent dit voor mij?</h3>
@@ -865,8 +865,8 @@
           <div id="aiExplanation" style="display:none;margin-top:12px;padding:14px;background:#fff;border-radius:8px;border:1px solid rgba(0,102,204,0.15);font-size:.9em;line-height:1.7"></div>
         </div>
 
-        <!-- Natuurkundige onderbouwing -->
-        <div class="result-card">
+        <!-- Natuurkundige onderbouwing (verborgen in print — dichtgeklapte accordeons zijn nutteloos in PDF) -->
+        <div class="result-card print-hide">
           <h3>Natuurkundige onderbouwing</h3>
           <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">De berekeningen in deze tool zijn gebaseerd op fundamentele warmteleer. Hieronder de volledige onderbouwing.</p>
 
@@ -943,8 +943,8 @@
           <strong>Disclaimer:</strong> Dit is een schattingstool bedoeld om inzicht te geven. De uitkomsten zijn indicatief (±15–25% bandbreedte) en vervangen geen professioneel energieadvies of officieel DPE-rapport.
         </div>
 
-        <!-- Opslaan in DossierFrankrijk -->
-        <div class="result-card" style="text-align:center;background:var(--primary-light)">
+        <!-- Opslaan in DossierFrankrijk (verborgen in print) -->
+        <div class="result-card print-hide" style="text-align:center;background:var(--primary-light)">
           <h3>Rapport opslaan</h3>
           <p style="font-size:.88em;color:var(--text-light);margin-bottom:12px">Sla dit energierapport op in uw persoonlijk dossier op DossierFrankrijk.</p>
           <button class="btn-primary" id="dfSaveBtn" onclick="saveToDF()">Opslaan in DossierFrankrijk →</button>

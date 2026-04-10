@@ -213,6 +213,7 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     .result-card h3{font-size:12pt;color:var(--primary)}
     #savingsCard{break-inside:avoid}
     #aiExplainBtn,#aiExplanation,.btn-ai,.btn-info,.field-header-btns{display:none!important}
+    .print-hide{display:none!important}
     .result-card[style*="0066cc"]{display:none!important}
     a{color:inherit;text-decoration:none}
     /* Verberg URL in footer */
