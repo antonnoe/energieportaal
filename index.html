@@ -150,10 +150,26 @@
           </div>
 
           <div class="field-row">
-            <div class="field">
-              <label>Hoeveel dagen per jaar bent u aanwezig?</label>
-              <input type="number" id="presentDays" value="260" min="0" max="365" step="1">
-              <div class="help">Permanent wonen: circa 340. Vakantiehuis: 30–120. Halftijds: 180.</div>
+            <div class="field" style="width:100%">
+              <label>Hoe gebruikt u de woning?</label>
+              <div id="presencePresets" class="preset-row" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0">
+                <button type="button" class="preset-btn presence-preset" data-w="200" data-s="145">🏠 Permanent</button>
+                <button type="button" class="preset-btn presence-preset" data-w="120" data-s="80">🏡 Halftijds</button>
+                <button type="button" class="preset-btn presence-preset" data-w="30" data-s="90">🌴 Zomervakantie</button>
+                <button type="button" class="preset-btn presence-preset" data-w="90" data-s="30">❄️ Winterverblijf</button>
+                <button type="button" class="preset-btn presence-preset active" data-w="0" data-s="0">✏️ Zelf invullen</button>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+                <div>
+                  <label style="font-size:.85em;font-weight:600">❄️ Winter <span class="unit">(okt–apr, max 212 d)</span></label>
+                  <input type="number" id="presentDaysWinter" value="155" min="0" max="212" step="1">
+                </div>
+                <div>
+                  <label style="font-size:.85em;font-weight:600">☀️ Zomer <span class="unit">(mei–sep, max 153 d)</span></label>
+                  <input type="number" id="presentDaysSummer" value="105" min="0" max="153" step="1">
+                </div>
+              </div>
+              <div class="help" id="presenceSummary" style="margin-top:6px">Totaal: 260 dagen/jaar aanwezig</div>
             </div>
           </div>
         </div>
