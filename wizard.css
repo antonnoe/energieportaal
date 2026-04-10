@@ -183,6 +183,9 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     .welcome-features{grid-template-columns:1fr}
     .result-hero .big-number{font-size:2.2em}
 }
+/* Screen-only hide (printbaar) */
+.screen-hide{display:none}
+
 @media print{
     .wizard-nav,.slide-nav{display:none!important}
     .slide{position:static!important;display:block!important;overflow:visible!important}
@@ -190,9 +193,9 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     .slide-viewport{overflow:visible!important}
     .dpe-modal-overlay{display:none!important}
     #dpeDetailBtn{display:none!important}
-    /* Print: toon DPE modal-content inline na het resultaat */
-    #dpePrintBlock{display:block!important;page-break-before:always}
-    #dpePrintBlock .dpe-modal-close,
+    /* Toon DPE print blok */
+    .screen-hide{display:block!important}
+    #dpePrintBlock{page-break-before:always}
     #dpePrintBlock button{display:none!important}
 }
 
