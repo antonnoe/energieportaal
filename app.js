@@ -502,46 +502,80 @@ window.saveToDF=function(){
   var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
   var ht={hp:'Warmtepomp',elec:'Elektrisch',gas:'Gasketel',fioul:'Stookolie',pellet:'Pelletketel',wood:'Houtkachel'};
 
-  var titel='EnergiePortaal rapport — '+eur(r.totalCost)+'/jaar';
-  var inhoud='<h2>Energierapport</h2>'+
-    '<p><strong>Geschatte jaarkosten:</strong> '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)</p>'+
-    '<p><strong>Klimaatzone:</strong> '+(zn[s.zone]||s.zone)+'</p>'+
-    '<p><strong>Volume:</strong> '+s.volume+' m\u00B3 | <strong>Aanwezig:</strong> '+s.presentDaysWinter+' d winter + '+s.presentDaysSummer+' d zomer</p>'+
-    '<p><strong>Verwarming:</strong> '+(ht[s.mainType]||s.mainType)+'</p>'+
-    '<h3>Kostenopbouw</h3>'+
-    '<p>Verwarming: '+eur(r.costs.verwarming)+'<br>Warm water: '+eur(r.costs.tapwater)+'<br>Apparaten: '+eur(r.costs.apparaten)+'</p>'+
-    '<h3>Isolatie</h3>'+
-    '<p>Muren: '+s.wallA+'m\u00B2, U='+s.wallU+' | Dak: '+s.roofA+'m\u00B2, U='+s.roofU+' | Vloer: '+s.floorA+'m\u00B2, U='+s.floorU+' | Ramen: '+s.winA+'m\u00B2, U='+s.winU+'</p>'+
-    '<h3>Berekening</h3>'+
-    '<p>Transmissie H='+fmt1(r.debug.UA)+' W/K | Ventilatie '+fmt1(r.debug.HventEff)+' W/K | Totaal H='+fmt1(r.debug.H)+' W/K</p>'+
-    '<p>Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar</p>'+
-    '<details><summary>Natuurkundige onderbouwing</summary>'+
-    '<p>Transmissieverlies: H_tr = \u03A3(U\u00D7A) — Wet van Fourier (1822)</p>'+
-    '<p>Ventilatieverlies: H_vent = 0,34 \u00D7 n \u00D7 V — \u03C1_lucht \u00D7 c_p / 3600</p>'+
-    '<p>Warmtevraag: E = H \u00D7 HDD \u00D7 24 / 1000 — graaddagenmethode</p>'+
-    '<p>Tapwater: Q = m \u00D7 c \u00D7 \u0394T — basisthermodynamica</p>'+
-    '<p>Warmtepomp: COP_max = T_warm / (T_warm \u2212 T_koud) — Carnotcyclus (1824)</p>'+
-    '</details>'+
-    '<h3>DPE-indicatie</h3>';
-
-  // DPE berekenen voor DF
+  // DPE berekenen
   var floorA2=Math.max(1,s.floorA||100);
   var dpeKwh2=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
   var kwhM22=dpeKwh2/floorA2;
   var dpe2=getDPE(kwhM22);
-  inhoud+='<p><strong>Energielabel: '+dpe2.letter+'</strong> ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)</p>';
+
+  var titel='EnergiePortaal rapport \u2014 '+eur(r.totalCost)+'/jaar';
+
+  // Platte tekst (leesbaar in DF zonder HTML-rendering)
+  var nl='\n';
+  var inhoud='ENERGIERAPPORT'+nl+
+    '══════════════════════════════════════'+nl+nl+
+    'Geschatte jaarkosten: '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)'+nl+
+    'Klimaatzone: '+(zn[s.zone]||s.zone)+nl+
+    'Volume: '+s.volume+' m\u00B3'+nl+
+    'Aanwezig: '+s.presentDaysWinter+' d winter (okt\u2013apr) + '+s.presentDaysSummer+' d zomer (mei\u2013sep)'+nl+
+    'Verwarming: '+(ht[s.mainType]||s.mainType)+nl+nl+
+    'KOSTENOPBOUW'+nl+
+    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
+    'Verwarming:  '+eur(r.costs.verwarming)+nl+
+    'Warm water:  '+eur(r.costs.tapwater)+nl+
+    'Apparaten:   '+eur(r.costs.apparaten)+nl;
+  if(Math.abs(r.costs.koeling)>1) inhoud+='Koeling:     '+eur(r.costs.koeling)+nl;
+  if(Math.abs(r.costs.ev)>1) inhoud+='EV:          '+eur(r.costs.ev)+nl;
+  if(Math.abs(r.costs.zwembad)>1) inhoud+='Zwembad:     '+eur(r.costs.zwembad)+nl;
+  if(Math.abs(r.costs.pvWaarde)>1) inhoud+='PV besparing: '+eur(r.costs.pvWaarde)+nl;
+  inhoud+=nl+
+    'ISOLATIE'+nl+
+    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
+    'Muren: '+s.wallA+'m\u00B2, U='+s.wallU+nl+
+    'Dak:   '+s.roofA+'m\u00B2, U='+s.roofU+nl+
+    'Vloer: '+s.floorA+'m\u00B2, U='+s.floorU+nl+
+    'Ramen: '+s.winA+'m\u00B2, U='+s.winU+nl+nl+
+    'BEREKENING'+nl+
+    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
+    'Transmissie: H = '+fmt1(r.debug.UA)+' W/K'+nl+
+    'Ventilatie:  H = '+fmt1(r.debug.HventEff)+' W/K'+nl+
+    'Totaal:      H = '+fmt1(r.debug.H)+' W/K'+nl+
+    'Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar'+nl+nl+
+    'DPE-INDICATIE'+nl+
+    '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl+
+    'Energielabel: '+dpe2.letter+' ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)'+nl;
   var ban4=VERHUURVERBODEN.find(function(v){return v.letter===dpe2.letter});
-  if(ban4) inhoud+='<p style="color:#dc3545"><strong>\u26A0 Verhuurverbod:</strong> '+ban4.tekst+'</p>';
+  if(ban4) inhoud+='\u26A0 Verhuurverbod: '+ban4.tekst+nl;
   if(dpe2.index>0){
     var better=DPE_KLASSEN[dpe2.index-1];
-    inhoud+='<p>Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.</p>';
+    inhoud+='Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.'+nl;
   }
-  inhoud+='<p style="font-size:.85em;color:#666">Dit is een indicatieve DPE op basis van finale energie. Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.</p>';
+  inhoud+=nl+
+    'Dit is een indicatieve DPE op basis van finale energie.'+nl+
+    'Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.'+nl+nl+
+    'Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com';
 
-  inhoud+='<p style="font-size:.85em;color:#666">Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com</p>';
-
-  var url='https://dossierfrankrijk.nl/nieuw?titel='+encodeURIComponent(titel)+'&inhoud='+encodeURIComponent(inhoud);
-  window.open(url,'_blank');
+  // Stuur via pending API (zoals Café Claude)
+  var btn=$('#dfSaveBtn');
+  if(btn){btn.textContent='Opslaan...';btn.disabled=true}
+  fetch('https://dossierfrankrijk.nl/api/pending',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({titel:titel,inhoud:inhoud})
+  }).then(function(resp){return resp.json()})
+  .then(function(data){
+    if(data.id){
+      window.open('https://dossierfrankrijk.nl/importeer?id='+data.id,'_blank');
+    }else{
+      // Fallback: directe URL
+      window.open('https://dossierfrankrijk.nl/nieuw?titel='+encodeURIComponent(titel)+'&inhoud='+encodeURIComponent(inhoud),'_blank');
+    }
+    if(btn){btn.textContent='Opslaan in DossierFrankrijk \u2192';btn.disabled=false}
+  }).catch(function(){
+    // Fallback: directe URL
+    window.open('https://dossierfrankrijk.nl/nieuw?titel='+encodeURIComponent(titel)+'&inhoud='+encodeURIComponent(inhoud),'_blank');
+    if(btn){btn.textContent='Opslaan in DossierFrankrijk \u2192';btn.disabled=false}
+  });
 };
 
 /* ═══ DPE INDICATIE ═══ */
