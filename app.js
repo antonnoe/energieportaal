@@ -403,8 +403,28 @@ window.computeAndRender=function(){
   }
   // Store for AI and DF
   window._lastState=s; window._lastResult=r;
+  // Trigger DPE render (compact card + modal data)
+  if(typeof renderDPE==='function') renderDPE();
 };
 function rw(l,val){return'<div class="result-row"><span class="label">'+l+'</span><span class="val">'+val+'</span></div>'}
+
+/* ═══ DPE MODAL ═══ */
+window.openDPEModal=function(){
+  var m=document.getElementById('dpeModal');
+  if(m){m.style.display='flex';document.body.style.overflow='hidden'}
+};
+window.closeDPEModal=function(){
+  var m=document.getElementById('dpeModal');
+  if(m){m.style.display='none';document.body.style.overflow=''}
+};
+// Close on overlay click
+document.addEventListener('click',function(e){
+  if(e.target&&e.target.id==='dpeModal') closeDPEModal();
+});
+// Close on Escape
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeDPEModal();
+});
 
 /* ═══ AI EXPLANATION ═══ */
 window.requestAIExplanation=function(){
@@ -612,6 +632,24 @@ window.renderDPE=function(){
         'Uw woning valt in klasse D. Momenteel is er geen verhuurverbod, maar de trend is dalend. Overweeg verbeteringen om waardevermindering te voorkomen.';
     }else{
       rentalCard.style.display='none';
+    }
+  }
+
+  // Compact card in resultaatscherm
+  var compactCard=$('#dpeCompactCard');
+  var compactLetter=$('#dpeBigLetterCompact');
+  var compactText=$('#dpeLetterText');
+  var compactKwh=$('#dpeKwhM2Compact');
+  var compactRental=$('#dpeRentalCompact');
+  if(compactCard){
+    compactCard.style.display='block';
+    if(compactLetter){compactLetter.textContent=dpe.letter;compactLetter.style.backgroundColor=dpe.kleur}
+    if(compactText)compactText.textContent='Klasse '+dpe.letter;
+    if(compactKwh)compactKwh.textContent=Math.round(kwhM2)+' kWh/m² per jaar';
+    if(compactRental){
+      var ban2=VERHUURVERBODEN.find(function(v){return v.letter===dpe.letter});
+      if(ban2){compactRental.style.display='block';compactRental.textContent='\u26A0 Verhuurverbod sinds '+ban2.sinds}
+      else{compactRental.style.display='none'}
     }
   }
 };

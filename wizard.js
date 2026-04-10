@@ -30,14 +30,9 @@
         if (typeof buildConfirm === 'function') buildConfirm(sec);
       }
 
-      // If navigating to result section, trigger calculation
+      // If navigating to result section, trigger calculation + DPE
       if (sec === '8') {
         if (typeof computeAndRender === 'function') computeAndRender();
-      }
-
-      // If navigating to DPE section, trigger DPE render
-      if (sec === '9') {
-        if (typeof renderDPE === 'function') renderDPE();
       }
 
       goTo(sec, phase);
@@ -47,11 +42,9 @@
     stepItems.forEach(function (item) {
       item.addEventListener('click', function () {
         var sec = parseInt(item.dataset.section, 10);
-        // DPE tab (9) is always clickable
-        if (sec === 9 || sec <= currentSection + 1) {
-          var phase = (sec === 1 || sec === 8 || sec === 9) ? 'main' : 'explain';
+        if (sec <= currentSection + 1) {
+          var phase = (sec === 1 || sec === 8) ? 'main' : 'explain';
           if (sec === 8 && typeof computeAndRender === 'function') computeAndRender();
-          if (sec === 9 && typeof renderDPE === 'function') renderDPE();
           goTo(String(sec), phase);
         }
       });

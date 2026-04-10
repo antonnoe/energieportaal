@@ -34,8 +34,6 @@
       <div class="step-item" data-section="7"><span class="step-num">6</span><span class="step-label">Elektra</span></div>
       <div class="step-connector"></div>
       <div class="step-item" data-section="8"><span class="step-num">✓</span><span class="step-label">Resultaat</span></div>
-      <div class="step-connector"></div>
-      <div class="step-item" data-section="9"><span class="step-num">⚡</span><span class="step-label">DPE</span></div>
     </div>
   </nav>
 
@@ -825,6 +823,19 @@
           <div id="costBars" class="bar-chart"></div>
         </div>
 
+        <!-- DPE Indicatie (compact) -->
+        <div class="result-card" id="dpeCompactCard" style="display:none;background:rgba(128,0,0,0.04);border-color:rgba(128,0,0,0.2)">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+            <div id="dpeBigLetterCompact" style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:12px;color:#fff;font-size:2em;font-weight:800;font-family:Poppins,sans-serif;flex-shrink:0"></div>
+            <div style="flex:1;min-width:180px">
+              <h3 style="margin:0 0 4px 0">DPE-indicatie: <span id="dpeLetterText"></span></h3>
+              <div id="dpeKwhM2Compact" style="font-size:1.1em;font-weight:600;color:var(--text)"></div>
+              <div id="dpeRentalCompact" style="font-size:.85em;color:#dc3545;margin-top:4px;display:none"></div>
+            </div>
+            <button class="btn-primary" id="dpeDetailBtn" style="font-size:.88em;padding:10px 18px;white-space:nowrap" onclick="openDPEModal()">Bekijk DPE details →</button>
+          </div>
+        </div>
+
         <!-- Grondslagen -->
         <div class="result-card">
           <h3>Berekeningsgrondslagen</h3>
@@ -934,65 +945,66 @@
       </div>
     </div>
 
-    <!-- ============================================================
-         DPE SECTION (section 9)
-         ============================================================ -->
-    <div class="slide" data-section="9" data-phase="main">
-      <div class="slide-content">
-        <h2 class="slide-title">DPE-indicatie</h2>
-        <p class="sub" style="margin-bottom:1.5em">Indicatief energielabel op basis van uw invoer — geen officiële DPE.</p>
+  </div><!-- /slide-viewport -->
+</div><!-- /wizard -->
 
-        <!-- Placeholder: filled by renderDPE() -->
-        <div id="dpeNoData" style="display:none">
-          <div class="result-card" style="text-align:center;padding:2em">
-            <p style="font-size:1.1em;color:var(--text-light)">Doorloop eerst de stappen en bekijk uw Resultaat om de DPE-indicatie te berekenen.</p>
-            <button class="btn-primary" data-go="1-main" style="margin-top:1em">← Naar Start</button>
-          </div>
-        </div>
+<!-- ============================================================
+     DPE MODAL
+     ============================================================ -->
+<div id="dpeModal" class="dpe-modal-overlay" style="display:none">
+  <div class="dpe-modal">
+    <div class="dpe-modal-header">
+      <h2 style="margin:0;font-family:Poppins,sans-serif;color:var(--primary)">⚡ DPE-indicatie</h2>
+      <button class="dpe-modal-close" onclick="closeDPEModal()" title="Sluiten">&times;</button>
+    </div>
+    <p class="sub" style="margin-bottom:1.5em">Indicatief energielabel op basis van uw invoer — geen officiële DPE.</p>
 
-        <div id="dpeContent" style="display:none">
-          <!-- Big letter + value -->
-          <div class="result-card" style="text-align:center;padding:1.5em">
-            <div id="dpeBigLetter" style="display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:16px;color:#fff;font-size:2.5em;font-weight:800;font-family:Poppins,sans-serif;margin-bottom:12px"></div>
-            <div id="dpeKwhM2" style="font-size:1.8em;font-weight:700;color:var(--text)"></div>
-            <div style="font-size:.88em;color:var(--text-light);margin-top:4px">kWh/m² per jaar (finale energie)</div>
-          </div>
-
-          <!-- DPE bar scale -->
-          <div class="result-card">
-            <h3>DPE-schaal</h3>
-            <div id="dpeScale" style="margin:1em 0"></div>
-          </div>
-
-          <!-- Distance to next class -->
-          <div class="result-card" id="dpeDistanceCard">
-            <h3>Afstand tot volgende klasse</h3>
-            <p id="dpeDistance" style="line-height:1.7"></p>
-          </div>
-
-          <!-- Rental ban warning -->
-          <div class="result-card" id="dpeRentalCard" style="display:none;background:rgba(220,53,69,0.06);border-color:rgba(220,53,69,0.3)">
-            <h3 style="color:#dc3545">⚠ Verhuurverbod</h3>
-            <p id="dpeRentalText" style="line-height:1.7"></p>
-          </div>
-
-          <!-- Explanation -->
-          <div class="result-card" style="background:var(--primary-light)">
-            <h3>Wat is de DPE?</h3>
-            <p style="line-height:1.7;font-size:.9em">Het <strong>Diagnostic de Performance Énergétique</strong> (DPE) is het Franse energielabel. Sinds 2023 is het juridisch bindend bij verkoop en verhuur. De schaal loopt van A (zeer zuinig, ≤ 70 kWh/m²) tot G (energielek, > 420 kWh/m²).</p>
-            <p style="line-height:1.7;font-size:.9em;margin-top:8px">Deze indicatie is gebaseerd op <strong>finale energie</strong> en uw invoer. Een officiële DPE vereist een gecertificeerde diagnostiqueur die rekent met de 3CL-DPE methode, primaire energie en een dubbele drempel (energie + CO₂).</p>
-            <p style="line-height:1.7;font-size:.85em;color:var(--text-light);margin-top:8px">Bron: Arrêté du 31 mars 2021, Méthode 3CL-DPE 2021 · Ministère de la Transition Écologique</p>
-          </div>
-        </div>
-
-        <div class="slide-nav" style="margin-top:16px">
-          <button class="btn-secondary" data-go="8-main">← Terug naar Resultaat</button>
-        </div>
+    <div id="dpeNoData" style="display:none">
+      <div class="result-card" style="text-align:center;padding:2em">
+        <p style="font-size:1.1em;color:var(--text-light)">Doorloop eerst de stappen en bekijk uw Resultaat om de DPE-indicatie te berekenen.</p>
       </div>
     </div>
 
-  </div><!-- /slide-viewport -->
-</div><!-- /wizard -->
+    <div id="dpeContent" style="display:none">
+      <!-- Big letter + value -->
+      <div class="result-card" style="text-align:center;padding:1.5em">
+        <div id="dpeBigLetter" style="display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:16px;color:#fff;font-size:2.5em;font-weight:800;font-family:Poppins,sans-serif;margin-bottom:12px"></div>
+        <div id="dpeKwhM2" style="font-size:1.8em;font-weight:700;color:var(--text)"></div>
+        <div style="font-size:.88em;color:var(--text-light);margin-top:4px">kWh/m² per jaar (finale energie)</div>
+      </div>
+
+      <!-- DPE bar scale -->
+      <div class="result-card">
+        <h3>DPE-schaal</h3>
+        <div id="dpeScale" style="margin:1em 0"></div>
+      </div>
+
+      <!-- Distance to next class -->
+      <div class="result-card" id="dpeDistanceCard">
+        <h3>Afstand tot volgende klasse</h3>
+        <p id="dpeDistance" style="line-height:1.7"></p>
+      </div>
+
+      <!-- Rental ban warning -->
+      <div class="result-card" id="dpeRentalCard" style="display:none;background:rgba(220,53,69,0.06);border-color:rgba(220,53,69,0.3)">
+        <h3 style="color:#dc3545">⚠ Verhuurverbod</h3>
+        <p id="dpeRentalText" style="line-height:1.7"></p>
+      </div>
+
+      <!-- Explanation -->
+      <div class="result-card" style="background:var(--primary-light)">
+        <h3>Wat is de DPE?</h3>
+        <p style="line-height:1.7;font-size:.9em">Het <strong>Diagnostic de Performance Énergétique</strong> (DPE) is het Franse energielabel. Sinds 2023 is het juridisch bindend bij verkoop en verhuur. De schaal loopt van A (zeer zuinig, ≤ 70 kWh/m²) tot G (energielek, > 420 kWh/m²).</p>
+        <p style="line-height:1.7;font-size:.9em;margin-top:8px">Deze indicatie is gebaseerd op <strong>finale energie</strong> en uw invoer. Een officiële DPE vereist een gecertificeerde diagnostiqueur die rekent met de 3CL-DPE methode, primaire energie en een dubbele drempel (energie + CO₂).</p>
+        <p style="line-height:1.7;font-size:.85em;color:var(--text-light);margin-top:8px">Bron: Arrêté du 31 mars 2021, Méthode 3CL-DPE 2021 · Ministère de la Transition Écologique</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-primary" onclick="closeDPEModal()">Sluiten</button>
+    </div>
+  </div>
+</div>
 
 <!-- Scripts: engine first (data + calc), then wizard (nav), then app (UI logic) -->
 <script src="engine/tool-spec.js"></script>
