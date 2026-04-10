@@ -369,25 +369,30 @@ function buildPriceInputs(){
 function fetchLivePrices(){
   fetch('/api/prices').then(function(r){return r.json()}).then(function(data){
     if(!data||!data.elec)return;
-    var CONV={elec:1,gas:10,fioul:1,pellet:1,wood:1,propaan:1,petroleum:1};
-    // engine.js PRICE_DEFAULTS_USER is in gebruikerseenheden, API ook
     Object.keys(data).forEach(function(k){
-      if(k==='updated')return;
+      if(k==='updated'||k==='staleWarning')return;
       var p=data[k];if(!p||!p.value)return;
       var inp=document.getElementById('price_'+k);
       var src=document.getElementById('price_src_'+k);
       if(inp){
         inp.value=p.value;
-        // Update ook de default zodat gatherState het overneemt
         if(typeof PRICE_DEFAULTS_USER!=='undefined') PRICE_DEFAULTS_USER[k]=p.value;
       }
       if(src){
-        var badge=p.auto?'\u{1F7E2}':'\u{1F7E1}';
-        src.innerHTML=badge+' '+p.source+', '+p.date;
+        var badge=p.auto?'\u{1F7E2}':p.stale?'\u{1F534}':'\u{1F7E1}';
+        src.innerHTML=badge+' '+p.source+', '+p.date+(p.stale?' <strong style="color:#dc3545">(verouderd)</strong>':'');
       }
     });
     var info=$('#priceUpdateInfo');
-    if(info) info.innerHTML='Prijzen opgehaald: '+data.updated+(Object.values(data).some(function(v){return v&&v.auto})?'<br><span style="font-size:.9em">\u{1F7E2} = live opgehaald \u{1F7E1} = referentiewaarde</span>':'');
+    if(info){
+      var legend='\u{1F7E2} = live opgehaald \u{1F7E1} = referentiewaarde \u{1F534} = verouderd (>4 mnd)';
+      var html='Prijzen opgehaald: '+data.updated+'<br><span style="font-size:.9em">'+legend+'</span>';
+      if(data.staleWarning){
+        html+='<div style="margin-top:8px;padding:8px 12px;background:rgba(220,53,69,0.08);border-left:3px solid #dc3545;border-radius:0 6px 6px 0;font-size:.9em;color:#dc3545">'+
+          '<strong>\u26A0 '+data.staleWarning+'</strong><br>Pas de waarde handmatig aan op basis van uw meest recente factuur.</div>';
+      }
+      info.innerHTML=html;
+    }
   }).catch(function(){
     // Stil falen — hardcoded defaults blijven staan
   });
