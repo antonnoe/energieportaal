@@ -62,6 +62,24 @@ export default async function handler(req, res) {
     }
   } catch (e) { /* fallback */ }
 
+  // === FIOUL: scrape Sodif Fioul E.Leclerc ===
+  try {
+    const fioulResp = await fetch('https://www.sodif.fioul.leclerc/calcul-prix-fioul');
+    if (fioulResp.ok) {
+      const html = await fioulResp.text();
+      // Zoek de prijs voor 1000-1999L (meest representatief voor huishouden)
+      // Patroon in de tabel: "de 1000 à 1999 L" gevolgd door "X.XXX €TTC"
+      const match = html.match(/1000\s*[àa]\s*1999\s*L[^]*?(\d+[,.]\d{2,3})\s*€\s*TTC/i);
+      if (match) {
+        const val = parseFloat(match[1].replace(',', '.'));
+        if (val > 0.50 && val < 3.00) {
+          const dateLabel = now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+          prices.fioul = { value: Math.round(val * 1000) / 1000, unit: '€/L', source: 'Sodif Fioul E.Leclerc (1000-1999L, IdF)', date: dateLabel, refDate: now.toISOString().slice(0,10), auto: true };
+        }
+      }
+    }
+  } catch (e) { /* fallback */ }
+
   // === STALENESS CHECK ===
   const staleItems = [];
   for (const [key, p] of Object.entries(prices)) {
