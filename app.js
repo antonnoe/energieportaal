@@ -380,19 +380,34 @@ window.requestAIExplanation=function(){
   div.style.display='block';
   div.innerHTML='<em>De AI-assistent analyseert uw resultaten...</em>';
 
-  fetch('/api/explain',{
+  fetch('https://if-tools-api.vercel.app/api/energy-explain',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
       zone:s.zone,totalCost:r.totalCost,perMonth:r.perMonth,
       heatDemand:r.heatDemand,mainType:s.mainType,auxType:s.auxType,
+      mainScop:s.mainScop,mainEta:s.mainEta,
       wallU:s.wallU,roofU:s.roofU,floorU:s.floorU,winU:s.winU,
+      wallA:s.wallA,roofA:s.roofA,floorA:s.floorA,winA:s.winA,
       volume:s.volume,presentDays:s.presentDays,
+      setpoint:s.setpoint,awaySetpoint:s.awaySetpoint,
+      ach:s.ach,persons:s.persons,pvKwp:s.pvKwp,
       costs:r.costs,verbruik:r.verbruik,debug:r.debug
     })
   }).then(function(resp){return resp.json()})
   .then(function(data){
-    div.innerHTML=data.explanation||data.error||'Geen uitleg beschikbaar.';
+    var html=data.explanation||data.error||'Geen uitleg beschikbaar.';
+    // Toon plausibiliteitswaarschuwingen als die er zijn
+    if(data.warnings&&data.warnings.length>0){
+      html+='<div style="margin-top:16px;padding:12px 16px;background:rgba(245,166,35,0.08);border-left:4px solid #F5A623;border-radius:0 6px 6px 0;font-size:.88em">';
+      html+='<strong style="color:#E95D0F">Plausibiliteitscheck:</strong><br>';
+      data.warnings.forEach(function(w){
+        var icon=w.ernst==='fout'?'🔴':w.ernst==='waarschuwing'?'🟡':'🔵';
+        html+=icon+' <strong>'+w.veld+':</strong> '+w.probleem+'<br>';
+      });
+      html+='</div>';
+    }
+    div.innerHTML=html;
     btn.textContent='Opnieuw uitleggen';btn.disabled=false;
   }).catch(function(){
     div.innerHTML='<p>De AI-assistent is momenteel niet beschikbaar. Hieronder een samenvatting op basis van uw invoer:</p>'+buildFallbackExplanation(s,r);
