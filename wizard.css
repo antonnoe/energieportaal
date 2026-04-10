@@ -188,16 +188,20 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
 .screen-hide{display:none}
 
 @media print{
+    html,body{height:auto!important;overflow:visible!important}
+    .wizard{height:auto!important;overflow:visible!important;display:block!important}
     .wizard-nav,.slide-nav{display:none!important}
     .slide{position:static!important;display:block!important;overflow:visible!important}
     .slide:not([data-section="8"]){display:none!important}
-    .slide-viewport{overflow:visible!important}
+    .slide-viewport{overflow:visible!important;height:auto!important;position:static!important}
     .dpe-modal-overlay{display:none!important}
     #dpeDetailBtn{display:none!important}
     #dpeCompactCard{display:none!important}
     /* Toon print-only blokken */
     .screen-hide{display:block!important}
     #dpePrintBlock{page-break-before:always}
+    #savingsPrintBlock{page-break-before:always}
+    #aiPrintBlock{page-break-before:always}
     #dpePrintBlock button{display:none!important}
     /* Rapport styling */
     body{font-size:11pt;color:#222}
