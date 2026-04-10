@@ -137,13 +137,14 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
 .sources strong{color:var(--primary)}
 
 /* ===== INFO [i] & AI [ai] BUTTONS ===== */
-.field-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
-.field-header label{margin-bottom:0}
-.btn-info,.btn-ai{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:.72em;font-weight:800;font-family:'Poppins',sans-serif;transition:all .15s;flex-shrink:0;padding:0;line-height:1}
+.field-header{display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap}
+.field-header label{margin-bottom:0;flex:1}
+.field-header-btns{display:flex;gap:5px;flex-shrink:0}
+.btn-info,.btn-ai{display:inline-flex;align-items:center;justify-content:center;gap:4px;height:28px;border-radius:14px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:.75em;font-weight:700;font-family:'Poppins',sans-serif;transition:all .15s;flex-shrink:0;padding:0 10px;line-height:1;white-space:nowrap}
 .btn-info{color:var(--primary);border-color:var(--primary)}
-.btn-info:hover{background:var(--primary);color:#fff}
-.btn-ai{color:#0066cc;border-color:#0066cc;font-size:.65em;width:26px;height:26px}
-.btn-ai:hover{background:#0066cc;color:#fff}
+.btn-info:hover,.btn-info.active{background:var(--primary);color:#fff}
+.btn-ai{color:#0066cc;border-color:#0066cc}
+.btn-ai:hover,.btn-ai.active{background:#0066cc;color:#fff}
 
 /* Info panel (expands below field) */
 .info-panel{display:none;background:rgba(128,0,0,0.04);border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:12px 14px;margin-top:6px;font-size:.86em;line-height:1.7;color:var(--text);animation:fadeIn .2s ease}

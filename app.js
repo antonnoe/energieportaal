@@ -115,8 +115,11 @@ function injectInfoButtons(){
     var lbl=field.querySelector('label'); if(!lbl)return;
     var hdr=document.createElement('div'); hdr.className='field-header';
     lbl.parentNode.insertBefore(hdr,lbl); hdr.appendChild(lbl);
-    var btn=document.createElement('button'); btn.type='button'; btn.className='btn-info'; btn.textContent='i'; btn.title='Meer uitleg';
-    hdr.appendChild(btn);
+    // Button wrapper (holds both i and ai buttons)
+    var wrap=field._btnWrap;
+    if(!wrap){wrap=document.createElement('div');wrap.className='field-header-btns';hdr.appendChild(wrap);field._btnWrap=wrap}
+    var btn=document.createElement('button'); btn.type='button'; btn.className='btn-info'; btn.innerHTML='\u2139 Uitleg'; btn.title='Meer uitleg';
+    wrap.appendChild(btn);
     var panel=document.createElement('div'); panel.className='info-panel';
     panel.innerHTML=INFO[fid].text+(INFO[fid].source?'<div class="info-source">Bron: '+INFO[fid].source+'</div>':'');
     var help=field.querySelector('.help');
@@ -137,8 +140,11 @@ function injectAIHelpers(){
     var field=inp.closest('.field'); if(!field)return;
     var hdr=field.querySelector('.field-header'); if(!hdr)return;
     var h=AI[fid];
-    var btn=document.createElement('button'); btn.type='button'; btn.className='btn-ai'; btn.textContent='ai'; btn.title=h.title;
-    hdr.appendChild(btn);
+    // Use existing button wrapper or create one
+    var wrap=field._btnWrap;
+    if(!wrap){wrap=document.createElement('div');wrap.className='field-header-btns';hdr.appendChild(wrap);field._btnWrap=wrap}
+    var btn=document.createElement('button'); btn.type='button'; btn.className='btn-ai'; btn.innerHTML='\u{1F916} Assistent'; btn.title=h.title;
+    wrap.appendChild(btn);
     var panel=document.createElement('div'); panel.className='ai-panel';
     var pid='aip_'+fid;
     var html='<h4>\u{1F916} '+h.title+'</h4><p>'+h.desc+'</p>';
