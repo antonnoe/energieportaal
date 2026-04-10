@@ -450,8 +450,21 @@ window.buildConfirm=function(sec){
       if(v('auxType')!=='none')h+=c('Aandeel',(v('auxSharePreset')==='custom'?v('auxShareCustom'):v('auxSharePreset'))+'%');break;
     case'6':h=c('Personen',v('persons'))+c('Douches',v('showersPerPerson')+'/dag')+c('Liter/douche',v('litersPer')+' L');
       var dl=DHW_TYPES_DEF.find(function(x){return x.key===v('dhwType')});h+=c('Warmwater',dl?dl.label:v('dhwType'));break;
-    case'7':h=c('PV',num(v('pvKwp'))>0?v('pvKwp')+' kWp':'Geen')+c('EV',num(v('evKmWeek'))>0?v('evKmWeek')+' km/wk':'Geen')+
-      c('Airco',$('#acOn')&&$('#acOn').checked?'Ja':'Nee')+c('Zwembad',$('#poolHas')&&$('#poolHas').checked?'Ja':'Nee');break;
+    case'7':
+      h=c('Zonnepanelen',num(v('pvKwp'))>0?v('pvKwp')+' kWp, '+v('pvSelfUse')+'% eigen':'Geen');
+      if(num(v('pvKwp'))>0&&v('pvExportMode')!=='nvt') h+=c('Teruglevering',v('pvExportMode')==='vente'?'Vente du surplus':'Eigen tarief');
+      // Apparaten: tel actieve kWh
+      var appTotal=0;
+      DEFAULT_APPLIANCES.forEach(function(a,i){var cb=document.getElementById('appl_on_'+i);var kw=document.getElementById('appl_kwh_'+i);if(cb&&cb.checked&&kw)appTotal+=num(kw.value,a.kwh)});
+      h+=c('Apparaten',fmt0(appTotal)+' kWh/j ('+(DEFAULT_APPLIANCES.filter(function(a,i){var cb=document.getElementById('appl_on_'+i);return cb&&cb.checked}).length)+' actief)');
+      h+=c('EV',num(v('evKmWeek'))>0?v('evKmWeek')+' km/wk':'Geen');
+      h+=c('Airco',$('#acOn')&&$('#acOn').checked?'Ja (SEER '+v('seer')+')':'Nee');
+      h+=c('Zwembad',$('#poolHas')&&$('#poolHas').checked?'Ja, '+v('poolVol')+' m\u00B3':'Nee');
+      // Prijzen samenvatting
+      var elP=document.getElementById('price_elec'),gasP=document.getElementById('price_gas');
+      if(elP) h+=c('Elektriciteit',elP.value+' \u20AC/kWh');
+      if(gasP) h+=c('Gas',gasP.value+' \u20AC/m\u00B3');
+      break;
   }
   el.innerHTML=h;
 };
