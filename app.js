@@ -505,8 +505,9 @@ window.computeAndRender=function(){
   window._lastState=s; window._lastResult=r;
   // Trigger DPE render (compact card + modal data)
   if(typeof renderDPE==='function') renderDPE();
-  // Trigger savings calculation
+  // Trigger savings + subsidies
   renderSavings(s,r);
+  renderSubsidies(s,r);
 };
 function rw(l,val){return'<div class="result-row"><span class="label">'+l+'</span><span class="val">'+val+'</span></div>'}
 
@@ -632,6 +633,88 @@ document.addEventListener('click',function(e){
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape') closeDPEModal();
 });
+
+/* ═══ SUBSIDIES ═══ */
+function renderSubsidies(s,r){
+  var card=$('#subsidieCard');
+  var list=$('#subsidieList');
+  if(!card||!list)return;
+
+  // DPE berekenen
+  var floorA=Math.max(1,s.floorA||100);
+  var dpeKwh=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
+  var kwhM2=dpeKwh/floorA;
+  var dpe=getDPE(kwhM2);
+
+  var subs=[];
+
+  // MaPrimeRénov' Geste — altijd beschikbaar voor résidence principale
+  subs.push({
+    icon:'\u{1F3E0}',
+    name:'MaPrimeR\u00E9nov\u2019 Geste',
+    desc:'Eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie). Bedrag afhankelijk van inkomen en maatregel.',
+    status:'Beschikbaar',
+    color:'#009B4D'
+  });
+
+  // MaPrimeRénov' Ampleur — alleen bij DPE E/F/G
+  if(dpe.index>=4){
+    subs.push({
+      icon:'\u{1F3D7}\uFE0F',
+      name:'MaPrimeR\u00E9nov\u2019 Ampleur',
+      desc:'Combinatierenovatie met \u22652 sprongen op DPE-schaal. Tot \u20AC70.000 subsidie. DPE '+dpe.letter+' komt in aanmerking.',
+      status:'Uw woning komt in aanmerking (DPE '+dpe.letter+')',
+      color:'#009B4D'
+    });
+  } else {
+    subs.push({
+      icon:'\u{1F3D7}\uFE0F',
+      name:'MaPrimeR\u00E9nov\u2019 Ampleur',
+      desc:'Combinatierenovatie, vereist DPE E, F of G. Uw woning heeft DPE '+dpe.letter+'.',
+      status:'Niet van toepassing (DPE '+dpe.letter+')',
+      color:'#999'
+    });
+  }
+
+  // CEE
+  subs.push({
+    icon:'\u{1F4B6}',
+    name:'CEE (Certificats d\u2019\u00C9conomies d\u2019\u00C9nergie)',
+    desc:'Premies via uw energieleverancier. Cumuleerbaar met MaPrimeR\u00E9nov\u2019. Open voor alle woningen ouder dan 2 jaar.',
+    status:'Beschikbaar',
+    color:'#009B4D'
+  });
+
+  // Éco-PTZ
+  subs.push({
+    icon:'\u{1F3E6}',
+    name:'\u00C9co-PTZ (rentevrije lening)',
+    desc:'Tot \u20AC50.000 via een erkende bank. Geen inkomensvoorwaarde. Looptijd tot 20 jaar.',
+    status:'Beschikbaar',
+    color:'#009B4D'
+  });
+
+  // TVA 5,5%
+  subs.push({
+    icon:'\u{1F4CB}',
+    name:'TVA r\u00E9duite 5,5%',
+    desc:'Verlaagd btw-tarief op arbeid \u00E9n materiaal voor energierenovatie. Automatisch toegepast door de aannemer.',
+    status:'Automatisch',
+    color:'#009B4D'
+  });
+
+  card.style.display='block';
+  list.innerHTML=subs.map(function(sub){
+    return'<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid rgba(0,102,204,0.1)">'+
+      '<span style="font-size:1.2em;flex-shrink:0">'+sub.icon+'</span>'+
+      '<div style="flex:1">'+
+        '<div style="font-weight:700;font-size:.92em">'+sub.name+'</div>'+
+        '<div style="font-size:.84em;color:var(--text-light)">'+sub.desc+'</div>'+
+      '</div>'+
+      '<div style="font-size:.82em;font-weight:600;color:'+sub.color+';white-space:nowrap;flex-shrink:0">'+sub.status+'</div>'+
+    '</div>';
+  }).join('');
+}
 
 /* ═══ PDF RAPPORT ═══ */
 window.generatePDF=function(){
@@ -836,6 +919,15 @@ window.saveToDF=function(){
     var totalEl=$('#savingsTotal');
     if(totalEl) inhoud+='**'+totalEl.textContent+'**'+nl+nl;
   }
+
+  // Subsidies
+  inhoud+='## Subsidies voor energierenovatie'+nl+nl+
+    '- **MaPrimeR\u00E9nov\u2019 Geste** \u2014 eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie)'+nl+
+    '- **MaPrimeR\u00E9nov\u2019 Ampleur** \u2014 combinatierenovatie, vereist DPE E/F/G'+(dpe2.index>=4?' **(uw woning komt in aanmerking)**':'')+''+nl+
+    '- **CEE** \u2014 premies via uw energieleverancier, cumuleerbaar'+nl+
+    '- **\u00C9co-PTZ** \u2014 rentevrije lening tot \u20AC50.000'+nl+
+    '- **TVA 5,5%** \u2014 verlaagd btw-tarief op renovatiewerken'+nl+nl+
+    '> Sinds 23 feb 2026: afspraak bij France R\u00E9nov\u2019 verplicht v\u00F3\u00F3r elke MPR-aanvraag. De meeste subsidies moeten v\u00F3\u00F3r aanvang van de werken worden aangevraagd.'+nl+nl;
 
   inhoud+='---'+nl+'*Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com*';
 
