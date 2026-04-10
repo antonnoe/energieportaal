@@ -189,6 +189,11 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     .slide:not([data-section="8"]){display:none!important}
     .slide-viewport{overflow:visible!important}
     .dpe-modal-overlay{display:none!important}
+    #dpeDetailBtn{display:none!important}
+    /* Print: toon DPE modal-content inline na het resultaat */
+    #dpePrintBlock{display:block!important;page-break-before:always}
+    #dpePrintBlock .dpe-modal-close,
+    #dpePrintBlock button{display:none!important}
 }
 
 /* ═══ DPE MODAL ═══ */
