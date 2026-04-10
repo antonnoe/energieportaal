@@ -16,7 +16,7 @@ var INFO={
 zone:{text:'<strong>Klimaatzone</strong> — Frankrijk kent 6 klimaatzones, van de warme Middellandse Zeekust tot koude berggebieden. De zone bepaalt het aantal <em>graaddagen</em>: hoe meer graaddagen, hoe meer u stookt. Kies bij twijfel de koudere optie.',source:'Météo France klimaatnormalen · Infofrankrijk.com/klussen/verwarming'},
 setpoint:{text:'<strong>Binnentemperatuur</strong> — De temperatuur die u prettig vindt. In Frankrijk is 19°C de officiële ADEME-aanbeveling. Elke graad hoger kost circa 7% meer energie. De meeste Nederlanders kiezen 20–21°C.',source:'ADEME, Guide Chauffage 2024'},
 awaySetpoint:{text:'<strong>Vorstbescherming</strong> — Minimaal 7°C om bevriezing van leidingen te voorkomen. Vakantiehuis dat maandenlang leegstaat: 10–12°C.'},
-presentDays:{text:'<strong>Aanwezigheidsdagen</strong> — Hoeveel dagen per jaar u het huis bewoont en verwarmt.<br><br>🏠 Permanent: 330–350 dagen<br>🏡 Halftijds: 150–200 dagen<br>🌴 Vakantie: 30–120 dagen'},
+presentDaysWinter:{text:'<strong>Aanwezigheidsdagen per seizoen</strong> — Verdeel uw aanwezigheid over winter (oktober–april, 212 dagen) en zomer (mei–september, 153 dagen).<br><br>Dit is belangrijk omdat verwarming vooral in de winter speelt. Een vakantiehuis dat alleen in de zomer wordt gebruikt kost veel minder dan een winterverblijf.<br><br>🏠 Permanent: ~200 winter + ~145 zomer<br>🏡 Halftijds: ~120 winter + ~80 zomer<br>🌴 Zomervakantie: ~30 winter + ~90 zomer<br>❄️ Winterverblijf: ~90 winter + ~30 zomer'},
 volume:{text:'<strong>Verwarmd volume</strong> — Alle verwarmde ruimtes samen. Onverwarmde zolders, garages en kelders telt u niet mee.<br><br><strong>Berekening:</strong> vloeroppervlak × plafondhoogte per kamer, alles optellen.<br>Voorbeeld: woonkamer 35m²×2,7m + 2 slaapkamers 12m²×2,5m + keuken 15m²×2,5m = 192 m³.',source:'Infofrankrijk.com, "De isolatie van het Franse huis"'},
 ventType:{text:'<strong>Type ventilatie</strong><br><br>🪟 <strong>Natuurlijk:</strong> Via ramen, kieren, roosters. Meeste oude Franse huizen.<br>🔄 <strong>Mechanisch (VMC):</strong> Ventilator zuigt lucht af. Standaard in nieuwere woningen.<br>♻️ <strong>Met warmteterugwinning (VMC double flux):</strong> Bespaart 15–25% op verwarmingskosten.',source:'Infofrankrijk.com'},
 ach:{text:'<strong>Luchtwisseling per uur</strong> — Hoe vaak per uur alle lucht ververst wordt.<br><br>🏚️ Oud en tochtig: 1,0–2,0<br>🏠 Gemiddeld met kieren: 0,5–0,8<br>🏗️ Goed afgedicht: 0,3–0,5<br><br>Bij twijfel: kies 0,6.'},
@@ -69,8 +69,43 @@ pvKwp:{title:'Zonnepanelen-assistent',desc:'Vul het aantal panelen, de leeftijd 
 /* ═══ INIT ═══ */
 document.addEventListener('DOMContentLoaded',function(){
   buildSelects();buildPresets();buildAppliances();buildPriceInputs();bindToggles();
-  injectInfoButtons();injectAIHelpers();
+  injectInfoButtons();injectAIHelpers();bindPresence();
 });
+
+/* ═══ PRESENCE SEASON PRESETS ═══ */
+function bindPresence(){
+  var btns=$$('.presence-preset');
+  var wIn=document.getElementById('presentDaysWinter');
+  var sIn=document.getElementById('presentDaysSummer');
+  var sum=document.getElementById('presenceSummary');
+  function updateSummary(){
+    var w=num(wIn?wIn.value:155),s=num(sIn?sIn.value:105);
+    if(sum)sum.textContent='Totaal: '+(w+s)+' dagen/jaar aanwezig ('+w+' winter + '+s+' zomer)';
+  }
+  btns.forEach(function(b){
+    b.addEventListener('click',function(){
+      btns.forEach(function(x){x.classList.remove('active')});
+      b.classList.add('active');
+      var dw=parseInt(b.dataset.w),ds=parseInt(b.dataset.s);
+      if(dw>0||ds>0){
+        if(wIn)wIn.value=dw;
+        if(sIn)sIn.value=ds;
+      }
+      updateSummary();
+    });
+  });
+  if(wIn)wIn.addEventListener('input',function(){
+    btns.forEach(function(x){x.classList.remove('active')});
+    btns[btns.length-1].classList.add('active');
+    updateSummary();
+  });
+  if(sIn)sIn.addEventListener('input',function(){
+    btns.forEach(function(x){x.classList.remove('active')});
+    btns[btns.length-1].classList.add('active');
+    updateSummary();
+  });
+  updateSummary();
+}
 
 /* ═══ INJECT [i] BUTTONS ═══ */
 function injectInfoButtons(){
@@ -298,7 +333,7 @@ function gatherState(){
   var ap=DEFAULT_APPLIANCES.map(function(a,i){return{key:a.key,label:a.label,scales:a.scales,on:document.getElementById('appl_on_'+i)?document.getElementById('appl_on_'+i).checked:a.on,kwh:document.getElementById('appl_kwh_'+i)?num(document.getElementById('appl_kwh_'+i).value,a.kwh):a.kwh}});
   return{zone:v('zone','paris'),setpoint:num(v('setpoint'),20),volume:num(v('volume'),250),ach:num(v('ach'),0.5),ventType:v('ventType','natural'),hrvEta:num(v('hrvEta'),0.75),
     wallA:num(v('wallA'),120),wallU:num(v('wallU'),0.5),roofA:num(v('roofA'),100),roofU:num(v('roofU'),0.25),floorA:num(v('floorA'),100),floorU:num(v('floorU'),0.35),winA:num(v('winA'),20),winU:num(v('winU'),1.6),
-    presentDays:Math.min(365,Math.max(0,num(v('presentDays'),260))),awaySetpoint:num(v('awaySetpoint'),12),
+    presentDaysWinter:Math.min(212,Math.max(0,num(v('presentDaysWinter'),155))),presentDaysSummer:Math.min(153,Math.max(0,num(v('presentDaysSummer'),105))),awaySetpoint:num(v('awaySetpoint'),12),
     mainType:v('mainType','hp'),mainScop:num(v('mainScop'),3.2),mainEta:num(v('mainEta'),0.9),
     auxType:v('auxType','none'),auxSharePreset:v('auxSharePreset','25'),auxShareCustom:num(v('auxShareCustom'),25),auxScop:num(v('auxScop'),3.2),auxEta:num(v('auxEta'),0.85),
     persons:num(v('persons'),2),showersPerPerson:num(v('showersPerPerson'),1),litersPer:num(v('litersPer'),55),
@@ -319,7 +354,7 @@ window.buildConfirm=function(sec){
   var VL={natural:'Natuurlijk',mech:'Mechanisch',hrv:'Met warmteterugwinning'};
   var h='';
   switch(sec){
-    case'2':h=c('Klimaatzone',ZL[v('zone')]||v('zone'))+c('Binnentemperatuur',v('setpoint')+' °C')+c('Bij afwezigheid',v('awaySetpoint')+' °C')+c('Aanwezigheid',v('presentDays')+' d/j');break;
+    case'2':h=c('Klimaatzone',ZL[v('zone')]||v('zone'))+c('Binnentemperatuur',v('setpoint')+' °C')+c('Bij afwezigheid',v('awaySetpoint')+' °C')+c('Winter',v('presentDaysWinter')+' d (okt–apr)')+c('Zomer',v('presentDaysSummer')+' d (mei–sep)');break;
     case'3':h=c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));break;
     case'4':h=c('Muren',v('wallA')+' m² · U='+v('wallU'))+c('Dak',v('roofA')+' m² · U='+v('roofU'))+c('Vloer',v('floorA')+' m² · U='+v('floorU'))+c('Ramen',v('winA')+' m² · U='+v('winU'));break;
     case'5':var ml=HEAT_MAIN_DEF.find(function(x){return x.key===v('mainType')});h=c('Hoofd',ml?ml.label:v('mainType'));
@@ -361,6 +396,8 @@ window.computeAndRender=function(){
       '<p><strong>Ventilatie:</strong> 0,34 \u00D7 '+s.ach+' \u00D7 '+s.volume+' = '+fmt1(r.debug.Hvent)+' W/K'+(s.ventType==='hrv'?' \u2192 na WTW: '+fmt1(r.debug.HventEff)+' W/K':'')+'</p>'+
       '<p><strong>Totaal:</strong> H = '+fmt1(r.debug.H)+' W/K</p>'+
       '<p><strong>Zone:</strong> '+z.name+' \u00B7 '+z.hdd+' graaddagen</p>'+
+      '<p><strong>Aanwezigheid:</strong> '+s.presentDaysWinter+' d winter (okt\u2013apr) + '+s.presentDaysSummer+' d zomer (mei\u2013sep) = '+(s.presentDaysWinter+s.presentDaysSummer)+' d/jaar</p>'+
+      '<p><strong>HDD-verdeling:</strong> 85% winter / 15% zomer (Météo France klimaatnormalen)</p>'+
       '<p><strong>Warmtevraag:</strong> '+fmt0(r.heatDemand)+' kWh/j</p>'+
       '<p style="margin-top:10px;font-size:.85em;color:var(--text-light)">Bron: Méthode 3CL-DPE 2021 · Infofrankrijk.com · Météo France</p>';
   }
@@ -389,7 +426,7 @@ window.requestAIExplanation=function(){
       mainScop:s.mainScop,mainEta:s.mainEta,
       wallU:s.wallU,roofU:s.roofU,floorU:s.floorU,winU:s.winU,
       wallA:s.wallA,roofA:s.roofA,floorA:s.floorA,winA:s.winA,
-      volume:s.volume,presentDays:s.presentDays,
+      volume:s.volume,presentDaysWinter:s.presentDaysWinter,presentDaysSummer:s.presentDaysSummer,
       setpoint:s.setpoint,awaySetpoint:s.awaySetpoint,
       ach:s.ach,persons:s.persons,pvKwp:s.pvKwp,
       costs:r.costs,verbruik:r.verbruik,debug:r.debug
@@ -432,7 +469,7 @@ function buildFallbackExplanation(s,r){
   if(r.costs.tapwater>bigVal){biggest='warm water';bigVal=r.costs.tapwater}
   if(r.costs.apparaten>bigVal){biggest='apparaten';bigVal=r.costs.apparaten}
   return'<p>Uw woning in de zone <strong>'+( zn[s.zone]||s.zone)+'</strong> met een verwarmd volume van <strong>'+s.volume+' m\u00B3</strong> en <strong>'+(ht[s.mainType]||s.mainType)+'</strong> als hoofdverwarming kost naar schatting <strong>'+eur(r.totalCost)+'</strong> per jaar aan energie.</p>'+
-    '<p>De grootste kostenpost is <strong>'+biggest+'</strong> ('+eur(bigVal)+'/jaar). '+
+    '<p>U bent <strong>'+s.presentDaysWinter+' dagen in de winter</strong> en <strong>'+s.presentDaysSummer+' dagen in de zomer</strong> aanwezig. '+
     (s.winU>3?'<strong>Opvallend:</strong> uw ramen hebben een hoge U-waarde ('+s.winU+'). Dubbel glas zou hier al een groot verschil maken. ':'')+
     (s.roofU>1?'<strong>Tip:</strong> uw dak is matig geïsoleerd (U='+s.roofU+'). Dakisolatie is vaak de meest rendabele investering. ':'')+
     '</p><p style="font-size:.85em;color:var(--text-light)">Dit is een automatische samenvatting. Voor een uitgebreidere analyse, stel uw vraag aan Caf\u00E9 Claude op Infofrankrijk.com.</p>';
@@ -449,7 +486,7 @@ window.saveToDF=function(){
   var inhoud='<h2>Energierapport</h2>'+
     '<p><strong>Geschatte jaarkosten:</strong> '+eur(r.totalCost)+' ('+eur(r.perMonth)+'/maand)</p>'+
     '<p><strong>Klimaatzone:</strong> '+(zn[s.zone]||s.zone)+'</p>'+
-    '<p><strong>Volume:</strong> '+s.volume+' m\u00B3 | <strong>Aanwezig:</strong> '+s.presentDays+' d/j</p>'+
+    '<p><strong>Volume:</strong> '+s.volume+' m\u00B3 | <strong>Aanwezig:</strong> '+s.presentDaysWinter+' d winter + '+s.presentDaysSummer+' d zomer</p>'+
     '<p><strong>Verwarming:</strong> '+(ht[s.mainType]||s.mainType)+'</p>'+
     '<h3>Kostenopbouw</h3>'+
     '<p>Verwarming: '+eur(r.costs.verwarming)+'<br>Warm water: '+eur(r.costs.tapwater)+'<br>Apparaten: '+eur(r.costs.apparaten)+'</p>'+

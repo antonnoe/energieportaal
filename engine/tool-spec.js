@@ -77,14 +77,24 @@ const TOOL_SPEC = {
       validate: (v) => (v >= 0 && v <= 0.95) || 'HRV rendement moet tussen 0 en 0,95 liggen.'
     },
     {
-      id:       'presentDays',
-      label:    'Aanwezigheidsdagen/jaar',
+      id:       'presentDaysWinter',
+      label:    'Aanwezigheidsdagen winter (okt–apr)',
       unit:     'dagen',
       type:     'number',
-      default:  260,
+      default:  155,
       min:      0,
-      max:      365,
-      validate: (v) => (v >= 0 && v <= 365) || 'Aanwezigheidsdagen moeten tussen 0 en 365 liggen.'
+      max:      212,
+      validate: (v) => (v >= 0 && v <= 212) || 'Winterdagen moeten tussen 0 en 212 liggen.'
+    },
+    {
+      id:       'presentDaysSummer',
+      label:    'Aanwezigheidsdagen zomer (mei–sep)',
+      unit:     'dagen',
+      type:     'number',
+      default:  105,
+      min:      0,
+      max:      153,
+      validate: (v) => (v >= 0 && v <= 153) || 'Zomerdagen moeten tussen 0 en 153 liggen.'
     },
     {
       id:       'awaySetpoint',

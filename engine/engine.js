@@ -89,9 +89,26 @@ function computeResults(s) {
   const scale      = (sp) => Math.max(0, (sp - z.Tref) / (18 - z.Tref));
   const HDD_present = z.hdd * scale(s.setpoint);
   const HDD_away    = z.hdd * scale(s.awaySetpoint);
-  const daysPresent = s.presentDays;
-  const daysAway    = 365 - daysPresent;
-  const heatDemand  = H * ((HDD_present * (daysPresent / 365)) + (HDD_away * (daysAway / 365))) * 24 / 1000;
+
+  // Seizoensverdeling: winter (okt-apr, 212d) draagt ~85% HDD, zomer (mei-sep, 153d) ~15%
+  const DAYS_WINTER = 212;
+  const DAYS_SUMMER = 153;
+  const HDD_WINTER_SHARE = 0.85;
+  const HDD_SUMMER_SHARE = 0.15;
+
+  // Backward compat: als presentDays is meegegeven (oud formaat), verdeel 50/50
+  const daysWinter = (s.presentDaysWinter != null) ? s.presentDaysWinter : Math.round((s.presentDays || 260) * DAYS_WINTER / 365);
+  const daysSummer = (s.presentDaysSummer != null) ? s.presentDaysSummer : Math.round((s.presentDays || 260) * DAYS_SUMMER / 365);
+  const daysPresent = daysWinter + daysSummer;
+  const daysAwayWinter = DAYS_WINTER - daysWinter;
+  const daysAwaySummer = DAYS_SUMMER - daysSummer;
+
+  // HDD gewogen naar seizoen
+  const hddWinterPresent = HDD_present * HDD_WINTER_SHARE * (daysWinter / DAYS_WINTER);
+  const hddWinterAway    = HDD_away    * HDD_WINTER_SHARE * (daysAwayWinter / DAYS_WINTER);
+  const hddSummerPresent = HDD_present * HDD_SUMMER_SHARE * (daysSummer / DAYS_SUMMER);
+  const hddSummerAway    = HDD_away    * HDD_SUMMER_SHARE * (daysAwaySummer / DAYS_SUMMER);
+  const heatDemand = H * (hddWinterPresent + hddWinterAway + hddSummerPresent + hddSummerAway) * 24 / 1000;
 
   // hoofd/bij
   const auxSharePct = (s.auxSharePreset === 'custom' ? s.auxShareCustom : Number(s.auxSharePreset));
@@ -117,7 +134,7 @@ function computeResults(s) {
   // apparaten
   const m          = personsMultiplier(ppl);
   const applKwhRaw = s.appls.reduce((sum, a) => sum + (a.on ? a.kwh * (a.scales ? m : 1) : 0), 0);
-  const applKwh    = applKwhRaw * (daysPresent / 365);
+  const applKwh    = applKwhRaw * (daysPresent / 365);  // daysPresent = winter + zomer
 
   // EV
   const evKwhYear = (s.evKmWeek * 52) * (s.evKwh100 / 100) * (1 + s.evLoss / 100);
@@ -145,7 +162,7 @@ function computeResults(s) {
   let coolTherm = 0, coolEl = 0;
   if (s.acOn) {
     const kCool = 0.6;
-    const CDD   = z.cdd * (daysPresent / 365);
+    const CDD   = z.cdd * (daysSummer / DAYS_SUMMER);  // koeling alleen in zomerperiode
     const SEER  = Math.max(2.5, s.seer || 4);
     coolTherm = kCool * H * CDD * 24 / 1000;
     coolEl    = coolTherm / SEER;
@@ -216,7 +233,7 @@ function computeResults(s) {
     },
     debug: {
       UA, Hvent, HventEff, H,
-      HDD_present, HDD_away, daysPresent, daysAway,
+      HDD_present, HDD_away, daysPresent, daysWinter, daysSummer, daysAwayWinter, daysAwaySummer,
       mainFrac, auxFrac,
       mainEff, auxEff,
       mainInput, auxInput,

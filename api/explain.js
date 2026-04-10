@@ -30,7 +30,7 @@ Wees eerlijk en praktisch. Geen overdrijvingen.
 
 Gegevens:
 - Zone: ${zoneNames[data.zone] || data.zone}
-- Volume: ${data.volume} m³, aanwezig ${data.presentDays} dagen/jaar
+- Volume: ${data.volume} m³, aanwezig ${data.presentDaysWinter || 155} dagen in de winter (okt-apr) en ${data.presentDaysSummer || 105} dagen in de zomer (mei-sep)
 - Hoofdverwarming: ${heatNames[data.mainType] || data.mainType}
 - Bijverwarming: ${heatNames[data.auxType] || data.auxType || 'geen'}
 - Isolatie muren U=${data.wallU}, dak U=${data.roofU}, vloer U=${data.floorU}, ramen U=${data.winU}
