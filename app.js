@@ -63,7 +63,8 @@ winU:{title:'Raam-assistent',desc:'Welk type beglazing hebt u?',type:'select',op
 mainScop:{title:'SCOP-assistent',desc:'Welk type warmtepomp?',type:'select',opts:[
 ['2.8','Lucht/lucht (split airco, ouder)'],['3.5','Lucht/lucht (inverter, modern)'],
 ['3.0','Lucht/water (standaard)'],['3.8','Lucht/water (inverter, premium)'],['4.2','Bodem/water (geothermisch)']]},
-pvKwp:{title:'Zonnepanelen-assistent',desc:'Vul het aantal panelen, de leeftijd en oriëntatie in. Ik bereken het vermogen.',type:'pv'}
+pvKwp:{title:'Zonnepanelen-assistent',desc:'Vul het aantal panelen, de leeftijd en oriëntatie in. Ik bereken het vermogen.',type:'pv'},
+pvSelfUse:{title:'Eigenverbruik-assistent',desc:'Ik schat uw eigenverbruikpercentage op basis van uw situatie.',type:'selfuse'}
 };
 
 /* ═══ INIT ═══ */
@@ -173,6 +174,24 @@ function injectAIHelpers(){
           '<option value="0.50">Noord (ongunstig)</option></select></div>'+
         '<button type="button" class="ai-apply-btn" id="'+pid+'_calc" style="margin-top:4px">Bereken kWp \u2192</button>'+
         '<div class="ai-result" id="'+pid+'_res" style="display:none"></div></div>';
+    } else if(h.type==='selfuse'){
+      var sty='width:100%;padding:8px;border:1.5px solid #b0c4de;border-radius:6px;font-size:.9em';
+      html+='<div style="display:grid;gap:8px">'+
+        '<div><label style="font-size:.85em;font-weight:600">Hebt u een thuisbatterij?</label><select id="'+pid+'_bat" style="'+sty+'">'+
+          '<option value="0">Nee</option>'+
+          '<option value="15">Ja, kleine batterij (3\u20135 kWh)</option>'+
+          '<option value="25">Ja, grote batterij (8\u201315 kWh)</option></select></div>'+
+        '<div><label style="font-size:.85em;font-weight:600">Overdag thuis?</label><select id="'+pid+'_home" style="'+sty+'">'+
+          '<option value="0">Nee, overdag niet thuis</option>'+
+          '<option value="10">Soms (halftijds/part-time)</option>'+
+          '<option value="15">Ja, thuiswerker of gepensioneerd</option></select></div>'+
+        '<div><label style="font-size:.85em;font-weight:600">Grote dagverbruikers?</label><select id="'+pid+'_load" style="'+sty+'">'+
+          '<option value="0">Nee, alleen standaard apparaten</option>'+
+          '<option value="5">Warmtepomp of airco overdag</option>'+
+          '<option value="10">Warmtepomp + EV laden overdag</option>'+
+          '<option value="15">Warmtepomp + EV + zwembadpomp</option></select></div>'+
+        '<button type="button" class="ai-apply-btn" id="'+pid+'_calc" style="margin-top:4px">Bereken eigenverbruik \u2192</button>'+
+        '<div class="ai-result" id="'+pid+'_res" style="display:none"></div></div>';
     }
     panel.innerHTML=html;
     field.appendChild(panel);
@@ -233,6 +252,33 @@ function injectAIHelpers(){
               '<button type="button" class="ai-apply-btn" id="'+pid+'_apply2">Overnemen \u2192</button>';
             document.getElementById(pid+'_apply2').addEventListener('click',function(){
               document.getElementById(fid).value=effectiveKwp.toFixed(1);
+              this.textContent='\u2713 Ingevuld!';this.disabled=true;
+            });
+          }
+        });
+      } else if(h.type==='selfuse'){
+        var suCalcBtn=document.getElementById(pid+'_calc');
+        if(suCalcBtn)suCalcBtn.addEventListener('click',function(){
+          var batBonus=num(document.getElementById(pid+'_bat').value,0);
+          var homeBonus=num(document.getElementById(pid+'_home').value,0);
+          var loadBonus=num(document.getElementById(pid+'_load').value,0);
+          // Basis eigenverbruik zonder batterij, niet thuis, geen grote verbruikers: ~30%
+          var base=30;
+          var pct=Math.min(90,base+batBonus+homeBonus+loadBonus);
+          var res=document.getElementById(pid+'_res');
+          if(res){
+            res.style.display='block';
+            var uitleg=[];
+            uitleg.push('Basis: '+base+'%');
+            if(batBonus>0) uitleg.push('Batterij: +'+batBonus+'%');
+            if(homeBonus>0) uitleg.push('Thuis overdag: +'+homeBonus+'%');
+            if(loadBonus>0) uitleg.push('Dagverbruikers: +'+loadBonus+'%');
+            res.innerHTML='<strong>Geschat eigenverbruik: '+pct+'%</strong><br>'+
+              '<span style="font-size:.85em;color:#555">'+uitleg.join(' \u00B7 ')+'</span><br>'+
+              '<span style="font-size:.82em;color:var(--text-light);display:block;margin-top:4px">'+(pct<40?'Laag eigenverbruik \u2014 overweeg een batterij of verschuif verbruik naar overdag.':pct<60?'Gemiddeld eigenverbruik \u2014 goed resultaat voor een standaard installatie.':pct<75?'Hoog eigenverbruik \u2014 u haalt veel uit uw panelen.':'Zeer hoog eigenverbruik \u2014 maximaal rendement uit uw installatie.')+'</span><br>'+
+              '<button type="button" class="ai-apply-btn" id="'+pid+'_apply3">Overnemen \u2192</button>';
+            document.getElementById(pid+'_apply3').addEventListener('click',function(){
+              document.getElementById(fid).value=pct;
               this.textContent='\u2713 Ingevuld!';this.disabled=true;
             });
           }
