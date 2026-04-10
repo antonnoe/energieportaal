@@ -492,8 +492,115 @@ window.computeAndRender=function(){
   window._lastState=s; window._lastResult=r;
   // Trigger DPE render (compact card + modal data)
   if(typeof renderDPE==='function') renderDPE();
+  // Trigger savings calculation
+  renderSavings(s,r);
 };
 function rw(l,val){return'<div class="result-row"><span class="label">'+l+'</span><span class="val">'+val+'</span></div>'}
+
+/* ═══ BESPARINGSKANSEN ═══ */
+function renderSavings(s,r){
+  var card=$('#savingsCard');
+  var list=$('#savingsList');
+  var totalEl=$('#savingsTotal');
+  if(!card||!list||!totalEl)return;
+
+  // Drempelwaarden: huidige U vs. "goed geïsoleerd" doel
+  var maatregelen=[
+    {key:'roof', label:'Dakisolatie',  aField:'roofA', uField:'roofU', targetU:0.25, desc:'20 cm minerale wol of PUR', threshold:0.5,  icon:'\u{1F3E0}'},
+    {key:'wall', label:'Gevelisolatie', aField:'wallA', uField:'wallU', targetU:0.35, desc:'10-15 cm buitenisolatie',    threshold:0.6,  icon:'\u{1F9F1}'},
+    {key:'floor',label:'Vloerisolatie', aField:'floorA',uField:'floorU',targetU:0.35, desc:'8-12 cm onder of boven vloer',threshold:0.6,  icon:'\u{1FA9C}'},
+    {key:'win',  label:'Beter glas',    aField:'winA',  uField:'winU',  targetU:1.2,  desc:'Modern HR dubbel of triple', threshold:2.0,  icon:'\u{1FA9F}'}
+  ];
+
+  // Ventilatie-maatregel
+  var ventMaatregel=null;
+  if(s.ventType!=='hrv'&&s.ach>0.4){
+    ventMaatregel={key:'vent',label:'VMC double flux (WTW)',desc:'Warmteterugwinning op ventilatie',icon:'\u{1F4A8}'};
+  }
+
+  var items=[];
+  var totalSaving=0;
+
+  maatregelen.forEach(function(m){
+    var currentU=s[m.uField];
+    if(currentU<=m.threshold)return; // al goed genoeg
+
+    // Herbereken met verbeterde U-waarde
+    var improved=JSON.parse(JSON.stringify(s));
+    improved[m.uField]=m.targetU;
+    var rNew=computeResults(improved);
+    var saving=r.totalCost-rNew.totalCost;
+    if(saving<20)return; // niet de moeite
+
+    items.push({
+      icon:m.icon, label:m.label, desc:m.desc,
+      from:'U='+currentU, to:'U='+m.targetU,
+      saving:saving
+    });
+    totalSaving+=saving;
+  });
+
+  // Ventilatie
+  if(ventMaatregel){
+    var improved=JSON.parse(JSON.stringify(s));
+    improved.ventType='hrv';
+    improved.hrvEta=0.8;
+    var rNew=computeResults(improved);
+    var saving=r.totalCost-rNew.totalCost;
+    if(saving>=20){
+      items.push({
+        icon:ventMaatregel.icon, label:ventMaatregel.label, desc:ventMaatregel.desc,
+        from:'ACH='+s.ach, to:'WTW \u03B7=80%',
+        saving:saving
+      });
+      totalSaving+=saving;
+    }
+  }
+
+  // Warmtepomp upgrade (als geen WP)
+  if(s.mainType!=='hp'){
+    var improved=JSON.parse(JSON.stringify(s));
+    improved.mainType='hp';
+    improved.mainScop=3.5;
+    var rNew=computeResults(improved);
+    var saving=r.totalCost-rNew.totalCost;
+    if(saving>=50){
+      items.push({
+        icon:'\u{1F321}\uFE0F', label:'Warmtepomp (lucht/water)',desc:'SCOP 3,5 — vervangt '+(HEAT_MAIN_DEF.find(function(x){return x.key===s.mainType})||{label:s.mainType}).label,
+        from:s.mainType, to:'WP SCOP 3,5',
+        saving:saving
+      });
+      totalSaving+=saving;
+    }
+  }
+
+  if(items.length===0){
+    card.style.display='none';
+    return;
+  }
+
+  // Sorteer op hoogste besparing
+  items.sort(function(a,b){return b.saving-a.saving});
+
+  card.style.display='block';
+  list.innerHTML=items.map(function(it){
+    return'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(0,155,77,0.12)">'+
+      '<span style="font-size:1.3em;flex-shrink:0;margin-top:2px">'+it.icon+'</span>'+
+      '<div style="flex:1">'+
+        '<div style="font-weight:700;font-size:.95em">'+it.label+'</div>'+
+        '<div style="font-size:.84em;color:var(--text-light)">'+it.desc+'</div>'+
+        '<div style="font-size:.82em;color:var(--text-light);margin-top:2px">'+it.from+' \u2192 '+it.to+'</div>'+
+      '</div>'+
+      '<div style="text-align:right;flex-shrink:0">'+
+        '<div style="font-weight:800;font-size:1.05em;color:#009B4D">'+eur(it.saving)+'</div>'+
+        '<div style="font-size:.78em;color:var(--text-light)">/jaar</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  totalEl.innerHTML='<span style="color:#009B4D">Totaal potentieel: '+eur(totalSaving)+'/jaar</span>'+
+    '<span style="font-size:.85em;font-weight:400;color:var(--text-light);margin-left:8px">('+eur(totalSaving/12)+'/maand)</span>';
+}
 
 /* ═══ DPE MODAL ═══ */
 window.openDPEModal=function(){
@@ -639,8 +746,18 @@ window.saveToDF=function(){
   }
   inhoud+=nl+
     'Dit is een indicatieve DPE op basis van finale energie.'+nl+
-    'Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.'+nl+nl+
-    'Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com';
+    'Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.'+nl+nl;
+
+  // Besparingskansen toevoegen aan DF export
+  var savingsEl=$('#savingsList');
+  if(savingsEl&&savingsEl.children.length>0){
+    inhoud+='BESPARINGSKANSEN'+nl+
+      '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500'+nl;
+    var totalEl=$('#savingsTotal');
+    if(totalEl) inhoud+=totalEl.textContent+nl+nl;
+  }
+
+  inhoud+='Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com';
 
   // Stuur via pending API (zoals Café Claude)
   var btn=$('#dfSaveBtn');
