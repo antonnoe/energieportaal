@@ -959,9 +959,30 @@
           <p style="font-size:.85em;color:var(--text-light);margin-top:6px">Bron: Arrêté du 31 mars 2021, Méthode 3CL-DPE 2021 · Ministère de la Transition Écologique</p>
         </div>
 
+        <!-- Besparingskansen print-versie -->
+        <div id="savingsPrintBlock" class="screen-hide">
+          <h2 style="font-family:Poppins,sans-serif;color:#009B4D;margin-top:24px;page-break-before:always">💡 Besparingskansen</h2>
+          <div id="savingsPrintContent"></div>
+        </div>
+
+        <!-- AI-verslag print-versie -->
+        <div id="aiPrintBlock" class="screen-hide">
+          <h2 style="font-family:Poppins,sans-serif;color:var(--primary);margin-top:24px;page-break-before:always">🤖 AI-analyse</h2>
+          <p style="font-size:.88em;color:var(--text-light);margin-bottom:1em">Automatisch gegenereerd door de AI-assistent van EnergiePortaal op basis van uw invoer.</p>
+          <div id="aiPrintContent" style="line-height:1.7;font-size:.92em"></div>
+          <p style="font-size:.82em;color:var(--text-light);margin-top:16px">Gegenereerd door Infofrankrijk.com · EnergiePortaal · Niet bedoeld als professioneel advies.</p>
+        </div>
+
+        <!-- Rapport-footer (print only) -->
+        <div id="reportFooter" class="screen-hide" style="margin-top:32px;padding-top:16px;border-top:2px solid var(--primary);font-size:.82em;color:var(--text-light);line-height:1.7">
+          <strong>EnergiePortaal</strong> — Infofrankrijk.com<br>
+          Bronnen: Méthode 3CL-DPE 2021, ADEME, Météo France, RE2020, CRE, DGEC<br>
+          Dit rapport is indicatief (±15–25% bandbreedte) en vervangt geen professioneel energieadvies of officieel DPE-rapport.
+        </div>
+
         <div class="slide-nav" style="margin-top:16px">
           <button class="btn-secondary" data-go="1-main">← Opnieuw beginnen</button>
-          <button class="btn-primary" onclick="window.print()">Afdrukken / PDF</button>
+          <button class="btn-primary" id="printPdfBtn" onclick="generatePDF()">Rapport genereren (PDF) →</button>
         </div>
       </div>
     </div>
