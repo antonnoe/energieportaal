@@ -396,7 +396,17 @@ window.requestAIExplanation=function(){
     })
   }).then(function(resp){return resp.json()})
   .then(function(data){
-    var html=data.explanation||data.error||'Geen uitleg beschikbaar.';
+    var raw=data.explanation||data.error||'Geen uitleg beschikbaar.';
+    // Simpele markdown → HTML
+    var html=raw
+      .replace(/^### (.+)$/gm,'<h4 style="color:var(--primary);margin:12px 0 4px;font-size:.95em">$1</h4>')
+      .replace(/^## (.+)$/gm,'<h3 style="color:var(--primary);margin:16px 0 6px;font-size:1.05em">$1</h3>')
+      .replace(/^# (.+)$/gm,'<h3 style="color:var(--primary);margin:16px 0 8px;font-size:1.1em">$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/^- (.+)$/gm,'<div style="padding-left:1em;text-indent:-1em;margin:2px 0">\u2022 $1</div>')
+      .replace(/\n\n/g,'</p><p style="margin:8px 0">')
+      .replace(/\n/g,'<br>');
+    html='<div style="line-height:1.7;font-size:.9em"><p style="margin:8px 0">'+html+'</p></div>';
     // Toon plausibiliteitswaarschuwingen als die er zijn
     if(data.warnings&&data.warnings.length>0){
       html+='<div style="margin-top:16px;padding:12px 16px;background:rgba(245,166,35,0.08);border-left:4px solid #F5A623;border-radius:0 6px 6px 0;font-size:.88em">';
@@ -493,17 +503,10 @@ window.renderDPE=function(){
 
   // Bereken oppervlak en kWh/m²
   var floorA=Math.max(1,s.floorA||100);
-  // Totale finale energie: verwarming + tapwater + koeling + apparaten + EV + zwembad (bruto, vóór PV)
-  var totaalKwh=r.verbruik.heatMain+r.verbruik.heatAux+r.verbruik.tapwater+r.verbruik.brutoElec;
-  // Vermijd dubbeltellingen: brutoElec bevat al de elektra-component van verwarming/tapwater
-  // Dus: niet-elektra verwarming + niet-elektra tapwater + brutoElec
-  var mainDef=HEAT_MAIN_DEF.find(function(x){return x.key===s.mainType});
-  var auxDef=HEAT_AUX_DEF.find(function(x){return x.key===s.auxType})||{priceKey:null};
-  var dhwDef=DHW_TYPES_DEF.find(function(x){return x.key===s.dhwType})||{priceKey:null};
-  var nonElecHeat=(mainDef&&mainDef.priceKey!=='elec'?r.verbruik.heatMain:0)+(auxDef.priceKey!=='elec'?r.verbruik.heatAux:0);
-  var nonElecDhw=(dhwDef.priceKey!=='elec'?r.verbruik.tapwater:0);
-  totaalKwh=nonElecHeat+nonElecDhw+r.verbruik.brutoElec;
-  var kwhM2=totaalKwh/floorA;
+  // DPE = alleen verwarming + warm water + koeling (NIET apparaten, EV, zwembad, PV)
+  // Dit volgt de Méthode 3CL-DPE: chauffage + ECS + refroidissement + auxiliaires
+  var dpeKwh=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
+  var kwhM2=dpeKwh/floorA;
   var dpe=getDPE(kwhM2);
 
   // Big letter
@@ -520,7 +523,7 @@ window.renderDPE=function(){
       var k=DPE_KLASSEN[i];
       var isCurrent=i===dpe.index;
       var w=35+i*9;
-      var maxLabel=k.max===Infinity?'> 420':'\\u2264 '+k.max;
+      var maxLabel=k.max===Infinity?'> 420':'\u2264 '+k.max;
       html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+
         '<div style="height:32px;width:'+w+'%;border-radius:0 8px 8px 0;background:'+k.kleur+';display:flex;align-items:center;padding:0 10px;color:#fff;font-weight:700;font-size:.85em;'+
         (isCurrent?'box-shadow:0 0 0 3px #333,0 0 0 5px rgba(0,0,0,.15);':'opacity:.7;')+'">'+
