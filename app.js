@@ -522,7 +522,23 @@ window.saveToDF=function(){
     '<p>Tapwater: Q = m \u00D7 c \u00D7 \u0394T — basisthermodynamica</p>'+
     '<p>Warmtepomp: COP_max = T_warm / (T_warm \u2212 T_koud) — Carnotcyclus (1824)</p>'+
     '</details>'+
-    '<p style="font-size:.85em;color:#666">Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com</p>';
+    '<h3>DPE-indicatie</h3>';
+
+  // DPE berekenen voor DF
+  var floorA2=Math.max(1,s.floorA||100);
+  var dpeKwh2=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
+  var kwhM22=dpeKwh2/floorA2;
+  var dpe2=getDPE(kwhM22);
+  inhoud+='<p><strong>Energielabel: '+dpe2.letter+'</strong> ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)</p>';
+  var ban4=VERHUURVERBODEN.find(function(v){return v.letter===dpe2.letter});
+  if(ban4) inhoud+='<p style="color:#dc3545"><strong>\u26A0 Verhuurverbod:</strong> '+ban4.tekst+'</p>';
+  if(dpe2.index>0){
+    var better=DPE_KLASSEN[dpe2.index-1];
+    inhoud+='<p>Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.</p>';
+  }
+  inhoud+='<p style="font-size:.85em;color:#666">Dit is een indicatieve DPE op basis van finale energie. Een offici\u00EBle DPE vereist een gecertificeerde diagnostiqueur.</p>';
+
+  inhoud+='<p style="font-size:.85em;color:#666">Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com</p>';
 
   var url='https://dossierfrankrijk.nl/nieuw?titel='+encodeURIComponent(titel)+'&inhoud='+encodeURIComponent(inhoud);
   window.open(url,'_blank');
@@ -651,6 +667,34 @@ window.renderDPE=function(){
       if(ban2){compactRental.style.display='block';compactRental.textContent='\u26A0 Verhuurverbod sinds '+ban2.sinds}
       else{compactRental.style.display='none'}
     }
+  }
+
+  // Print block (hidden on screen, shown in print CSS)
+  var printLetter=$('#dpePrintLetter');
+  if(printLetter){
+    printLetter.innerHTML='<div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:14px;color:#fff;font-size:2.2em;font-weight:800;font-family:Poppins,sans-serif;background:'+dpe.kleur+'">'+dpe.letter+'</div>'+
+      '<div style="font-size:1.5em;font-weight:700;margin-top:8px">'+Math.round(kwhM2)+' kWh/m\u00B2 per jaar</div>';
+  }
+  var printScale=$('#dpePrintScale');
+  if(printScale){
+    var sh='';
+    for(var j=0;j<DPE_KLASSEN.length;j++){
+      var kk=DPE_KLASSEN[j];var isCur=j===dpe.index;var ww=35+j*9;
+      var ml=kk.max===Infinity?'> 420':'\u2264 '+kk.max;
+      sh+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+
+        '<div style="height:26px;width:'+ww+'%;border-radius:0 6px 6px 0;background:'+kk.kleur+';display:flex;align-items:center;padding:0 8px;color:#fff;font-weight:700;font-size:.8em;'+(isCur?'outline:3px solid #333;':'opacity:.6;')+'">'+kk.letter+'<span style="margin-left:auto;font-size:.7em;opacity:.9">'+ml+'</span></div>'+
+        (isCur?'<span style="font-weight:700;font-size:.85em">\u25C4 '+Math.round(kwhM2)+' kWh/m\u00B2</span>':'')+
+        '</div>';
+    }
+    printScale.innerHTML=sh;
+  }
+  var printDist=$('#dpePrintDistance');
+  if(printDist&&distEl) printDist.innerHTML=distEl.innerHTML;
+  var printRental=$('#dpePrintRental');
+  if(printRental&&rentalText){
+    var ban3=VERHUURVERBODEN.find(function(v){return v.letter===dpe.letter});
+    if(ban3){printRental.style.display='block';printRental.innerHTML='<strong style="color:#dc3545">\u26A0 Verhuurverbod:</strong> '+ban3.tekst}
+    else{printRental.style.display='none'}
   }
 };
 
