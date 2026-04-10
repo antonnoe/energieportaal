@@ -128,7 +128,11 @@ export default async function handler(req, res) {
     }
   }
   prices.staleWarning = staleItems.length > 0
-    ? staleItems.length + ' prijs(zen) ouder dan ' + STALE_DAYS + ' dagen: ' + staleItems.join(', ')
+    ? (function(){
+        var labels={elec:'Elektriciteit',gas:'Aardgas',fioul:'Stookolie',pellet:'Houtpellets',wood:'Stookhout',propaan:'Propaan',petroleum:'Petroleum'};
+        var named=staleItems.map(function(k){return labels[k]||k});
+        return staleItems.length + ' prijs(zen) ouder dan ' + STALE_DAYS + ' dagen: ' + named.join(', ');
+      })()
     : null;
 
   return res.status(200).json(prices);
