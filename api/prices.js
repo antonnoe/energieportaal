@@ -80,6 +80,42 @@ export default async function handler(req, res) {
     }
   } catch (e) { /* fallback */ }
 
+  // === PELLET: scrape Proxi-TotalEnergies ===
+  try {
+    const pelletResp = await fetch('https://www.proxi-totalenergies.fr/prix-pellets');
+    if (pelletResp.ok) {
+      const html = await pelletResp.text();
+      // Zoek "X,XX € au kg" of "X,XX € / Kg"
+      const match = html.match(/(\d+[,.]\d+)\s*€\s*(?:au|\/)\s*[Kk]g/);
+      if (match) {
+        const val = parseFloat(match[1].replace(',', '.'));
+        if (val > 0.20 && val < 1.50) {
+          const dateLabel = now.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+          prices.pellet = { value: Math.round(val * 1000) / 1000, unit: '€/kg', source: 'Proxi-TotalEnergies', date: dateLabel, refDate: now.toISOString().slice(0,10), auto: true };
+        }
+      }
+    }
+  } catch (e) { /* fallback */ }
+
+  // === PROPAAN: scrape lepropane.com (gemiddelde €/tonne → €/L) ===
+  try {
+    const propResp = await fetch('https://lepropane.com/citernes/prix/cours');
+    if (propResp.ok) {
+      const html = await propResp.text();
+      // Zoek "prix moyen ... XXXX €"
+      const match = html.match(/prix\s*moyen[^.]*?(\d[\d\s]*)\s*€/i);
+      if (match) {
+        const tonnePrix = parseFloat(match[1].replace(/\s/g, ''));
+        // 1 tonne propaan ≈ 1960 liter (dichtheid 0.51 kg/L)
+        if (tonnePrix > 1000 && tonnePrix < 5000) {
+          const litrePrice = Math.round((tonnePrix / 1960) * 1000) / 1000;
+          const dateLabel = now.toLocaleDateString('nl-NL', { month: 'short', year: 'numeric' });
+          prices.propaan = { value: litrePrice, unit: '€/L', source: 'lepropane.com (gem. €/t → €/L)', date: dateLabel, refDate: now.toISOString().slice(0,10), auto: true };
+        }
+      }
+    }
+  } catch (e) { /* fallback */ }
+
   // === STALENESS CHECK ===
   const staleItems = [];
   for (const [key, p] of Object.entries(prices)) {
