@@ -620,6 +620,74 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape') closeDPEModal();
 });
 
+/* ═══ PDF RAPPORT ═══ */
+window.generatePDF=function(){
+  var btn=$('#printPdfBtn');
+  var s=window._lastState, r=window._lastResult;
+  if(!s||!r){alert('Bereken eerst het resultaat.');return}
+
+  if(btn){btn.textContent='Rapport wordt voorbereid...';btn.disabled=true}
+
+  // 1. Vul besparingskansen print-blok
+  var savingsPrint=$('#savingsPrintContent');
+  var savingsScreen=$('#savingsList');
+  var savingsTotal=$('#savingsTotal');
+  if(savingsPrint&&savingsScreen&&savingsScreen.innerHTML){
+    savingsPrint.innerHTML=savingsScreen.innerHTML;
+    if(savingsTotal) savingsPrint.innerHTML+='<div style="margin-top:12px;padding-top:12px;border-top:2px solid rgba(0,155,77,0.2);font-weight:700">'+savingsTotal.innerHTML+'</div>';
+  }
+
+  // 2. Haal AI-verslag op, dan print
+  var aiPrint=$('#aiPrintContent');
+  var aiScreen=$('#aiExplanation');
+
+  // Als AI al op scherm staat, gebruik dat
+  if(aiScreen&&aiScreen.style.display!=='none'&&aiScreen.innerHTML&&aiScreen.innerHTML.indexOf('analyseert')===-1){
+    if(aiPrint) aiPrint.innerHTML=aiScreen.innerHTML;
+    doPrint(btn);
+    return;
+  }
+
+  // Anders: haal AI op
+  fetch('https://if-tools-api.vercel.app/api/energy-explain',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      zone:s.zone,totalCost:r.totalCost,perMonth:r.perMonth,
+      heatDemand:r.heatDemand,mainType:s.mainType,auxType:s.auxType,
+      mainScop:s.mainScop,mainEta:s.mainEta,
+      wallU:s.wallU,roofU:s.roofU,floorU:s.floorU,winU:s.winU,
+      wallA:s.wallA,roofA:s.roofA,floorA:s.floorA,winA:s.winA,
+      volume:s.volume,presentDaysWinter:s.presentDaysWinter,presentDaysSummer:s.presentDaysSummer,
+      setpoint:s.setpoint,awaySetpoint:s.awaySetpoint,
+      ach:s.ach,persons:s.persons,pvKwp:s.pvKwp,
+      costs:r.costs,verbruik:r.verbruik,debug:r.debug
+    })
+  }).then(function(resp){return resp.json()})
+  .then(function(data){
+    var raw=data.explanation||'Geen AI-analyse beschikbaar.';
+    var html=raw
+      .replace(/^### (.+)$/gm,'<h4 style="color:var(--primary);margin:12px 0 4px;font-size:.95em">$1</h4>')
+      .replace(/^## (.+)$/gm,'<h3 style="color:var(--primary);margin:16px 0 6px;font-size:1.05em">$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+      .replace(/^- (.+)$/gm,'<div style="padding-left:1em;text-indent:-1em;margin:2px 0">\u2022 $1</div>')
+      .replace(/\n\n/g,'</p><p style="margin:8px 0">')
+      .replace(/\n/g,'<br>');
+    if(aiPrint) aiPrint.innerHTML='<p style="margin:8px 0">'+html+'</p>';
+    doPrint(btn);
+  }).catch(function(){
+    if(aiPrint) aiPrint.innerHTML='<p><em>AI-analyse kon niet worden opgehaald.</em></p>';
+    doPrint(btn);
+  });
+};
+
+function doPrint(btn){
+  setTimeout(function(){
+    window.print();
+    if(btn){btn.textContent='Rapport genereren (PDF) \u2192';btn.disabled=false}
+  },300);
+}
+
 /* ═══ AI EXPLANATION ═══ */
 window.requestAIExplanation=function(){
   var btn=$('#aiExplainBtn');

@@ -194,10 +194,21 @@ h1,h2,h3{font-family:'Poppins',sans-serif;font-weight:600}
     .slide-viewport{overflow:visible!important}
     .dpe-modal-overlay{display:none!important}
     #dpeDetailBtn{display:none!important}
-    /* Toon DPE print blok */
+    #dpeCompactCard{display:none!important}
+    /* Toon print-only blokken */
     .screen-hide{display:block!important}
     #dpePrintBlock{page-break-before:always}
     #dpePrintBlock button{display:none!important}
+    /* Rapport styling */
+    body{font-size:11pt;color:#222}
+    .result-hero{margin-bottom:24px}
+    .result-hero .big-number{font-size:2em;color:var(--primary)}
+    .result-card{break-inside:avoid;margin-bottom:12px;border:1px solid #ddd;padding:16px}
+    .result-card h3{font-size:12pt;color:var(--primary)}
+    #savingsCard{break-inside:avoid}
+    #aiExplainBtn,#aiExplanation,.btn-ai,.btn-info,.field-header-btns{display:none!important}
+    .result-card[style*="0066cc"]{display:none!important}
+    a{color:inherit;text-decoration:none}
 }
 
 /* ═══ DPE MODAL ═══ */
