@@ -70,7 +70,7 @@ pvSelfUse:{title:'Eigenverbruik-assistent',desc:'Ik schat uw eigenverbruikpercen
 
 /* ═══ INIT ═══ */
 document.addEventListener('DOMContentLoaded',function(){
-  buildSelects();buildPresets();buildAppliances();buildPriceInputs();bindToggles();
+  buildSelects();buildPresets();buildAppliances();buildPriceInputs();bindToggles();bindValueSync();
   injectInfoButtons();injectAIHelpers();bindPresence();
 });
 
@@ -228,10 +228,10 @@ function injectAIHelpers(){
           res.style.display='block';
           res.innerHTML='<strong>Geschatte waarde: '+sel.value+'</strong><br>'+
             '<span style="font-size:.85em;color:#555">'+label+'</span><br>'+
-            '<button type="button" class="ai-apply-btn" id="'+pid+'_apply">Overnemen \u2192</button>';
+            '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+sel.value+'" id="'+pid+'_apply">Overnemen \u2192</button>';
           document.getElementById(pid+'_apply').addEventListener('click',function(){
-            document.getElementById(fid).value=sel.value;
-            this.textContent='\u2713 Ingevuld!'; this.disabled=true;
+            var f=document.getElementById(fid); f.value=sel.value;
+            f.dispatchEvent(new Event('input',{bubbles:true}));
           });
         });
       } else if(h.type==='pv'){
@@ -250,10 +250,10 @@ function injectAIHelpers(){
             var oriLabel=document.getElementById(pid+'_ori').options[document.getElementById(pid+'_ori').selectedIndex].text;
             res.innerHTML='<strong>Effectief vermogen: '+effectiveKwp.toFixed(1)+' kWp</strong><br>'+
               '<span style="font-size:.85em;color:#555">'+count+' panelen \u00D7 400Wp \u00D7 '+Math.round(ageFactor*100)+'% ('+ageLabel+') \u00D7 '+Math.round(oriFactor*100)+'% ('+oriLabel+')</span><br>'+
-              '<button type="button" class="ai-apply-btn" id="'+pid+'_apply2">Overnemen \u2192</button>';
+              '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+effectiveKwp.toFixed(1)+'" id="'+pid+'_apply2">Overnemen \u2192</button>';
             document.getElementById(pid+'_apply2').addEventListener('click',function(){
-              document.getElementById(fid).value=effectiveKwp.toFixed(1);
-              this.textContent='\u2713 Ingevuld!';this.disabled=true;
+              var f=document.getElementById(fid); f.value=effectiveKwp.toFixed(1);
+              f.dispatchEvent(new Event('input',{bubbles:true}));
             });
           }
         });
@@ -277,10 +277,10 @@ function injectAIHelpers(){
             res.innerHTML='<strong>Geschat eigenverbruik: '+pct+'%</strong><br>'+
               '<span style="font-size:.85em;color:#555">'+uitleg.join(' \u00B7 ')+'</span><br>'+
               '<span style="font-size:.82em;color:var(--text-light);display:block;margin-top:4px">'+(pct<40?'Laag eigenverbruik \u2014 overweeg een batterij of verschuif verbruik naar overdag.':pct<60?'Gemiddeld eigenverbruik \u2014 goed resultaat voor een standaard installatie.':pct<75?'Hoog eigenverbruik \u2014 u haalt veel uit uw panelen.':'Zeer hoog eigenverbruik \u2014 maximaal rendement uit uw installatie.')+'</span><br>'+
-              '<button type="button" class="ai-apply-btn" id="'+pid+'_apply3">Overnemen \u2192</button>';
+              '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+pct+'" id="'+pid+'_apply3">Overnemen \u2192</button>';
             document.getElementById(pid+'_apply3').addEventListener('click',function(){
-              document.getElementById(fid).value=pct;
-              this.textContent='\u2713 Ingevuld!';this.disabled=true;
+              var f=document.getElementById(fid); f.value=pct;
+              f.dispatchEvent(new Event('input',{bubbles:true}));
             });
           }
         });
@@ -300,12 +300,31 @@ function calcVol(pid,fid){
   if(res&&total>0){
     res.style.display='block';
     res.innerHTML='<strong>Berekend volume: '+Math.round(total)+' m\u00B3</strong><br>'+
-      '<button type="button" class="ai-apply-btn" id="'+pid+'_apply">Overnemen \u2192</button>';
+      '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+Math.round(total)+'" id="'+pid+'_apply">Overnemen \u2192</button>';
     document.getElementById(pid+'_apply').addEventListener('click',function(){
-      document.getElementById(fid).value=Math.round(total);
-      this.textContent='\u2713 Ingevuld!'; this.disabled=true;
+      var f=document.getElementById(fid); f.value=Math.round(total);
+      f.dispatchEvent(new Event('input',{bubbles:true}));
     });
   }
+}
+
+/* ═══ VELD = ENIGE WAARHEID: presets en assistent-knoppen volgen de veldwaarde ═══ */
+function syncFieldState(fid){
+  var f=document.getElementById(fid); if(!f)return;
+  var v=num(f.value,NaN);
+  document.querySelectorAll('.preset-btn[data-t="'+fid+'"]').forEach(function(b){
+    if(num(b.dataset.v,NaN)===v)b.classList.add('active');else b.classList.remove('active');
+  });
+  document.querySelectorAll('.ai-apply-btn[data-for="'+fid+'"]').forEach(function(b){
+    if(num(b.dataset.val,NaN)===v){b.textContent='\u2713 Ingevuld!';b.disabled=true}
+    else{b.textContent='Overnemen \u2192';b.disabled=false}
+  });
+}
+function bindValueSync(){
+  ['wallU','roofU','floorU','winU','mainScop','volume','pvKwp','pvSelfUse'].forEach(function(fid){
+    var f=document.getElementById(fid);
+    if(f)f.addEventListener('input',function(){syncFieldState(fid)});
+  });
 }
 
 /* ═══ BUILD SELECTS ═══ */
@@ -335,9 +354,9 @@ function buildPresets(){
     c.innerHTML=Object.keys(P[k]).map(function(l){return'<button type="button" class="preset-btn" data-t="'+tid+'" data-v="'+P[k][l]+'">'+l+'</button>'}).join('');
     c.querySelectorAll('.preset-btn').forEach(function(b){
       b.addEventListener('click',function(){
-        document.getElementById(b.dataset.t).value=b.dataset.v;
-        c.querySelectorAll('.preset-btn').forEach(function(x){x.classList.remove('active')});
-        b.classList.add('active');
+        var f=document.getElementById(b.dataset.t);
+        f.value=b.dataset.v;
+        f.dispatchEvent(new Event('input',{bubbles:true}));
       });
     });
   });
