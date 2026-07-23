@@ -662,7 +662,7 @@ function renderSubsidies(s,r){
     subs.push({
       icon:'\u{1F3D7}\uFE0F',
       name:'MaPrimeR\u00E9nov\u2019 Ampleur',
-      desc:'Combinatierenovatie met \u22652 sprongen op DPE-schaal. Tot \u20AC70.000 subsidie. DPE '+dpe.letter+' komt in aanmerking.',
+      desc:'Combinatierenovatie met \u22652 klassensprongen en \u22652 isolatiemaatregelen. Subsidiabele werken tot \u20AC30.000 (2 klassen) of \u20AC40.000 (3+ klassen); vergoedingspercentage afhankelijk van inkomenscategorie. Verplicht: Mon Accompagnateur R\u00E9nov\u2019 en vooraf een afspraak bij France R\u00E9nov\u2019.',
       status:'Uw woning komt in aanmerking (DPE '+dpe.letter+')',
       color:'#009B4D'
     });
@@ -680,7 +680,7 @@ function renderSubsidies(s,r){
   subs.push({
     icon:'\u{1F4B6}',
     name:'CEE (Certificats d\u2019\u00C9conomies d\u2019\u00C9nergie)',
-    desc:'Premies via uw energieleverancier. Cumuleerbaar met MaPrimeR\u00E9nov\u2019. Open voor alle woningen ouder dan 2 jaar.',
+    desc:'Premies via uw energieleverancier, voor woningen ouder dan 2 jaar. Cumuleerbaar met MaPrimeR\u00E9nov\u2019 par geste; bij een r\u00E9novation d\u2019ampleur zit de CEE-waarde al in de prime verwerkt.',
     status:'Beschikbaar',
     color:'#009B4D'
   });
@@ -713,7 +713,8 @@ function renderSubsidies(s,r){
       '</div>'+
       '<div style="font-size:.82em;font-weight:600;color:'+sub.color+';white-space:nowrap;flex-shrink:0">'+sub.status+'</div>'+
     '</div>';
-  }).join('');
+  }).join('')+
+  '<div style="font-size:.78em;color:var(--text-light);margin-top:8px;font-style:italic">Stand: juli 2026 (loi de finances 2026, heropening guichet 23 februari 2026). Regels wijzigen regelmatig \u2014 controleer de actuele voorwaarden op france-renov.gouv.fr v\u00F3\u00F3r u een aanvraag doet.</div>';
 }
 
 /* ═══ PDF RAPPORT ═══ */
