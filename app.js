@@ -47,7 +47,7 @@ price_elec:{text:'<strong>Elektriciteitsprijs</strong> — Kijk op uw factuur bi
 
 /* ═══ AI HELPER DEFINITIONS [ai] ═══ */
 var AI={
-volume:{title:'Volume-assistent',desc:'Vul de afmetingen per kamer in. Ik reken het voor u uit.',type:'volume'},
+volume:{title:'Volume-assistent',desc:'Uw volume = woonoppervlak \u00D7 gemiddelde plafondhoogte. Kies de hoogte die het beste bij uw woning past.',type:'height'},
 wallU:{title:'Muur-assistent',desc:'Beschrijf uw buitenmuren.',type:'select',opts:[
 ['2.0','Dikke stenen muur (>40cm), ongeïsoleerd'],['1.5','Parpaing (betonblokken), ongeïsoleerd'],
 ['0.8','Stenen muur + dunne isolatie (4-5cm)'],['0.5','Parpaing + 8-10cm isolatie'],
@@ -150,10 +150,15 @@ function injectAIHelpers(){
     var panel=document.createElement('div'); panel.className='ai-panel';
     var pid='aip_'+fid;
     var html='<h4>\u{1F916} '+h.title+'</h4><p>'+h.desc+'</p>';
-    if(h.type==='volume'){
-      html+='<div id="'+pid+'_rooms"></div>'+
-        '<button type="button" class="btn-secondary" style="font-size:.82em;padding:6px 12px;margin:6px 0" id="'+pid+'_add">+ Kamer toevoegen</button>'+
-        '<div class="ai-result" id="'+pid+'_res" style="display:none"></div>';
+    if(h.type==='height'){
+      html+='<select id="'+pid+'_hgt">'+
+        '<option value="">\u2014 Kies de plafondhoogte \u2014</option>'+
+        '<option value="2.2">Laag \u00B7 2,2 m (appartement, verbouwde zolder)</option>'+
+        '<option value="2.5">Standaard \u00B7 2,5 m (moderne woning)</option>'+
+        '<option value="2.7">Ruim \u00B7 2,7 m</option>'+
+        '<option value="3.0">Hoog \u00B7 3,0 m (oude Franse woning)</option>'+
+        '<option value="3.5">Zeer hoog \u00B7 3,5 m (herenhuis, deels vide)</option>'+
+        '</select><div class="ai-result" id="'+pid+'_res" style="display:none"></div>';
     } else if(h.type==='select'){
       html+='<select id="'+pid+'_sel"><option value="">— Kies —</option>';
       h.opts.forEach(function(o){html+='<option value="'+o[0]+'">'+o[1]+'</option>'});
@@ -203,30 +208,29 @@ function injectAIHelpers(){
     });
     // Bind events after panel is in DOM
     setTimeout(function(){
-      if(h.type==='volume'){
-        var addBtn=document.getElementById(pid+'_add');
-        if(addBtn)addBtn.addEventListener('click',function(){
-          var container=document.getElementById(pid+'_rooms');
-          var row=document.createElement('div');
-          row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px';
-          row.innerHTML='<span class="'+pid+'_lbl" style="flex:2;padding:6px 8px;font-size:.85em;font-weight:600;color:var(--primary)"></span>'+
-            '<input type="number" placeholder="m\u00B2" class="'+pid+'_a" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">'+
-            '<input type="number" placeholder="hoogte" value="2.5" class="'+pid+'_h" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">'+
-            '<button type="button" class="'+pid+'_del" title="Kamer verwijderen" style="flex-shrink:0;width:26px;height:26px;border:1px solid #b0c4de;background:#fff;border-radius:4px;color:#c0392b;cursor:pointer;font-weight:700;line-height:1">\u2715</button>';
-          container.appendChild(row);
-          function renum(){
-            Array.from(container.children).forEach(function(r,i){
-              var l=r.querySelector('.'+pid+'_lbl'); if(l)l.textContent='Kamer '+(i+1);
-            });
+      if(h.type==='height'){
+        var hgt=document.getElementById(pid+'_hgt');
+        if(hgt)hgt.addEventListener('change',function(){
+          var res=document.getElementById(pid+'_res');
+          if(!res)return;
+          if(!hgt.value){res.style.display='none';return}
+          var m2=num(document.getElementById('woonoppervlak')?document.getElementById('woonoppervlak').value:0,0);
+          if(m2<=0){
+            res.style.display='block';
+            res.innerHTML='<span style="color:#c0392b">Vul eerst het woonoppervlak (m\u00B2) in \u2014 dat is de basis voor deze berekening.</span>';
+            return;
           }
-          renum();
-          row.querySelectorAll('input[type="number"]').forEach(function(inp2){
-            inp2.addEventListener('input',function(){calcVol(pid,fid)});
+          var hv=num(hgt.value,2.5);
+          var volCalc=Math.round(m2*hv);
+          var hLabel=hgt.options[hgt.selectedIndex].text;
+          res.style.display='block';
+          res.innerHTML='<strong>Berekend volume: '+volCalc+' m\u00B3</strong><br>'+
+            '<span style="font-size:.85em;color:#555">'+m2+' m\u00B2 woonoppervlak \u00D7 '+String(hv).replace('.',',')+' m ('+hLabel+')</span><br>'+
+            '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+volCalc+'" id="'+pid+'_apply">Overnemen \u2192</button>';
+          document.getElementById(pid+'_apply').addEventListener('click',function(){
+            var f=document.getElementById(fid); f.value=volCalc;
+            f.dispatchEvent(new Event('input',{bubbles:true}));
           });
-          row.querySelector('.'+pid+'_del').addEventListener('click',function(){
-            row.remove(); renum(); calcVol(pid,fid);
-          });
-          row.querySelector('.'+pid+'_a').focus();
         });
       } else if(h.type==='select'){
         var sel=document.getElementById(pid+'_sel');
@@ -298,26 +302,6 @@ function injectAIHelpers(){
   });
 }
 
-function calcVol(pid,fid){
-  var areas=$$('.'+pid+'_a');
-  var heights=$$('.'+pid+'_h');
-  var total=0;
-  for(var i=0;i<areas.length;i++){
-    total+=num(areas[i].value)*num(heights[i]?heights[i].value:2.5,2.5);
-  }
-  var res=document.getElementById(pid+'_res');
-  if(res&&total>0){
-    res.style.display='block';
-    res.innerHTML='<strong>Berekend volume: '+Math.round(total)+' m\u00B3</strong><br>'+
-      '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+Math.round(total)+'" id="'+pid+'_apply">Overnemen \u2192</button>';
-    document.getElementById(pid+'_apply').addEventListener('click',function(){
-      var f=document.getElementById(fid); f.value=Math.round(total);
-      f.dispatchEvent(new Event('input',{bubbles:true}));
-    });
-  } else if(res){
-    res.style.display='none';
-  }
-}
 
 /* ═══ VELD = ENIGE WAARHEID: presets en assistent-knoppen volgen de veldwaarde ═══ */
 function syncFieldState(fid){
