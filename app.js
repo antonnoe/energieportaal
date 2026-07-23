@@ -18,7 +18,8 @@ setpoint:{text:'<strong>Binnentemperatuur</strong> — De temperatuur die u pret
 awaySetpoint:{text:'<strong>Vorstbescherming</strong> — Minimaal 7°C om bevriezing van leidingen te voorkomen. Vakantiehuis dat maandenlang leegstaat: 10–12°C.'},
 presentDaysWinter:{text:'<strong>Aanwezigheidsdagen per seizoen</strong> — Verdeel uw aanwezigheid over winter (oktober–april, 212 dagen) en zomer (mei–september, 153 dagen).<br><br>Dit is belangrijk omdat verwarming vooral in de winter speelt. Een vakantiehuis dat alleen in de zomer wordt gebruikt kost veel minder dan een winterverblijf.<br><br>🏠 Permanent: ~200 winter + ~145 zomer<br>🏡 Halftijds: ~120 winter + ~80 zomer<br>🌴 Zomervakantie: ~30 winter + ~90 zomer<br>❄️ Winterverblijf: ~90 winter + ~30 zomer'},
 woonoppervlak:{text:'<strong>Woonoppervlak (surface habitable)</strong> — De bewoonbare vloeroppervlakte van uw woning in m², gemeten binnen de muren. Dit is de wettelijke <em>surface habitable</em> zoals gebruikt op de DPE: alle verwarmde leefruimtes (woon- en slaapkamers, keuken, badkamer, gang), <em>exclusief</em> muren, trappen, kelders, garages, zolders lager dan 1,80&nbsp;m en balkons/terrassen.<br><br>Dit oppervlak is de noemer van de DPE-indicatie: de energie wordt uitgedrukt in kWh per m² per jaar. Staat vaak op uw koop-/huurakte of eerdere DPE.',source:'Code de la construction art. R.156-1 (surface habitable) · Méthode 3CL-DPE 2021'},
-volume:{text:'<strong>Verwarmd volume</strong> — Alle verwarmde ruimtes samen. Onverwarmde zolders, garages en kelders telt u niet mee.<br><br><strong>Berekening:</strong> vloeroppervlak × plafondhoogte per kamer, alles optellen.<br>Voorbeeld: woonkamer 35m²×2,7m + 2 slaapkamers 12m²×2,5m + keuken 15m²×2,5m = 192 m³.',source:'Infofrankrijk.com, "De isolatie van het Franse huis"'},
+volume:{text:'<strong>Verwarmd volume</strong> \u2014 Wordt automatisch berekend als woonoppervlak \u00D7 gemiddelde plafondhoogte. Alleen zelf aanpassen als u het werkelijke volume kent, bijvoorbeeld bij een vide, hoge nok of onverwarmde ruimtes binnen het woonoppervlak. Onverwarmde zolders, garages en kelders tellen niet mee.'},
+ceilingH:{text:'<strong>Gemiddelde plafondhoogte</strong> \u2014 Moderne woningen: 2,5 m. Oude Franse huizen (ma\u00E7onnerie, herenhuizen): vaak 2,7\u20133,0 m. Bij verschillende hoogtes per verdieping: neem het gemiddelde. De tool rekent hiermee uw verwarmd volume uit.'},
 ventType:{text:'<strong>Type ventilatie</strong><br><br>🪟 <strong>Natuurlijk:</strong> Via ramen, kieren, roosters. Meeste oude Franse huizen.<br>🔄 <strong>Mechanisch (VMC):</strong> Ventilator zuigt lucht af. Standaard in nieuwere woningen.<br>♻️ <strong>Met warmteterugwinning (VMC double flux):</strong> Bespaart 15–25% op verwarmingskosten.',source:'Infofrankrijk.com'},
 ach:{text:'<strong>Luchtwisseling per uur</strong> — Hoe vaak per uur alle lucht ververst wordt.<br><br>🏚️ Oud en tochtig: 1,0–2,0<br>🏠 Gemiddeld met kieren: 0,5–0,8<br>🏗️ Goed afgedicht: 0,3–0,5<br><br>Bij twijfel: kies 0,6.'},
 hrvEta:{text:'<strong>Rendement warmteterugwinning</strong> — Staat op het typeplaatje van uw VMC double flux. Goede systemen: 80–90%.'},
@@ -47,7 +48,6 @@ price_elec:{text:'<strong>Elektriciteitsprijs</strong> — Kijk op uw factuur bi
 
 /* ═══ AI HELPER DEFINITIONS [ai] ═══ */
 var AI={
-volume:{title:'Volume-assistent',desc:'Uw volume = woonoppervlak \u00D7 gemiddelde plafondhoogte. Kies de hoogte die het beste bij uw woning past.',type:'height'},
 wallU:{title:'Muur-assistent',desc:'Beschrijf uw buitenmuren.',type:'select',opts:[
 ['2.0','Dikke stenen muur (>40cm), ongeïsoleerd'],['1.5','Parpaing (betonblokken), ongeïsoleerd'],
 ['0.8','Stenen muur + dunne isolatie (4-5cm)'],['0.5','Parpaing + 8-10cm isolatie'],
@@ -150,16 +150,7 @@ function injectAIHelpers(){
     var panel=document.createElement('div'); panel.className='ai-panel';
     var pid='aip_'+fid;
     var html='<h4>\u{1F916} '+h.title+'</h4><p>'+h.desc+'</p>';
-    if(h.type==='height'){
-      html+='<select id="'+pid+'_hgt">'+
-        '<option value="">\u2014 Kies de plafondhoogte \u2014</option>'+
-        '<option value="2.2">Laag \u00B7 2,2 m (appartement, verbouwde zolder)</option>'+
-        '<option value="2.5">Standaard \u00B7 2,5 m (moderne woning)</option>'+
-        '<option value="2.7">Ruim \u00B7 2,7 m</option>'+
-        '<option value="3.0">Hoog \u00B7 3,0 m (oude Franse woning)</option>'+
-        '<option value="3.5">Zeer hoog \u00B7 3,5 m (herenhuis, deels vide)</option>'+
-        '</select><div class="ai-result" id="'+pid+'_res" style="display:none"></div>';
-    } else if(h.type==='select'){
+    if(h.type==='select'){
       html+='<select id="'+pid+'_sel"><option value="">— Kies —</option>';
       h.opts.forEach(function(o){html+='<option value="'+o[0]+'">'+o[1]+'</option>'});
       html+='</select><div class="ai-result" id="'+pid+'_res" style="display:none"></div>';
@@ -208,31 +199,7 @@ function injectAIHelpers(){
     });
     // Bind events after panel is in DOM
     setTimeout(function(){
-      if(h.type==='height'){
-        var hgt=document.getElementById(pid+'_hgt');
-        if(hgt)hgt.addEventListener('change',function(){
-          var res=document.getElementById(pid+'_res');
-          if(!res)return;
-          if(!hgt.value){res.style.display='none';return}
-          var m2=num(document.getElementById('woonoppervlak')?document.getElementById('woonoppervlak').value:0,0);
-          if(m2<=0){
-            res.style.display='block';
-            res.innerHTML='<span style="color:#c0392b">Vul eerst het woonoppervlak (m\u00B2) in \u2014 dat is de basis voor deze berekening.</span>';
-            return;
-          }
-          var hv=num(hgt.value,2.5);
-          var volCalc=Math.round(m2*hv);
-          var hLabel=hgt.options[hgt.selectedIndex].text;
-          res.style.display='block';
-          res.innerHTML='<strong>Berekend volume: '+volCalc+' m\u00B3</strong><br>'+
-            '<span style="font-size:.85em;color:#555">'+m2+' m\u00B2 woonoppervlak \u00D7 '+String(hv).replace('.',',')+' m ('+hLabel+')</span><br>'+
-            '<button type="button" class="ai-apply-btn" data-for="'+fid+'" data-val="'+volCalc+'" id="'+pid+'_apply">Overnemen \u2192</button>';
-          document.getElementById(pid+'_apply').addEventListener('click',function(){
-            var f=document.getElementById(fid); f.value=volCalc;
-            f.dispatchEvent(new Event('input',{bubbles:true}));
-          });
-        });
-      } else if(h.type==='select'){
+      if(h.type==='select'){
         var sel=document.getElementById(pid+'_sel');
         if(sel)sel.addEventListener('change',function(){
           var res=document.getElementById(pid+'_res');
@@ -316,31 +283,33 @@ function syncFieldState(fid){
   });
 }
 function bindValueSync(){
-  ['wallU','roofU','floorU','winU','mainScop','volume','pvKwp','pvSelfUse'].forEach(function(fid){
+  ['wallU','roofU','floorU','winU','ceilingH','mainScop','volume','pvKwp','pvSelfUse'].forEach(function(fid){
     var f=document.getElementById(fid);
     if(f)f.addEventListener('input',function(){syncFieldState(fid)});
   });
 }
 
-/* ═══ M² ↔ M³ KOPPELING: volume volgt woonoppervlak × 2,5 totdat de gebruiker
-   het volume bewust zelf zet (handmatig of via de assistent) ═══ */
+/* ═══ M² × PLAFONDHOOGTE → M³: volume volgt automatisch totdat de gebruiker
+   het volume bewust zelf overschrijft ═══ */
 function bindAreaVolumeLink(){
   var opp=document.getElementById('woonoppervlak');
+  var ch=document.getElementById('ceilingH');
   var vol=document.getElementById('volume');
   if(!opp||!vol)return;
   var volumeTouched=false;
   vol.addEventListener('input',function(e){ if(e.isTrusted)volumeTouched=true; });
-  document.addEventListener('click',function(e){
-    if(e.target&&e.target.closest&&e.target.closest('.ai-apply-btn[data-for="volume"]'))volumeTouched=true;
-  });
-  opp.addEventListener('input',function(){
+  function recalc(){
     if(volumeTouched)return;
     var m2=num(opp.value,0);
-    if(m2>0){
-      vol.value=Math.round(m2*2.5);
+    var h=num(ch?ch.value:2.5,2.5);
+    if(m2>0&&h>0){
+      vol.value=Math.round(m2*h);
       vol.dispatchEvent(new Event('input',{bubbles:false}));
     }
-  });
+  }
+  opp.addEventListener('input',recalc);
+  if(ch)ch.addEventListener('input',recalc);
+  recalc();
 }
 
 /* ═══ BUILD SELECTS ═══ */
@@ -362,10 +331,12 @@ function buildPresets(){
     wall:{'Dikke stenen muur, ongeïsoleerd':2.0,'Licht geïsoleerd (~5cm)':0.8,'Goed (~10cm)':0.4,'Zeer goed (15cm+)':0.25},
     roof:{'Ongeïsoleerd dak':3.0,'Beetje isolatie (~10cm)':0.5,'Goed (~20cm)':0.25,'Zeer goed (30cm+)':0.15},
     floor:{'Op zand/aarde':2.2,'Kruipruimte':1.2,'Licht geïsoleerd':0.8,'Goed geïsoleerd':0.3},
-    win:{'Enkel glas':5.5,'Oud dubbel':2.8,'Modern dubbel':1.6,'Triple HR++':1.0}
+    win:{'Enkel glas':5.5,'Oud dubbel':2.8,'Modern dubbel':1.6,'Triple HR++':1.0},
+    ceiling:{'Laag (2,2 m)':2.2,'Standaard (2,5 m)':2.5,'Ruim (2,7 m)':2.7,'Oud Frans huis (3,0 m)':3.0}
   };
+  var T={wall:'wallU',roof:'roofU',floor:'floorU',win:'winU',ceiling:'ceilingH'};
   Object.keys(P).forEach(function(k){
-    var c=$('#'+k+'Presets'), tid=k==='win'?'winU':k+'U';
+    var c=$('#'+k+'Presets'), tid=T[k];
     if(!c)return;
     c.innerHTML=Object.keys(P[k]).map(function(l){return'<button type="button" class="preset-btn" data-t="'+tid+'" data-v="'+P[k][l]+'">'+l+'</button>'}).join('');
     c.querySelectorAll('.preset-btn').forEach(function(b){
@@ -485,7 +456,7 @@ window.buildConfirm=function(sec){
         c('Aanwezigheid',(wd+sd)+' dagen/jaar · '+wd+' winter (okt–apr) + '+sd+' zomer (mei–sep)');
       break;
     case'3':
-      h=c('Woonoppervlak',v('woonoppervlak')+' m²')+c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');
+      h=c('Woonoppervlak',v('woonoppervlak')+' m²')+c('Plafondhoogte',String(v('ceilingH')).replace('.',',')+' m')+c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');
       if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));
       var _vol=num(v('volume'),0), _opp=num(v('woonoppervlak'),0);
       if(_opp>0&&_vol>0){

@@ -236,9 +236,18 @@
               <div class="help">Bewoonbare vloeroppervlakte (surface habitable). Basis voor de DPE-indicatie (kWh/m²).</div>
             </div>
             <div class="field">
+              <label>Gemiddelde plafondhoogte <span class="unit">(m)</span></label>
+              <input type="number" id="ceilingH" value="2.5" min="1.8" max="5" step="0.1">
+              <div class="help">Oude Franse woningen hebben vaak 2,7–3,0 m.</div>
+              <div class="presets" id="ceilingPresets"></div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
               <label>Verwarmd volume <span class="unit">(m³)</span></label>
               <input type="number" id="volume" value="250" min="20" max="5000" step="10">
-              <div class="help">Vloeroppervlak × plafondhoogte. Typisch Frans huis: 150–400 m³.</div>
+              <div class="help">Automatisch berekend: woonoppervlak × plafondhoogte. Pas aan als u het werkelijke volume kent (bijvoorbeeld bij een vide of hoge nok) — daarna rekent de tool niet meer automatisch mee.</div>
             </div>
           </div>
 
