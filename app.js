@@ -70,7 +70,7 @@ pvSelfUse:{title:'Eigenverbruik-assistent',desc:'Ik schat uw eigenverbruikpercen
 
 /* ═══ INIT ═══ */
 document.addEventListener('DOMContentLoaded',function(){
-  buildSelects();buildPresets();buildAppliances();buildPriceInputs();bindToggles();bindValueSync();
+  buildSelects();buildPresets();buildAppliances();buildPriceInputs();bindToggles();bindValueSync();bindAreaVolumeLink();
   injectInfoButtons();injectAIHelpers();bindPresence();
 });
 
@@ -205,19 +205,28 @@ function injectAIHelpers(){
     setTimeout(function(){
       if(h.type==='volume'){
         var addBtn=document.getElementById(pid+'_add');
-        var rc=0;
         if(addBtn)addBtn.addEventListener('click',function(){
-          rc++;
           var container=document.getElementById(pid+'_rooms');
           var row=document.createElement('div');
           row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px';
-          row.innerHTML='<span style="flex:2;padding:6px 8px;font-size:.85em;font-weight:600;color:var(--primary)">Kamer '+rc+'</span>'+
+          row.innerHTML='<span class="'+pid+'_lbl" style="flex:2;padding:6px 8px;font-size:.85em;font-weight:600;color:var(--primary)"></span>'+
             '<input type="number" placeholder="m\u00B2" class="'+pid+'_a" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">'+
-            '<input type="number" placeholder="hoogte" value="2.5" class="'+pid+'_h" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">';
+            '<input type="number" placeholder="hoogte" value="2.5" class="'+pid+'_h" style="flex:1;padding:6px;border:1px solid #b0c4de;border-radius:4px;font-size:.85em;text-align:center">'+
+            '<button type="button" class="'+pid+'_del" title="Kamer verwijderen" style="flex-shrink:0;width:26px;height:26px;border:1px solid #b0c4de;background:#fff;border-radius:4px;color:#c0392b;cursor:pointer;font-weight:700;line-height:1">\u2715</button>';
           container.appendChild(row);
+          function renum(){
+            Array.from(container.children).forEach(function(r,i){
+              var l=r.querySelector('.'+pid+'_lbl'); if(l)l.textContent='Kamer '+(i+1);
+            });
+          }
+          renum();
           row.querySelectorAll('input[type="number"]').forEach(function(inp2){
             inp2.addEventListener('input',function(){calcVol(pid,fid)});
           });
+          row.querySelector('.'+pid+'_del').addEventListener('click',function(){
+            row.remove(); renum(); calcVol(pid,fid);
+          });
+          row.querySelector('.'+pid+'_a').focus();
         });
       } else if(h.type==='select'){
         var sel=document.getElementById(pid+'_sel');
@@ -305,6 +314,8 @@ function calcVol(pid,fid){
       var f=document.getElementById(fid); f.value=Math.round(total);
       f.dispatchEvent(new Event('input',{bubbles:true}));
     });
+  } else if(res){
+    res.style.display='none';
   }
 }
 
@@ -324,6 +335,27 @@ function bindValueSync(){
   ['wallU','roofU','floorU','winU','mainScop','volume','pvKwp','pvSelfUse'].forEach(function(fid){
     var f=document.getElementById(fid);
     if(f)f.addEventListener('input',function(){syncFieldState(fid)});
+  });
+}
+
+/* ═══ M² ↔ M³ KOPPELING: volume volgt woonoppervlak × 2,5 totdat de gebruiker
+   het volume bewust zelf zet (handmatig of via de assistent) ═══ */
+function bindAreaVolumeLink(){
+  var opp=document.getElementById('woonoppervlak');
+  var vol=document.getElementById('volume');
+  if(!opp||!vol)return;
+  var volumeTouched=false;
+  vol.addEventListener('input',function(e){ if(e.isTrusted)volumeTouched=true; });
+  document.addEventListener('click',function(e){
+    if(e.target&&e.target.closest&&e.target.closest('.ai-apply-btn[data-for="volume"]'))volumeTouched=true;
+  });
+  opp.addEventListener('input',function(){
+    if(volumeTouched)return;
+    var m2=num(opp.value,0);
+    if(m2>0){
+      vol.value=Math.round(m2*2.5);
+      vol.dispatchEvent(new Event('input',{bubbles:false}));
+    }
   });
 }
 
@@ -461,8 +493,24 @@ window.buildConfirm=function(sec){
   var VL={natural:'Natuurlijk',mech:'Mechanisch',hrv:'Met warmteterugwinning'};
   var h='';
   switch(sec){
-    case'2':h=c('Klimaatzone',ZL[v('zone')]||v('zone'))+c('Binnentemperatuur',v('setpoint')+' °C')+c('Bij afwezigheid',v('awaySetpoint')+' °C')+c('Winter',v('presentDaysWinter')+' d (okt–apr)')+c('Zomer',v('presentDaysSummer')+' d (mei–sep)');break;
-    case'3':h=c('Woonoppervlak',v('woonoppervlak')+' m²')+c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));break;
+    case'2':
+      var actP=document.querySelector('.presence-preset.active');
+      var wd=num(v('presentDaysWinter'),0), sd=num(v('presentDaysSummer'),0);
+      h=c('Klimaatzone',ZL[v('zone')]||v('zone'))+c('Binnentemperatuur',v('setpoint')+' °C')+c('Bij afwezigheid',v('awaySetpoint')+' °C')+
+        c('Gebruik',actP?actP.textContent.trim():'Zelf ingevuld')+
+        c('Aanwezigheid',(wd+sd)+' dagen/jaar · '+wd+' winter (okt–apr) + '+sd+' zomer (mei–sep)');
+      break;
+    case'3':
+      h=c('Woonoppervlak',v('woonoppervlak')+' m²')+c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');
+      if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));
+      var _vol=num(v('volume'),0), _opp=num(v('woonoppervlak'),0);
+      if(_opp>0&&_vol>0){
+        var _ph=_vol/_opp;
+        if(_ph<2||_ph>4){
+          h+='<div class="confirm-card" style="border-color:#c0392b;background:rgba(192,57,43,0.05)"><div class="label" style="color:#c0392b">Controleer deze combinatie</div><div class="value small" style="color:#c0392b">'+_vol+' m³ bij '+_opp+' m² betekent een gemiddelde plafondhoogte van '+_ph.toFixed(1)+' m — dat is onwaarschijnlijk. Klopt het woonoppervlak of het volume niet?</div></div>';
+        }
+      }
+      break;
     case'4':h=c('Muren',v('wallA')+' m² · U='+v('wallU'))+c('Dak',v('roofA')+' m² · U='+v('roofU'))+c('Vloer',v('floorA')+' m² · U='+v('floorU'))+c('Ramen',v('winA')+' m² · U='+v('winU'));break;
     case'5':var ml=HEAT_MAIN_DEF.find(function(x){return x.key===v('mainType')});h=c('Hoofd',ml?ml.label:v('mainType'));
       if(v('mainType')==='hp')h+=c('SCOP',v('mainScop'));if('gas fioul pellet wood'.split(' ').indexOf(v('mainType'))>=0)h+=c('Rendement',v('mainEta'));
