@@ -959,7 +959,7 @@ window.saveToDF=function(){
     '- **TVA 5,5%** \u2014 verlaagd btw-tarief op renovatiewerken'+nl+nl+
     '> Sinds 23 feb 2026: afspraak bij France R\u00E9nov\u2019 verplicht v\u00F3\u00F3r elke MPR-aanvraag. De meeste subsidies moeten v\u00F3\u00F3r aanvang van de werken worden aangevraagd.'+nl+nl;
 
-  inhoud+='---'+nl+'*Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com*';
+  inhoud+='---'+nl+'*Bronnen: M\u00E9thode 3CL-DPE 2021, ADEME, M\u00E9t\u00E9o France, Infofrankrijk.com \u00B7 Christian von Kl\u00F6sterlein, "Klussen in Frankrijk" \u00B7 Rob van der Meulen, "Warmteverliezen"*';
 
   // Stuur via pending API (zoals Café Claude)
   var btn=$('#dfSaveBtn');
