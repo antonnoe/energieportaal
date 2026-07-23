@@ -1188,3 +1188,134 @@ window.renderDPE=function(){
 };
 
 })();
+
+/* ═══════════════════════════════════════════════════════════════
+   V3 — INTAKE (gescripte conversational flow) + LIVE DASHBOARD
+   Geen LLM: deterministische vraag-antwoordflow met knoppen.
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+var $=function(s){return document.querySelector(s)};
+var num=function(v,d){var n=parseFloat(String(v).replace(',','.'));return Number.isFinite(n)?n:(d||0)};
+var eur=function(x){return new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(x||0)};
+
+var answers={renovations:[]};
+var chat, stepIdx=0;
+
+var FLOW=[
+ {id:'zone',q:'Waar in Frankrijk staat de woning?',opts:[
+   ['med','Middellandse Zeekust'],['ouest','Zuid-West / Atlantisch'],['paris','Noord / Parijs'],
+   ['centre','Centraal Frankrijk'],['est','Oost-Frankrijk'],['mont','Berggebied']]},
+ {id:'houseType',q:'Welk type woning is het?',opts:[
+   ['longere','Long\u00e8re / fermette'],['village','Dorpswoning (aaneengesloten)'],['maitre','Maison de ma\u00eetre'],
+   ['pavillon','Pavillon (vrijstaand)'],['modern','Moderne woning'],['appartement','Appartement']]},
+ {id:'period',q:'Uit welke periode stamt de woning (oorspronkelijke bouw)?',opts:[
+   ['pre1948','V\u00f3\u00f3r 1948'],['y48_74','1948\u20131974'],['y75_89','1975\u20131989'],
+   ['y90_05','1990\u20132005'],['post2005','Na 2005']]},
+ {id:'m2',q:'Hoeveel m\u00b2 woonoppervlak (surface habitable)?',type:'number',placeholder:'bijv. 120'},
+ {id:'renovations',q:'Zijn er onderdelen al goed gerenoveerd/ge\u00efsoleerd? (meerdere mogelijk)',type:'multi',opts:[
+   ['roof','Dak'],['walls','Muren'],['windows','Ramen (HR-glas)'],['floor','Vloer']]},
+ {id:'heating',q:'Wat is de hoofdverwarming?',opts:[
+   ['hp','Warmtepomp'],['gas','Gasketel'],['fioul','Stookolie'],['wood','Houtkachel'],['pellet','Pelletketel'],['elec','Elektrisch']]},
+ {id:'usage',q:'Hoe gebruikt u de woning?',opts:[
+   ['permanent','\U0001F3E0 Permanent'],['halftijds','\U0001F3E1 Halftijds'],['zomer','\U0001F334 Zomervakantie'],['winter','\u2744\uFE0F Winterverblijf']]}
+];
+
+function bot(html){var b=document.createElement('div');b.className='chat-bubble chat-bot';b.innerHTML=html;chat.appendChild(b);scroll()}
+function user(txt){var b=document.createElement('div');b.className='chat-bubble chat-user';b.textContent=txt;chat.appendChild(b);scroll()}
+function scroll(){var s=chat.closest('.slide');if(s)s.scrollTop=s.scrollHeight}
+
+function ask(){
+  if(stepIdx>=FLOW.length){finishIntake();return}
+  var st=FLOW[stepIdx];
+  bot(st.q);
+  var wrap=document.createElement('div');wrap.className='chat-options';
+  if(st.type==='number'){
+    wrap.className='chat-num';
+    wrap.innerHTML='<input type="number" min="15" max="2000" placeholder="'+(st.placeholder||'')+'"> <button class="chat-opt">OK</button>';
+    var inp=wrap.querySelector('input'),ok=wrap.querySelector('button');
+    function submit(){var v=num(inp.value,0);if(v<15)return;answers[st.id]=v;wrap.remove();user(v+' m\u00b2');stepIdx++;ask()}
+    ok.addEventListener('click',submit);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter')submit()});
+    chat.appendChild(wrap);setTimeout(function(){inp.focus()},50);
+  } else if(st.type==='multi'){
+    var chosen=[];
+    st.opts.forEach(function(o){
+      var b=document.createElement('button');b.className='chat-opt chip';b.textContent=o[1];
+      b.addEventListener('click',function(){
+        var i=chosen.indexOf(o[0]);
+        if(i>=0){chosen.splice(i,1);b.classList.remove('on')}else{chosen.push(o[0]);b.classList.add('on')}
+      });
+      wrap.appendChild(b);
+    });
+    var done=document.createElement('button');done.className='chat-opt';done.style.fontWeight='700';done.textContent='Klaar \u2192';
+    done.addEventListener('click',function(){
+      answers[st.id]=chosen.slice();wrap.remove();
+      user(chosen.length?st.opts.filter(function(o){return chosen.indexOf(o[0])>=0}).map(function(o){return o[1]}).join(', '):'Geen renovaties');
+      stepIdx++;ask();
+    });
+    wrap.appendChild(done);chat.appendChild(wrap);scroll();
+  } else {
+    st.opts.forEach(function(o){
+      var b=document.createElement('button');b.className='chat-opt';b.textContent=o[1];
+      b.addEventListener('click',function(){answers[st.id]=o[0];wrap.remove();user(o[1]);stepIdx++;ask()});
+      wrap.appendChild(b);
+    });
+    chat.appendChild(wrap);scroll();
+  }
+}
+
+function setField(id,val){
+  var e=document.getElementById(id);if(!e)return;
+  e.value=val;
+  e.dispatchEvent(new Event('input',{bubbles:true}));
+  e.dispatchEvent(new Event('change',{bubbles:true}));
+}
+
+window.finishIntake=function(testAnswers){
+  if(testAnswers)answers=testAnswers;
+  var pkg=applyArchetype(answers);
+  Object.keys(pkg.fields).forEach(function(k){setField(k,pkg.fields[k])});
+  // presence-profiel knop activeren op basis van gekozen usage
+  var up=window.USAGE_PROFILES&&window.USAGE_PROFILES[answers.usage];
+  if(up){document.querySelectorAll('.presence-preset').forEach(function(b){
+    b.classList.toggle('active',num(b.dataset.w,-1)===up.winter&&num(b.dataset.s,-1)===up.summer)});}
+  if(chat){
+    bot('<div class="chat-summary"><strong>Uw startpakket staat klaar.</strong><br>'+pkg.summary.join('<br>')+
+      '<br><br>In het overzicht kunt u elke waarde controleren en bijstellen \u2014 de berekening loopt live mee.</div>');
+    var go=document.createElement('button');go.className='btn-primary';go.style.alignSelf='center';go.textContent='Naar het overzicht \u2192';
+    go.addEventListener('click',function(){window.wizardGoTo('2','main');liveRecalc()});
+    chat.appendChild(go);scroll();
+  } else { liveRecalc(); }
+};
+
+/* ── Live herberekening op het dashboard ── */
+var debTimer=null;
+function liveRecalc(){
+  if(typeof computeAndRender==='function')computeAndRender();
+  var r=window._lastResult,s=window._lastState;
+  if(!r)return;
+  var c=$('#dashCost');if(c)c.textContent=eur(r.totalCost);
+  var mo=$('#dashMonth');if(mo)mo.textContent=eur(r.perMonth)+' per maand';
+  var d=null;
+  try{ if(typeof computeDPE==='function'&&s) d=computeDPE(s); }catch(e){}
+  var badge=$('#dashDPE');
+  if(badge&&d){
+    var KL={A:'#009B4D',B:'#52B74B',C:'#C8D400',D:'#FFED00',E:'#F5A623',F:'#E95D0F',G:'#E30613'};
+    badge.textContent=d.classe;
+    badge.style.background=KL[d.classe]||'#999';
+    badge.style.color=(d.classe==='C'||d.classe==='D')?'#333':'#fff';
+    var sub=$('#dashDPESub');if(sub)sub.textContent=Math.round(d.perM2.ep)+' kWh EP/m\u00b2 \u00b7 '+d.perM2.ges.toFixed(1)+' kg CO\u2082/m\u00b2';
+  }
+}
+window.liveRecalc=liveRecalc;
+
+document.addEventListener('DOMContentLoaded',function(){
+  chat=document.getElementById('intakeChat');
+  if(chat){bot('Welkom! Ik stel u zes korte vragen en zet daarna een compleet startpakket voor uw woning klaar.');ask()}
+  var dash=document.querySelector('.slide[data-section="2"]');
+  if(dash)['input','change'].forEach(function(ev){
+    dash.addEventListener(ev,function(){clearTimeout(debTimer);debTimer=setTimeout(liveRecalc,250)});
+  });
+});
+})();

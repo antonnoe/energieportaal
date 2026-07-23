@@ -31,7 +31,7 @@
       }
 
       // If navigating to result section, trigger calculation + DPE
-      if (sec === '8') {
+      if (sec === '3') {
         if (typeof computeAndRender === 'function') computeAndRender();
       }
 
@@ -42,11 +42,8 @@
     stepItems.forEach(function (item) {
       item.addEventListener('click', function () {
         var sec = parseInt(item.dataset.section, 10);
-        if (sec <= currentSection + 1) {
-          var phase = (sec === 1 || sec === 8) ? 'main' : 'explain';
-          if (sec === 8 && typeof computeAndRender === 'function') computeAndRender();
-          goTo(String(sec), phase);
-        }
+        if (sec === 3 && typeof computeAndRender === 'function') computeAndRender();
+        goTo(String(sec), 'main');
       });
     });
 
