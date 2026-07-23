@@ -17,6 +17,7 @@ zone:{text:'<strong>Klimaatzone</strong> — Frankrijk kent 6 klimaatzones, van 
 setpoint:{text:'<strong>Binnentemperatuur</strong> — De temperatuur die u prettig vindt. In Frankrijk is 19°C de officiële ADEME-aanbeveling. Elke graad hoger kost circa 7% meer energie. De meeste Nederlanders kiezen 20–21°C.',source:'ADEME, Guide Chauffage 2024'},
 awaySetpoint:{text:'<strong>Vorstbescherming</strong> — Minimaal 7°C om bevriezing van leidingen te voorkomen. Vakantiehuis dat maandenlang leegstaat: 10–12°C.'},
 presentDaysWinter:{text:'<strong>Aanwezigheidsdagen per seizoen</strong> — Verdeel uw aanwezigheid over winter (oktober–april, 212 dagen) en zomer (mei–september, 153 dagen).<br><br>Dit is belangrijk omdat verwarming vooral in de winter speelt. Een vakantiehuis dat alleen in de zomer wordt gebruikt kost veel minder dan een winterverblijf.<br><br>🏠 Permanent: ~200 winter + ~145 zomer<br>🏡 Halftijds: ~120 winter + ~80 zomer<br>🌴 Zomervakantie: ~30 winter + ~90 zomer<br>❄️ Winterverblijf: ~90 winter + ~30 zomer'},
+woonoppervlak:{text:'<strong>Woonoppervlak (surface habitable)</strong> — De bewoonbare vloeroppervlakte van uw woning in m², gemeten binnen de muren. Dit is de wettelijke <em>surface habitable</em> zoals gebruikt op de DPE: alle verwarmde leefruimtes (woon- en slaapkamers, keuken, badkamer, gang), <em>exclusief</em> muren, trappen, kelders, garages, zolders lager dan 1,80&nbsp;m en balkons/terrassen.<br><br>Dit oppervlak is de noemer van de DPE-indicatie: de energie wordt uitgedrukt in kWh per m² per jaar. Staat vaak op uw koop-/huurakte of eerdere DPE.',source:'Code de la construction art. R.156-1 (surface habitable) · Méthode 3CL-DPE 2021'},
 volume:{text:'<strong>Verwarmd volume</strong> — Alle verwarmde ruimtes samen. Onverwarmde zolders, garages en kelders telt u niet mee.<br><br><strong>Berekening:</strong> vloeroppervlak × plafondhoogte per kamer, alles optellen.<br>Voorbeeld: woonkamer 35m²×2,7m + 2 slaapkamers 12m²×2,5m + keuken 15m²×2,5m = 192 m³.',source:'Infofrankrijk.com, "De isolatie van het Franse huis"'},
 ventType:{text:'<strong>Type ventilatie</strong><br><br>🪟 <strong>Natuurlijk:</strong> Via ramen, kieren, roosters. Meeste oude Franse huizen.<br>🔄 <strong>Mechanisch (VMC):</strong> Ventilator zuigt lucht af. Standaard in nieuwere woningen.<br>♻️ <strong>Met warmteterugwinning (VMC double flux):</strong> Bespaart 15–25% op verwarmingskosten.',source:'Infofrankrijk.com'},
 ach:{text:'<strong>Luchtwisseling per uur</strong> — Hoe vaak per uur alle lucht ververst wordt.<br><br>🏚️ Oud en tochtig: 1,0–2,0<br>🏠 Gemiddeld met kieren: 0,5–0,8<br>🏗️ Goed afgedicht: 0,3–0,5<br><br>Bij twijfel: kies 0,6.'},
@@ -418,7 +419,7 @@ function tog(id,show){var e=document.getElementById(id);if(e){if(show)e.classLis
 function gatherState(){
   var pr={};Object.keys(PRICE_DEFAULTS_USER).forEach(function(k){var e=document.getElementById('price_'+k);pr[k]=e?num(e.value,PRICE_DEFAULTS_USER[k]):PRICE_DEFAULTS_USER[k]});
   var ap=DEFAULT_APPLIANCES.map(function(a,i){return{key:a.key,label:a.label,scales:a.scales,on:document.getElementById('appl_on_'+i)?document.getElementById('appl_on_'+i).checked:a.on,kwh:document.getElementById('appl_kwh_'+i)?num(document.getElementById('appl_kwh_'+i).value,a.kwh):a.kwh}});
-  return{zone:v('zone','paris'),setpoint:num(v('setpoint'),20),volume:num(v('volume'),250),ach:num(v('ach'),0.5),ventType:v('ventType','natural'),hrvEta:num(v('hrvEta'),0.75),
+  return{zone:v('zone','paris'),setpoint:num(v('setpoint'),20),volume:num(v('volume'),250),woonoppervlak:num(v('woonoppervlak'),100),ach:num(v('ach'),0.5),ventType:v('ventType','natural'),hrvEta:num(v('hrvEta'),0.75),
     wallA:num(v('wallA'),120),wallU:num(v('wallU'),0.5),roofA:num(v('roofA'),100),roofU:num(v('roofU'),0.25),floorA:num(v('floorA'),100),floorU:num(v('floorU'),0.35),winA:num(v('winA'),20),winU:num(v('winU'),1.6),
     presentDaysWinter:Math.min(212,Math.max(0,num(v('presentDaysWinter'),155))),presentDaysSummer:Math.min(153,Math.max(0,num(v('presentDaysSummer'),105))),awaySetpoint:num(v('awaySetpoint'),12),
     mainType:v('mainType','hp'),mainScop:num(v('mainScop'),3.2),mainEta:num(v('mainEta'),0.9),
@@ -442,7 +443,7 @@ window.buildConfirm=function(sec){
   var h='';
   switch(sec){
     case'2':h=c('Klimaatzone',ZL[v('zone')]||v('zone'))+c('Binnentemperatuur',v('setpoint')+' °C')+c('Bij afwezigheid',v('awaySetpoint')+' °C')+c('Winter',v('presentDaysWinter')+' d (okt–apr)')+c('Zomer',v('presentDaysSummer')+' d (mei–sep)');break;
-    case'3':h=c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));break;
+    case'3':h=c('Woonoppervlak',v('woonoppervlak')+' m²')+c('Volume',v('volume')+' m³')+c('Ventilatie',VL[v('ventType')]||v('ventType'))+c('Luchtwisseling',v('ach')+'/uur');if(v('ventType')==='hrv')h+=c('WTW',v('hrvEta'));break;
     case'4':h=c('Muren',v('wallA')+' m² · U='+v('wallU'))+c('Dak',v('roofA')+' m² · U='+v('roofU'))+c('Vloer',v('floorA')+' m² · U='+v('floorU'))+c('Ramen',v('winA')+' m² · U='+v('winU'));break;
     case'5':var ml=HEAT_MAIN_DEF.find(function(x){return x.key===v('mainType')});h=c('Hoofd',ml?ml.label:v('mainType'));
       if(v('mainType')==='hp')h+=c('SCOP',v('mainScop'));if('gas fioul pellet wood'.split(' ').indexOf(v('mainType'))>=0)h+=c('Rendement',v('mainEta'));
@@ -640,11 +641,10 @@ function renderSubsidies(s,r){
   var list=$('#subsidieList');
   if(!card||!list)return;
 
-  // DPE berekenen
-  var floorA=Math.max(1,s.floorA||100);
-  var dpeKwh=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
-  var kwhM2=dpeKwh/floorA;
-  var dpe=getDPE(kwhM2);
+  // DPE berekenen (conventioneel, dubbele drempel) — met terugval op de oude schatting.
+  var dpeC=currentDPE(s);
+  var dpe=dpeC?{letter:dpeC.classe,index:dpeC.details.classeIndex}
+              :getDPE(((r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0))/Math.max(1,s.floorA||100));
 
   var subs=[];
 
@@ -864,11 +864,10 @@ window.saveToDF=function(){
   var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
   var ht={hp:'Warmtepomp',elec:'Elektrisch',gas:'Gasketel',fioul:'Stookolie',pellet:'Pelletketel',wood:'Houtkachel'};
 
-  // DPE berekenen
-  var floorA2=Math.max(1,s.floorA||100);
-  var dpeKwh2=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
-  var kwhM22=dpeKwh2/floorA2;
-  var dpe2=getDPE(kwhM22);
+  // DPE berekenen (conventioneel, dubbele drempel) — terugval op oude schatting.
+  var dpeC2=currentDPE(s);
+  var kwhM22=dpeC2?dpeC2.perM2.ep:((r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0))/Math.max(1,s.floorA||100);
+  var dpe2=dpeC2?{letter:dpeC2.classe,index:dpeC2.details.classeIndex}:getDPE(kwhM22);
 
   var titel='EnergiePortaal rapport \u2014 '+eur(r.totalCost)+'/jaar';
 
@@ -903,14 +902,22 @@ window.saveToDF=function(){
     '- Totaal: H = '+fmt1(r.debug.H)+' W/K'+nl+
     '- Warmtevraag: '+fmt0(r.heatDemand)+' kWh/jaar'+nl+nl+
     '## DPE-indicatie'+nl+nl+
-    '**Energielabel: '+dpe2.letter+'** ('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)'+nl+nl;
+    '**Energielabel: '+dpe2.letter+'**'+(dpeC2?' (conventioneel gebruik: 365 dagen, 19 \u00B0C)':'')+nl+nl;
+  if(dpeC2){
+    inhoud+='| Schaal | Waarde | Klasse |'+nl+'|---|---|---|'+nl+
+      '| Primaire energie | '+Math.round(dpeC2.perM2.ep)+' kWh EP/m\u00B2/jaar | '+dpeC2.details.epClasse+' |'+nl+
+      '| CO\u2082-uitstoot (GES) | '+fmt1(dpeC2.perM2.ges)+' kg CO\u2082/m\u00B2/jaar | '+dpeC2.details.gesClasse+' |'+nl+
+      '| **Eindklasse** | slechtste van beide | **'+dpe2.letter+'** |'+nl+nl;
+  } else {
+    inhoud+='('+Math.round(kwhM22)+' kWh/m\u00B2 per jaar)'+nl+nl;
+  }
   var ban4=VERHUURVERBODEN.find(function(v){return v.letter===dpe2.letter});
   if(ban4) inhoud+='\u26A0\uFE0F **Verhuurverbod:** '+ban4.tekst+nl+nl;
   if(dpe2.index>0){
     var better=DPE_KLASSEN[dpe2.index-1];
-    inhoud+='Klasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh/m\u00B2 besparen.'+nl+nl;
+    inhoud+='Energieklasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh EP/m\u00B2 besparen.'+nl+nl;
   }
-  inhoud+='> \u26D6\uFE0F Dit is een simulatie-instrument. In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et R\u00E9silience, Arr\u00EAt\u00E9 du 31 mars 2021).'+nl+nl;
+  inhoud+='> \u26D6\uFE0F Indicatie op basis van conventioneel gebruik (365 dagen, 19 \u00B0C) \u2014 dit is geen offici\u00EBle DPE. In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et R\u00E9silience, Arr\u00EAt\u00E9 du 31 mars 2021).'+nl+nl;
 
   // Besparingskansen toevoegen aan DF export
   var savingsEl=$('#savingsList');
@@ -977,20 +984,68 @@ function getDPE(kwhM2){
   return{letter:'G',kleur:'#E3001B',index:6,kwhM2:kwhM2};
 }
 
+// Conventionele DPE voor de huidige state (los van persoonlijk gebruik).
+// Null als engine/dpe.js niet geladen is.
+function currentDPE(s){
+  if(typeof window.computeDPE!=='function') return null;
+  try{ return window.computeDPE(s); }catch(e){ return null; }
+}
+// Horizontale A–G balk met marker (▼) op de berekende eindklasse.
+function dpeHorizontalBar(activeIdx){
+  var segs='';
+  for(var i=0;i<DPE_KLASSEN.length;i++){
+    var k=DPE_KLASSEN[i];var on=i===activeIdx;
+    segs+='<div style="flex:1;text-align:center">'+
+      '<div style="height:1.4em;line-height:1.4em;font-size:1.1em;color:#333">'+(on?'▼':'')+'</div>'+
+      '<div style="background:'+k.kleur+';color:#fff;font-weight:800;font-family:Poppins,sans-serif;padding:9px 0;border-radius:5px;'+
+      (on?'transform:scale(1.18);box-shadow:0 0 0 3px #333;position:relative;z-index:1':'opacity:.85')+'">'+k.letter+'</div>'+
+    '</div>';
+  }
+  return '<div style="display:flex;align-items:flex-end;gap:4px">'+segs+'</div>';
+}
+
 window.renderDPE=function(){
   var noData=$('#dpeNoData'),content=$('#dpeContent');
-  if(!noData||!content)return;
   var s=window._lastState,r=window._lastResult;
-  if(!s||!r){noData.style.display='block';content.style.display='none';return}
+  var dpeFull=s?currentDPE(s):null;
+
+  // NIEUW DPE-blok (sectie 8, direct onder de kostenopbouw) — conventioneel, dubbele drempel.
+  var convBlock=$('#dpeConvBlock');
+  if(convBlock&&dpeFull){
+    convBlock.style.display='block';
+    var cbar=$('#dpeConvBar'); if(cbar) cbar.innerHTML=dpeHorizontalBar(dpeFull.details.classeIndex);
+    var cnums=$('#dpeConvNumbers');
+    if(cnums){
+      var driver=dpeFull.details.drivenBy==='ges'?'CO₂-uitstoot'
+                :dpeFull.details.drivenBy==='energie'?'energieverbruik':'energie én CO₂';
+      cnums.innerHTML=
+        '<div style="flex:1;min-width:150px;padding:10px 12px;background:var(--primary-light);border-radius:8px">'+
+          '<div style="font-size:.72em;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px">Primaire energie</div>'+
+          '<div style="font-size:1.35em;font-weight:800;font-family:Poppins,sans-serif">'+fmt0(dpeFull.perM2.ep)+' <span style="font-size:.6em;font-weight:600">kWh EP/m²/jr</span></div>'+
+          '<div style="font-size:.78em;color:var(--text-light)">Energieklasse '+dpeFull.details.epClasse+'</div>'+
+        '</div>'+
+        '<div style="flex:1;min-width:150px;padding:10px 12px;background:var(--primary-light);border-radius:8px">'+
+          '<div style="font-size:.72em;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px">CO₂-uitstoot</div>'+
+          '<div style="font-size:1.35em;font-weight:800;font-family:Poppins,sans-serif">'+fmt1(dpeFull.perM2.ges)+' <span style="font-size:.6em;font-weight:600">kg CO₂/m²/jr</span></div>'+
+          '<div style="font-size:.78em;color:var(--text-light)">GES-klasse '+dpeFull.details.gesClasse+'</div>'+
+        '</div>'+
+        '<div style="flex:1;min-width:150px;padding:10px 12px;background:'+dpeFull.details.kleur+';color:#fff;border-radius:8px">'+
+          '<div style="font-size:.72em;opacity:.9;text-transform:uppercase;letter-spacing:.5px">Eindklasse</div>'+
+          '<div style="font-size:1.6em;font-weight:800;font-family:Poppins,sans-serif;line-height:1.1">'+dpeFull.classe+'</div>'+
+          '<div style="font-size:.75em;opacity:.92">Slechtste van beide (bepaald door '+driver+')</div>'+
+        '</div>';
+    }
+  } else if(convBlock){ convBlock.style.display='none'; }
+
+  // Modal + compact + print delen dezelfde conventionele DPE.
+  if(!noData||!content)return;
+  if(!s||!r||!dpeFull){noData.style.display='block';content.style.display='none';return}
   noData.style.display='none';content.style.display='block';
 
-  // Bereken oppervlak en kWh/m²
-  var floorA=Math.max(1,s.floorA||100);
-  // DPE = alleen verwarming + warm water + koeling (NIET apparaten, EV, zwembad, PV)
-  // Dit volgt de Méthode 3CL-DPE: chauffage + ECS + refroidissement + auxiliaires
-  var dpeKwh=(r.verbruik.heatMain||0)+(r.verbruik.heatAux||0)+(r.verbruik.tapwater||0)+(r.verbruik.koelingEl||0);
-  var kwhM2=dpeKwh/floorA;
-  var dpe=getDPE(kwhM2);
+  // Marker/afstand op de primaire-energie-as; eindklasse (letter/kleur) = slechtste van energie/GES.
+  var floorA=dpeFull.details.shab;
+  var kwhM2=dpeFull.perM2.ep;
+  var dpe={letter:dpeFull.classe,kleur:dpeFull.details.kleur,index:dpeFull.details.epClasseIndex};
 
   // Big letter
   var bigEl=$('#dpeBigLetter');
@@ -1071,7 +1126,7 @@ window.renderDPE=function(){
     compactCard.style.display='block';
     if(compactLetter){compactLetter.textContent=dpe.letter;compactLetter.style.backgroundColor=dpe.kleur}
     if(compactText)compactText.textContent='Klasse '+dpe.letter;
-    if(compactKwh)compactKwh.textContent=Math.round(kwhM2)+' kWh/m² per jaar';
+    if(compactKwh)compactKwh.innerHTML=Math.round(kwhM2)+' kWh EP/m² · '+fmt1(dpeFull.perM2.ges)+' kg CO₂/m² per jaar';
     if(compactRental){
       var ban2=VERHUURVERBODEN.find(function(v){return v.letter===dpe.letter});
       if(ban2){compactRental.style.display='block';compactRental.textContent='\u26A0 Verhuurverbod sinds '+ban2.sinds}
@@ -1083,7 +1138,8 @@ window.renderDPE=function(){
   var printLetter=$('#dpePrintLetter');
   if(printLetter){
     printLetter.innerHTML='<div style="display:inline-flex;align-items:center;justify-content:center;width:70px;height:70px;border-radius:14px;color:#fff;font-size:2.2em;font-weight:800;font-family:Poppins,sans-serif;background:'+dpe.kleur+'">'+dpe.letter+'</div>'+
-      '<div style="font-size:1.5em;font-weight:700;margin-top:8px">'+Math.round(kwhM2)+' kWh/m\u00B2 per jaar</div>';
+      '<div style="font-size:1.35em;font-weight:700;margin-top:8px">'+Math.round(kwhM2)+' kWh EP/m\u00B2 \u00B7 '+fmt1(dpeFull.perM2.ges)+' kg CO\u2082/m\u00B2 per jaar</div>'+
+      '<div style="font-size:.85em;color:#666;margin-top:2px">Eindklasse = slechtste van energie ('+dpeFull.details.epClasse+') en CO\u2082 ('+dpeFull.details.gesClasse+')</div>';
   }
   var printScale=$('#dpePrintScale');
   if(printScale){

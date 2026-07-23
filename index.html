@@ -231,10 +231,18 @@
         <div class="field-group">
           <div class="field-row two-col">
             <div class="field">
+              <label>Woonoppervlak <span class="unit">(m²)</span></label>
+              <input type="number" id="woonoppervlak" value="100" min="10" max="2000" step="1">
+              <div class="help">Bewoonbare vloeroppervlakte (surface habitable). Basis voor de DPE-indicatie (kWh/m²).</div>
+            </div>
+            <div class="field">
               <label>Verwarmd volume <span class="unit">(m³)</span></label>
               <input type="number" id="volume" value="250" min="20" max="5000" step="10">
               <div class="help">Vloeroppervlak × plafondhoogte. Typisch Frans huis: 150–400 m³.</div>
             </div>
+          </div>
+
+          <div class="field-row two-col">
             <div class="field">
               <label>Type ventilatie</label>
               <select id="ventType">
@@ -244,14 +252,14 @@
               </select>
               <div class="help">De meeste oude Franse huizen hebben natuurlijke ventilatie.</div>
             </div>
-          </div>
-
-          <div class="field-row two-col">
             <div class="field">
               <label>Luchtwisseling per uur</label>
               <input type="number" id="ach" value="0.5" min="0.1" max="5" step="0.1">
               <div class="help">Hoe vaak per uur de lucht in uw huis ververst wordt. Goed geïsoleerd: 0,3–0,5. Oud en tochtig: 1,0–2,0.</div>
             </div>
+          </div>
+
+          <div class="field-row two-col">
             <div class="field field-conditional" id="hrvWrap">
               <label>Rendement warmteterugwinning</label>
               <input type="number" id="hrvEta" value="0.75" min="0" max="0.95" step="0.05">
@@ -811,6 +819,16 @@
           <div id="costBreakdown"></div>
         </div>
 
+        <!-- DPE-indicatie (conventioneel: primaire energie + GES, dubbele drempel) -->
+        <div class="result-card" id="dpeConvBlock" style="display:none">
+          <h3>DPE-indicatie (energielabel)</h3>
+          <div id="dpeConvBar" style="margin:12px 0"></div>
+          <div id="dpeConvNumbers" style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px"></div>
+          <p style="font-size:.82em;color:var(--text-light);line-height:1.6;margin-top:12px">
+            Indicatie op basis van conventioneel gebruik (365 dagen, 19&nbsp;°C) — dit is geen officiële DPE.
+          </p>
+        </div>
+
         <!-- Energiebalans -->
         <div class="result-card">
           <h3>Energiebalans (kWh per jaar)</h3>
@@ -967,7 +985,7 @@
           <div id="dpePrintScale" style="margin:1em 0"></div>
           <div id="dpePrintDistance" style="line-height:1.7;margin:12px 0"></div>
           <div id="dpePrintRental" style="line-height:1.7;margin:12px 0;display:none"></div>
-          <p style="line-height:1.7;font-size:.9em;margin-top:16px">Het <strong>Diagnostic de Performance Énergétique</strong> (DPE) is het Franse energielabel. Sinds 2023 is het juridisch bindend bij verkoop en verhuur. De schaal loopt van A (zeer zuinig, ≤ 70 kWh/m²) tot G (energielek, > 420 kWh/m²). Deze indicatie is gebaseerd op finale energie. Een officiële DPE vereist een gecertificeerde diagnostiqueur.</p>
+          <p style="line-height:1.7;font-size:.9em;margin-top:16px">Het <strong>Diagnostic de Performance Énergétique</strong> (DPE) is het Franse energielabel. Sinds 2023 is het juridisch bindend bij verkoop en verhuur. De schaal loopt van A (zeer zuinig, ≤ 70 kWh EP/m²) tot G (energielek, > 420 kWh EP/m²). Deze indicatie rekent conventioneel (365 dagen, 19&nbsp;°C) met primaire energie en een dubbele drempel (energie + CO₂) — dit is geen officiële DPE.</p>
           <p style="font-size:.85em;color:var(--text-light);margin-top:6px">Bron: Arrêté du 31 mars 2021, Méthode 3CL-DPE 2021 · Ministère de la Transition Écologique</p>
           <div style="margin-top:16px;padding:10px 14px;border:1.5px solid rgba(220,53,69,0.3);border-radius:6px;font-size:.82em;line-height:1.7;color:#666">
             <strong style="color:#dc3545">⚖️</strong> Dit is een simulatie-instrument. In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et Résilience, Arrêté du 31 mars 2021).
@@ -1027,7 +1045,7 @@
       <div class="result-card" style="text-align:center;padding:1.5em">
         <div id="dpeBigLetter" style="display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:16px;color:#fff;font-size:2.5em;font-weight:800;font-family:Poppins,sans-serif;margin-bottom:12px"></div>
         <div id="dpeKwhM2" style="font-size:1.8em;font-weight:700;color:var(--text)"></div>
-        <div style="font-size:.88em;color:var(--text-light);margin-top:4px">kWh/m² per jaar (finale energie)</div>
+        <div style="font-size:.88em;color:var(--text-light);margin-top:4px">kWh EP/m² per jaar (primaire energie · conventioneel gebruik: 365 dagen, 19&nbsp;°C)</div>
       </div>
 
       <!-- DPE bar scale -->
@@ -1052,7 +1070,7 @@
       <div class="result-card" style="background:var(--primary-light)">
         <h3>Wat is de DPE?</h3>
         <p style="line-height:1.7;font-size:.9em">Het <strong>Diagnostic de Performance Énergétique</strong> (DPE) is het Franse energielabel. Sinds 2023 is het juridisch bindend bij verkoop en verhuur. De schaal loopt van A (zeer zuinig, ≤ 70 kWh/m²) tot G (energielek, > 420 kWh/m²).</p>
-        <p style="line-height:1.7;font-size:.9em;margin-top:8px">Deze indicatie is gebaseerd op <strong>finale energie</strong> en uw invoer. Een officiële DPE vereist een gecertificeerde diagnostiqueur die rekent met de 3CL-DPE methode, primaire energie en een dubbele drempel (energie + CO₂).</p>
+        <p style="line-height:1.7;font-size:.9em;margin-top:8px">Deze indicatie rekent <strong>conventioneel</strong> (365 dagen bezetting, 19&nbsp;°C, conventioneel tapwater) — dus over het gebouw, niet over uw persoonlijke gebruik — met <strong>primaire energie</strong> (elektriciteit × 1,9 sinds 1 januari 2026) en een <strong>dubbele drempel</strong>: de eindklasse is de slechtste van de energie- en de CO₂-schaal. Een officiële DPE vereist een gecertificeerde diagnostiqueur.</p>
         <p style="line-height:1.7;font-size:.85em;color:var(--text-light);margin-top:8px">Bron: Arrêté du 31 mars 2021, Méthode 3CL-DPE 2021 · Ministère de la Transition Écologique</p>
       </div>
 
@@ -1071,6 +1089,7 @@
 <!-- Scripts: engine first (data + calc), then wizard (nav), then app (UI logic) -->
 <script src="engine/tool-spec.js"></script>
 <script src="engine/engine.js"></script>
+<script src="engine/dpe.js"></script>
 <script src="wizard.js"></script>
 <script src="app.js"></script>
 </body>
