@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   const prices = {
     updated: now.toISOString().slice(0, 10),
     elec:      { value: 0.2001, unit: '€/kWh',   source: 'CRE TRVE Bleu optie Base 6 kVA TTC', date: 'aug 2026', refDate: '2026-08-01', auto: false },
-    gas:       { value: 1.40,   unit: '€/m³',     source: 'SDES/DGEC, gemiddelde 2025 (aanname)', date: '2025', refDate: '2026-10-20', auto: false },
+    gas:       { value: 0.1414, unit: '€/kWh',    source: 'SDES/DGEC, gemiddelde 2025 (aanname)', date: '2025', refDate: '2026-10-20', auto: false },
     fioul:     { value: 1.13,   unit: '€/L',      source: 'SDES/DGEC, gemiddelde 2025 (aanname)', date: '2025', refDate: '2026-10-20', auto: false },
     pellet:    { value: 0.40,   unit: '€/kg',     source: 'ADEME, prijzen 2024 (aanname)',        date: '2024', refDate: '2026-10-20', auto: false },
     wood:      { value: 90,     unit: '€/stère',  source: 'ADEME, prijzen 2024 (aanname)',        date: '2024', refDate: '2026-10-20', auto: false },

@@ -481,7 +481,7 @@ window.buildConfirm=function(sec){
       // Prijzen samenvatting
       var elP=document.getElementById('price_elec'),gasP=document.getElementById('price_gas');
       if(elP) h+=c('Elektriciteit',elP.value+' \u20AC/kWh');
-      if(gasP) h+=c('Gas',gasP.value+' \u20AC/m\u00B3');
+      if(gasP) h+=c('Gas',gasP.value+' \u20AC/kWh');
       break;
   }
   el.innerHTML=h;
