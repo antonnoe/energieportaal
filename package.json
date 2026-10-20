@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "npx serve .",
-    "test": "node tests/dpe-test.js"
+    "test": "node tests/dpe-test.js && node tests/peil.test.mjs"
   },
   "dependencies": {
     "jsdom": "^29.1.1"

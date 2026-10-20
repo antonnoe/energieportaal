@@ -345,7 +345,7 @@
         <!-- Apparaten -->
         <div class="field-group">
           <h3>Huishoudelijke apparaten</h3>
-          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">Standaardwaarden ingevuld. Pas aan of schakel uit wat niet van toepassing is.</p>
+          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">Standaardwaarden ingevuld. Pas aan of schakel uit wat niet van toepassing is. <span id="applUitleg"></span></p>
           <div id="appliances"></div>
         </div>
 
@@ -440,7 +440,7 @@
         <!-- Energieprijzen -->
         <div class="field-group">
           <h3>Energieprijzen</h3>
-          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px">Gangbare Franse tarieven ingevuld. Pas aan op basis van uw eigen factuur.</p>
+          <p style="font-size:.85em;color:var(--text-light);margin-bottom:10px" id="priceUitleg">Standaardprijzen ingevuld. Pas aan op basis van uw eigen factuur.</p>
           <div id="prices" class="field-row four-col"></div>
         </div></div></details><div class="slide-nav"><button class="btn-secondary" data-go="1-main">← Intake opnieuw</button><button class="btn-primary" data-go="3-main">Volledig rapport →</button></div>
       </div>
@@ -598,6 +598,12 @@
           </details>
         </div>
 
+        <!-- Aannames bij de uitkomst -->
+        <div class="result-card" id="aannamesCard">
+          <h3>Waar deze berekening op steunt</h3>
+          <ul id="aannamesLijst" style="margin:0;padding-left:1.1em;font-size:.85em;line-height:1.7;color:var(--text-light)"></ul>
+        </div>
+
         <!-- Bronnen -->
         <div class="sources">
           <strong>Bronnen en verantwoording:</strong><br>
@@ -608,12 +614,14 @@
           Infofrankrijk.com — redactionele vertaling en praktische context voor Nederlandse doelgroep<br>
           Christian von Klösterlein — "Klussen in Frankrijk" (handboek): <a href="https://infofrankrijk.com/klussen-in-frankrijk-van-meesterklusser-christian-von-klosterlein/" target="_blank" rel="noopener">infofrankrijk.com/klussen-in-frankrijk-van-meesterklusser-christian-von-klosterlein</a><br>
           Rob van der Meulen — "Warmteverliezen": <a href="https://infofrankrijk.com/warmteverliezen/" target="_blank" rel="noopener">infofrankrijk.com/warmteverliezen</a><br>
-          Energieprijzen: CRE, EDF/Engie tarieven 2025/2026<br>
+          Energieprijzen: CRE (tarief réglementé elektriciteit, 1 augustus 2026), SDES/DGEC (gas en fioul, gemiddelde 2025), ADEME (pellets en hout, 2024; apparaatverbruik, 2026)<br>
           <br>
           <strong>Verificatie:</strong> Het IF-voorbeeldhuis (156 m³, ongeïsoleerd) geeft in deze tool 14.133 W piekvermogen vs. 13.260 W in het IF-artikel (vuistregelmethode). Verschil 6,6% — binnen de marge van de vereenvoudigde vuistregelmethode.<br>
           <br>
           <strong>Disclaimer:</strong> Dit is een schattingstool bedoeld om inzicht te geven. De uitkomsten zijn indicatief (±15–25% bandbreedte) en vervangen geen professioneel energieadvies of officieel DPE-rapport.
         </div>
+        <div id="peilStempel" class="print-hide" hidden></div>
+        <p class="peil-alinea" id="peilVoet" hidden></p>
 
         <!-- Opslaan in DossierFrankrijk (verborgen in print) -->
         <div class="result-card print-hide" style="text-align:center;background:var(--primary-light)">
@@ -674,6 +682,7 @@
 <script src="engine/engine.js"></script>
 <script src="engine/dpe.js"></script>
 <script src="engine/archetypes.js"></script>
+<script src="peil.js"></script>
 <script src="wizard.js"></script>
 <script src="app.js"></script>
 </body>

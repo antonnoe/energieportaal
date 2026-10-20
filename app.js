@@ -26,7 +26,7 @@ hrvEta:{text:'<strong>Rendement warmteterugwinning</strong> — Staat op het typ
 wallA:{text:'<strong>Muuroppervlakte</strong> — Alle buitenmuren samen, <em>exclusief</em> ramen en deuren.<br><br>Voorbeeld: huis 10×8m, hoogte 2,7m → omtrek 36m × 2,7 = 97 m². Min 15 m² ramen = 82 m².'},
 wallU:{text:'<strong>Isolatiewaarde muren (U-waarde)</strong> — Hoe lager, hoe beter.<br><br>🧱 Dikke stenen muur (>50cm), ongeïsoleerd: U ≈ 1,5–2,5<br>🧱 + 4–5cm isolatie: U ≈ 0,6–0,8<br>🧱 Goed geïsoleerd (10–15cm): U ≈ 0,25–0,40<br><br>R-waarde = 1/U-waarde. R=2,5 → U=0,40.',source:'Infofrankrijk.com · Méthode 3CL-DPE 2021'},
 roofA:{text:'<strong>Dakoppervlakte</strong> — Onbewoonde zolder: oppervlakte plafond eronder. Bewoonde zolder: oppervlakte schuine dak zelf.'},
-roofU:{text:'<strong>Isolatiewaarde dak</strong> — Het dak is vaak de grootste bron van warmteverlies (tot 30%).<br><br>🏚️ Ongeïsoleerd (pannen+latten): U ≈ 2,5–3,5<br>📦 Laag stro of 5–10cm: U ≈ 0,5–0,8<br>✅ 20cm minerale wol: U ≈ 0,20–0,25<br>⭐ 30cm+: U ≈ 0,12–0,15',source:'Infofrankrijk.com, "Zolders zijn niet meer wat ze waren"'},
+roofU:{text:'<strong>Isolatiewaarde dak</strong> — Het dak is vaak de grootste bron van warmteverlies (tot 30%).<br><br>🏚️ Ongeïsoleerd (pannen+latten): U ≈ 2,5<br>📦 Laag stro of 5–10cm: U ≈ 0,5–0,8<br>✅ 20cm minerale wol: U ≈ 0,20–0,25<br>⭐ 30cm+: U ≈ 0,12–0,15',source:'Infofrankrijk.com, "Zolders zijn niet meer wat ze waren"'},
 floorA:{text:'<strong>Vloeroppervlakte</strong> — Alleen de vloer direct op de grond of boven kruipruimte/kelder.'},
 floorU:{text:'<strong>Isolatiewaarde vloer</strong><br><br>🟤 Tomettes op zand/aarde: U ≈ 2,0–2,5<br>🔲 Beton op kruipruimte: U ≈ 1,0–1,5<br>📦 Licht geïsoleerd: U ≈ 0,5–0,8<br>✅ Goed geïsoleerd: U ≈ 0,25–0,35'},
 winA:{text:'<strong>Glasoppervlakte</strong> — Alle ramen en glasdeuren samen. Breedte × hoogte per raam, optellen.'},
@@ -43,23 +43,23 @@ pvKwp:{text:'<strong>Zonnepanelen vermogen (kWp)</strong> — 1 kWp ≈ 2–3 pa
 pvSelfUse:{text:'<strong>Eigenverbruik</strong> — Zonder batterij: 30–50%. Met batterij: 50–70%. Met thuiswerk: 50–60%.'},
 evKmWeek:{text:'<strong>EV kilometers/week</strong> — 200 km/week ≈ 1.900 kWh/jaar aan thuisladen. Geen EV? Laat op 0.'},
 seer:{text:'<strong>SEER (koelrendement)</strong> — SEER 4 = voor €1 stroom krijgt u €4 koeling. Staat op energielabel airco.'},
-price_elec:{text:'<strong>Elektriciteitsprijs</strong> — Kijk op uw factuur bij "prix du kWh TTC".<br><br>Gemiddeld FR 2025/2026:<br>Heures pleines: €0,25–0,27/kWh<br>Heures creuses: €0,18–0,20/kWh'}
+price_elec:{text:'<strong>Elektriciteitsprijs</strong> — Kijk op uw factuur bij "prix du kWh TTC".<br><br>Standaard: het gereguleerde tarief (Bleu, optie Base, 3 en 6 kVA) sinds 1 augustus 2026: €0,2001/kWh TTC (9 tot 15 kVA: €0,1985). Het abonnement komt er los bij: €145,76 per jaar bij 3 kVA, €190,81 bij 6 kVA. De tool rekent het abonnement niet mee.',source:'CRE, tarief réglementé, sinds 1 augustus 2026'}
 };
 
 /* ═══ AI HELPER DEFINITIONS [ai] ═══ */
 var AI={
 wallU:{title:'Muur-assistent',desc:'Beschrijf uw buitenmuren.',type:'select',opts:[
-['2.0','Dikke stenen muur (>40cm), ongeïsoleerd'],['1.5','Parpaing (betonblokken), ongeïsoleerd'],
+['2.5','Dikke stenen muur (>40cm), ongeïsoleerd'],['1.5','Parpaing (betonblokken), ongeïsoleerd'],
 ['0.8','Stenen muur + dunne isolatie (4-5cm)'],['0.5','Parpaing + 8-10cm isolatie'],
 ['0.35','Goed geïsoleerd (10-15cm)'],['0.25','Zeer goed (15cm+ met dampscherm)']]},
 roofU:{title:'Dak-assistent',desc:'Beschrijf uw daksituatie.',type:'select',opts:[
-['3.0','Ongeïsoleerd (pannen+latten, geen isolatie)'],['1.5','Laag stro of oud materiaal (<5cm)'],
+['2.5','Ongeïsoleerd (pannen+latten, geen isolatie)'],['1.5','Laag stro of oud materiaal (<5cm)'],
 ['0.5','Deels geïsoleerd (10cm glaswol)'],['0.25','Goed geïsoleerd (20cm)'],['0.15','Zeer goed (30cm+ of sandwichpanelen)']]},
 floorU:{title:'Vloer-assistent',desc:'Beschrijf uw vloer.',type:'select',opts:[
-['2.2','Tomettes/tegels direct op zand/aarde'],['1.5','Beton op aarde, zonder isolatie'],
+['2.0','Tomettes/tegels direct op zand/aarde'],['1.5','Beton op aarde, zonder isolatie'],
 ['1.2','Houten vloer boven kruipruimte'],['0.8','Vloer met dunne isolatie (3-5cm)'],['0.35','Goed geïsoleerd (8-12cm)']]},
 winU:{title:'Raam-assistent',desc:'Welk type beglazing hebt u?',type:'select',opts:[
-['5.5','Enkel glas (één laag, koud bij aanraking)'],['2.8','Oud dubbel glas (vóór 2000)'],
+['4.9','Enkel glas (één laag, koud bij aanraking)'],['2.8','Oud dubbel glas (vóór 2000)'],
 ['1.6','Modern dubbel glas (HR)'],['1.1','Modern HR+ glas'],['0.9','Triple glas (HR++)']]},
 mainScop:{title:'SCOP-assistent',desc:'Welk type warmtepomp?',type:'select',opts:[
 ['2.8','Lucht/lucht (split airco, ouder)'],['3.5','Lucht/lucht (inverter, modern)'],
@@ -328,16 +328,23 @@ function fill(sel,defs,def){
 /* ═══ PRESETS ═══ */
 function buildPresets(){
   var P={
-    wall:{'Dikke stenen muur, ongeïsoleerd':2.0,'Licht geïsoleerd (~5cm)':0.8,'Goed (~10cm)':0.4,'Zeer goed (15cm+)':0.25},
-    roof:{'Ongeïsoleerd dak':3.0,'Beetje isolatie (~10cm)':0.5,'Goed (~20cm)':0.25,'Zeer goed (30cm+)':0.15},
-    floor:{'Op zand/aarde':2.2,'Kruipruimte':1.2,'Licht geïsoleerd':0.8,'Goed geïsoleerd':0.3},
-    win:{'Enkel glas':5.5,'Oud dubbel':2.8,'Modern dubbel':1.6,'Triple HR++':1.0},
+    wall:U_PRESETS.wall,
+    roof:U_PRESETS.roof,
+    floor:U_PRESETS.floor,
+    win:U_PRESETS.win,
     ceiling:{'Laag (2,2 m)':2.2,'Standaard (2,5 m)':2.5,'Ruim (2,7 m)':2.7,'Oud Frans huis (3,0 m)':3.0}
+  };
+  var NOOT={
+    wall:'Standaardwaarden uit de DPE-methode (3CL) per bouwperiode. Dat matig bij 1983\u201388 hoort, goed bij 2006\u201312 en zeer goed bij vanaf 2013 is een aanname van deze tool.',
+    roof:'Zelfde koppeling aan bouwperiodes (aanname), waarden voor een zolder.',
+    floor:'Zelfde koppeling aan bouwperiodes (aanname).',
+    win:'3CL rekent per glastype en kozijn: enkel glas (4,9) en modern dubbelglas (1,6) gelden voor een PVC-kozijn, oud dubbelglas (2,8) en triple (1,0) zijn aannames.'
   };
   var T={wall:'wallU',roof:'roofU',floor:'floorU',win:'winU',ceiling:'ceilingH'};
   Object.keys(P).forEach(function(k){
     var c=$('#'+k+'Presets'), tid=T[k];
     if(!c)return;
+    if(NOOT[k]&&!(c.nextElementSibling&&c.nextElementSibling.classList.contains('u-noot'))){var n=document.createElement('div');n.className='help u-noot';n.textContent=NOOT[k];c.parentNode.insertBefore(n,c.nextSibling)}
     c.innerHTML=Object.keys(P[k]).map(function(l){return'<button type="button" class="preset-btn" data-t="'+tid+'" data-v="'+P[k][l]+'">'+l+'</button>'}).join('');
     c.querySelectorAll('.preset-btn').forEach(function(b){
       b.addEventListener('click',function(){
@@ -352,56 +359,44 @@ function buildPresets(){
 /* ═══ APPLIANCES ═══ */
 function buildAppliances(){
   var c=$('#appliances');if(!c)return;
+  var au=$('#applUitleg');if(au)au.textContent=APPARATEN_UITLEG;
   c.innerHTML=DEFAULT_APPLIANCES.map(function(a,i){
     return'<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--primary-light);border-radius:6px;margin-bottom:6px">'+
       '<label style="display:flex;align-items:center;gap:8px;font-size:.9em;cursor:pointer">'+
-      '<input type="checkbox" id="appl_on_'+i+'" '+(a.on?'checked':'')+' style="accent-color:var(--primary);width:16px;height:16px"> '+a.label+'</label>'+
+      '<input type="checkbox" id="appl_on_'+i+'" '+(a.on?'checked':'')+' style="accent-color:var(--primary);width:16px;height:16px"> <span title="'+a.bron+'">'+a.label+(a.status==='aanname'?' <span class="unit">(aanname)</span>':'')+'</span></label>'+
       '<div style="display:flex;align-items:center;gap:4px"><input type="number" id="appl_kwh_'+i+'" value="'+a.kwh+'" style="width:70px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;text-align:right;font-size:.85em"> <span style="font-size:.78em;color:var(--text-light)">kWh/j</span></div></div>';
   }).join('');
 }
 
 /* ═══ PRICES ═══ */
+function prijsBronTekst(k){
+  var i=PRIJS_INFO[k];
+  return (i.status==='vastgesteld'?'Officieel tarief: ':'Standaard, pas aan naar uw factuur. ')+i.bron+(i.toelichting?'. '+i.toelichting:'');
+}
 function buildPriceInputs(){
   var c=$('#prices');if(!c)return;
+  var pu=$('#priceUitleg');if(pu)pu.textContent=PRIJS_UITLEG;
   var L={elec:'Elektriciteit',gas:'Aardgas',fioul:'Stookolie',pellet:'Houtpellets',wood:'Stookhout',propaan:'Propaan',petroleum:'Petroleum'};
   c.innerHTML=Object.keys(L).map(function(k){
     return'<div class="field"><label>'+L[k]+' <span class="unit">('+ENERGY_UNITS[k]+')</span></label>'+
-      '<input type="number" id="price_'+k+'" value="'+PRICE_DEFAULTS_USER[k]+'" step="0.01">'+
-      '<div class="help price-source" id="price_src_'+k+'"></div></div>';
+      '<input type="number" id="price_'+k+'" value="'+PRICE_DEFAULTS_USER[k]+'" step="any">'+
+      '<div class="help price-source" id="price_src_'+k+'">'+prijsBronTekst(k)+'</div></div>';
   }).join('')+'<div id="priceUpdateInfo" style="font-size:.82em;color:var(--text-light);margin-top:8px"></div>';
   // Fetch actuele prijzen van API
   fetchLivePrices();
 }
 
 function fetchLivePrices(){
+  // Alleen de elektriciteitsprijs wordt live van CRE opgehaald; lukt dat niet, dan blijven de standaardwaarden uit Peil staan.
   fetch('/api/prices').then(function(r){return r.json()}).then(function(data){
-    if(!data||!data.elec)return;
-    Object.keys(data).forEach(function(k){
-      if(k==='updated'||k==='staleWarning')return;
-      var p=data[k];if(!p||!p.value)return;
-      var inp=document.getElementById('price_'+k);
-      var src=document.getElementById('price_src_'+k);
-      if(inp){
-        inp.value=p.value;
-        if(typeof PRICE_DEFAULTS_USER!=='undefined') PRICE_DEFAULTS_USER[k]=p.value;
-      }
-      if(src){
-        var badge=p.auto?'\u{1F7E2}':p.stale?'\u{1F534}':'\u{1F7E1}';
-        src.innerHTML=badge+' '+p.source+', '+p.date+(p.stale?' <strong style="color:#dc3545">(verouderd)</strong>':'');
-      }
-    });
-    var info=$('#priceUpdateInfo');
-    if(info){
-      var legend='\u{1F7E2} = live opgehaald \u{1F7E1} = referentiewaarde \u{1F534} = verouderd (>4 mnd)';
-      var html='Prijzen opgehaald: '+data.updated+'<br><span style="font-size:.9em">'+legend+'</span>';
-      if(data.staleWarning){
-        html+='<div style="margin-top:8px;padding:8px 12px;background:rgba(220,53,69,0.08);border-left:3px solid #dc3545;border-radius:0 6px 6px 0;font-size:.9em;color:#dc3545">'+
-          '<strong>\u26A0 '+data.staleWarning+'</strong><br>Pas de waarde handmatig aan op basis van uw meest recente factuur.</div>';
-      }
-      info.innerHTML=html;
-    }
+    var p=data&&data.elec;
+    if(!p||!p.auto||!p.value)return;
+    var inp=document.getElementById('price_elec');
+    var src=document.getElementById('price_src_elec');
+    if(inp){inp.value=p.value;PRICE_DEFAULTS_USER.elec=p.value}
+    if(src)src.textContent='Officieel tarief: CRE, tarief réglementé Bleu optie Base 6 kVA, TTC, '+p.date+'. '+PRIJS_INFO.elec.toelichting;
   }).catch(function(){
-    // Stil falen — hardcoded defaults blijven staan
+    // Stil falen: de standaardwaarden blijven staan
   });
 }
 
@@ -1310,7 +1305,19 @@ function liveRecalc(){
 }
 window.liveRecalc=liveRecalc;
 
+function vulAannames(){
+  var ul=$('#aannamesLijst');if(!ul)return;
+  var f=function(x){return String(x).replace('.',',')};
+  var items=[
+    'Energieprijzen: '+PRIJS_UITLEG,
+    'Apparaten: '+APPARATEN_UITLEG,
+    'Isolatiewaarden: '+U_UITLEG,
+    'DPE-indicatie: elektriciteit telt mee met de wettelijke primaire-energiefactor '+f(dpePefElec())+' (1,9 tot en met 31 december 2026, 1,7 vanaf 1 januari 2027).'
+  ];
+  ul.innerHTML=items.map(function(x){return'<li>'+x+'</li>'}).join('');
+}
 document.addEventListener('DOMContentLoaded',function(){
+  vulAannames();
   chat=document.getElementById('intakeChat');
   if(chat){bot('Welkom! Ik stel u zes korte vragen en zet daarna een compleet startpakket voor uw woning klaar.');ask()}
   var dash=document.querySelector('.slide[data-section="2"]');

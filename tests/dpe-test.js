@@ -30,7 +30,7 @@ function baseHouse(over) {
   var s = {
     zone: 'paris', volume: 250, ach: 0.6, ventType: 'natural', hrvEta: 0.75,
     wallA: 120, wallU: 0.5, roofA: 100, roofU: 0.25, floorA: 100, floorU: 0.35, winA: 20, winU: 1.6,
-    woonoppervlak: 100,
+    woonoppervlak: 100, rekendatum: '2026-10-20',
     mainType: 'hp', mainScop: 3.2, mainEta: 0.9,
     dhwType: 'elec', dhwScop: 2.5, dhwEta: 0.9
   };
