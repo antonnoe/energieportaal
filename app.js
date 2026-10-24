@@ -338,7 +338,7 @@ function buildPresets(){
     wall:'Standaardwaarden uit de DPE-methode (3CL) per bouwperiode. Dat matig bij 1983\u201388 hoort, goed bij 2006\u201312 en zeer goed bij vanaf 2013 is een aanname van deze tool.',
     roof:'Zelfde koppeling aan bouwperiodes (aanname), waarden voor een zolder.',
     floor:'Zelfde koppeling aan bouwperiodes (aanname).',
-    win:'3CL rekent per glastype en kozijn: enkel glas (4,9) en modern dubbelglas (1,6) gelden voor een PVC-kozijn, oud dubbelglas (2,8) en triple (1,0) zijn aannames.'
+    win:'3CL rekent per glastype en kozijn: enkel glas (Uw 4,9) en hoogrendementsdubbelglas met Ug 1,4 (Uw 1,6) gelden voor een draaiend PVC-kozijn; voor dubbelglas bestaat geen vaste standaardwaarde, Uw volgt uit Ug en het kozijn. Oud dubbelglas (2,8) en triple (1,0) zijn aannames.'
   };
   var T={wall:'wallU',roof:'roofU',floor:'floorU',win:'winU',ceiling:'ceilingH'};
   Object.keys(P).forEach(function(k){
