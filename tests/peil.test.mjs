@@ -14,6 +14,7 @@ const require = createRequire(import.meta.url);
 const WAARDEN = JSON.parse(lees("peil", "waarden.json"));
 const PIN = JSON.parse(lees("peil", "engine-hash.json"));
 const UITLEG_URL = "https://infofrankrijk.com/ons-manifest-hoe-wij-werken/";
+const KAART_URL = "https://communitiesabroad.com/manifest/tool/energieportaal";
 const fouten = [];
 const fout = (m) => fouten.push(m);
 const gelijk = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -34,7 +35,7 @@ if (!blok) fout("peil.js mist het blok tussen PEIL-BLOK-BEGIN en PEIL-BLOK-EIND.
 function laadPeil(code) {
   const c = { console };
   vm.createContext(c);
-  vm.runInContext(code + "\n;this.__P = { PEIL_STAND, PEIL_LABEL_AAN, PEIL_UITLEG_URL, peilStandNl, peilStandKort, peilRegelHtml, peilRegelMd, peilVoetHtml };", c);
+  vm.runInContext(code + "\n;this.__P = { PEIL_STAND, PEIL_LABEL_AAN, PEIL_UITLEG_URL,PEIL_KAART_URL, peilStandNl, peilStandKort, peilRegelHtml, peilRegelMd, peilVoetHtml };", c);
   return c.__P;
 }
 const P = laadPeil(blok || "");
@@ -188,8 +189,8 @@ const param = (id) => { const p = perId.get(id); if (!p) fout(`${id} staat niet 
   if (P.PEIL_LABEL_AAN !== true) fout("PEIL_LABEL_AAN moet true zijn.");
   if (P.peilRegelMd() !== `[Bedragen gecontroleerd tegen Peil, stand ${nlD}](${UITLEG_URL})`) fout("De markdownregel klopt niet.");
   const h = P.peilRegelHtml();
-  if (!h.includes(`href="${UITLEG_URL}"`) || !h.includes('target="_blank"') || !h.includes('rel="noopener"')) fout("Stempel linkt niet naar het manifest met target _blank en rel noopener.");
-  if (!h.includes(`aria-label="Bedragen gecontroleerd tegen Peil, stand ${nlD}, lees hoe wij werken"`)) fout("Stempel mist de aria-label met volledige datum.");
+  if (!h.includes(`href="${KAART_URL}"`) || !h.includes('target="_blank"') || !h.includes('rel="noopener"')) fout("Stempel linkt niet naar de toolkaart met target _blank en rel noopener.");
+  if (!h.includes(`aria-label="Bedragen gecontroleerd tegen Peil, stand ${nlD}, bekijk wat er gecontroleerd is"`)) fout("Stempel mist de aria-label met volledige datum.");
   if (!h.includes("Gecontroleerd tegen Peil</span>") || !h.includes(`stand ${kort}<span class="peil-pijl" aria-hidden="true">&#8599;</span></span>`)) fout("Stempel mist de twee korte regels of het pijltje.");
   if ((h.match(/<a /g) || []).length !== 1 || !h.includes("<svg") || !h.includes('stroke="#800000"')) fout("Stempel moet één link met inline svg in #800000 zijn.");
   const v = P.peilVoetHtml();
