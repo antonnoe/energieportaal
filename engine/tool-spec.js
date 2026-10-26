@@ -195,16 +195,17 @@ const TOOL_SPEC = {
       label:    'Hoofdverwarming',
       type:     'select',
       default:  'hp',
-      options:  ['elec', 'hp', 'gas', 'fioul', 'pellet', 'wood'],
+      options:  ['elec', 'hp', 'gas', 'propaan', 'fioul', 'pellet', 'wood'],
       optionLabels: {
         elec:   'Elektrisch (direct)',
         hp:     'Warmtepomp (SCOP)',
         gas:    'Aardgas (ketel η)',
+        propaan: 'Propaan (ketel η)',
         fioul:  'Fioul/mazout (η)',
         pellet: 'Houtpellets‑CV (η)',
         wood:   'Hout‑CV (η)'
       },
-      validate: (v) => ['elec','hp','gas','fioul','pellet','wood'].includes(v) || 'Onbekend verwarmingstype.'
+      validate: (v) => ['elec','hp','gas','propaan','fioul','pellet','wood'].includes(v) || 'Onbekend verwarmingstype.'
     },
     {
       id:           'mainScop',
@@ -223,7 +224,7 @@ const TOOL_SPEC = {
       default:      0.9,
       min:          0.5,
       max:          1,
-      relevantWhen: { mainType: ['gas', 'fioul', 'pellet', 'wood'] },
+      relevantWhen: { mainType: ['gas', 'propaan', 'fioul', 'pellet', 'wood'] },
       validate:     (v) => (v >= 0.5 && v <= 1) || 'Rendement moet tussen 0,5 en 1 liggen.'
     },
     {
@@ -376,7 +377,7 @@ const TOOL_SPEC = {
       options:  ['nvt', 'vente', 'custom'],
       optionLabels: {
         nvt:    'NVT (geen verkoop)',
-        vente:  'Vente du surplus ≤9 kWc (Q3 2025)',
+        vente:  'Vente du surplus (1,1 cent per kWh sinds 5 juni 2026)',
         custom: 'Custom tarief…'
       },
       validate: (v) => ['nvt','vente','custom'].includes(v) || 'Onbekende exportmodus.'
@@ -386,7 +387,7 @@ const TOOL_SPEC = {
       label:        'Tarief export',
       unit:         '€/kWh',
       type:         'number',
-      default:      0.04,
+      default:      0.011,
       min:          0,
       max:          1,
       relevantWhen: { pvExportMode: 'custom' },
@@ -559,7 +560,7 @@ const TOOL_SPEC = {
       label:    'Gasprijs',
       unit:     '€/kWh',
       type:     'number',
-      default:  0.1414,
+      default:  0.146,
       min:      0,
       max:      5,
       validate: (v) => (v >= 0 && v <= 5) || 'Gasprijs moet tussen 0 en 5 €/kWh liggen.'
@@ -569,7 +570,7 @@ const TOOL_SPEC = {
       label:    'Fioulprijs',
       unit:     '€/L',
       type:     'number',
-      default:  1.13,
+      default:  1.72,
       min:      0,
       max:      5,
       validate: (v) => (v >= 0 && v <= 5) || 'Fioulprijs moet tussen 0 en 5 €/L liggen.'
@@ -579,7 +580,7 @@ const TOOL_SPEC = {
       label:    'Houtpellets prijs',
       unit:     '€/kg',
       type:     'number',
-      default:  0.38,
+      default:  0.388,
       min:      0,
       max:      5,
       validate: (v) => (v >= 0 && v <= 5) || 'Pelletprijs moet tussen 0 en 5 €/kg liggen.'
@@ -589,7 +590,7 @@ const TOOL_SPEC = {
       label:    'Stookhoutprijs',
       unit:     '€/stère',
       type:     'number',
-      default:  90,
+      default:  85,
       min:      0,
       max:      500,
       validate: (v) => (v >= 0 && v <= 500) || 'Stookhoutprijs moet tussen 0 en 500 €/stère liggen.'
@@ -599,7 +600,7 @@ const TOOL_SPEC = {
       label:    'Propaanprijs',
       unit:     '€/L',
       type:     'number',
-      default:  1.80,
+      default:  1.17,
       min:      0,
       max:      10,
       validate: (v) => (v >= 0 && v <= 10) || 'Propaanprijs moet tussen 0 en 10 €/L liggen.'

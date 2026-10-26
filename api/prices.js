@@ -14,13 +14,15 @@ export default async function handler(req, res) {
   const now = new Date();
   const prices = {
     updated: now.toISOString().slice(0, 10),
-    elec:      { value: 0.2001, unit: '€/kWh',   source: 'CRE TRVE Bleu optie Base 6 kVA TTC', date: 'aug 2026', refDate: '2026-08-01', auto: false },
-    gas:       { value: 0.1414, unit: '€/kWh',    source: 'SDES/DGEC, gemiddelde 2025 (aanname)', date: '2025', refDate: '2026-10-20', auto: false },
-    fioul:     { value: 1.13,   unit: '€/L',      source: 'SDES/DGEC, gemiddelde 2025 (aanname)', date: '2025', refDate: '2026-10-20', auto: false },
-    pellet:    { value: 0.38,   unit: '€/kg',     source: 'ADEME, prijzen 2025 (aanname)',        date: '2025', refDate: '2026-10-24', auto: false },
-    wood:      { value: 90,     unit: '€/stère',  source: 'ADEME, prijzen 2025 (aanname)',        date: '2025', refDate: '2026-10-24', auto: false },
-    propaan:   { value: 1.80,   unit: '€/L',      source: 'eigen schatting, geen overheidsbron (aanname)', date: '2026', refDate: '2026-10-20', auto: false },
-    petroleum: { value: 2.00,   unit: '€/L',      source: 'eigen schatting, geen overheidsbron (aanname)', date: '2026', refDate: '2026-10-20', auto: false }
+    // Elektriciteit: gereguleerd tarief, geldig tot de CRE het wijzigt; refDate is de ingangsdatum en telt niet voor veroudering (regulated).
+    elec:      { value: 0.2001, unit: '€/kWh',   source: 'CRE TRVE Bleu optie Base 6 kVA TTC', date: 'aug 2026', refDate: '2026-08-01', regulated: true, auto: false },
+    // refDate = einde van de periode waarover de prijs een gemiddelde is (zie PRIJS_INFO.periodeEinde in engine/engine.js).
+    gas:       { value: 0.146,  unit: '€/kWh',    source: 'CRE, prix repère verwarmingsprofiel, september tot en met november 2026 (aanname)', date: 'sep tot en met nov 2026', refDate: '2026-11-30', auto: false },
+    fioul:     { value: 1.72,   unit: '€/L',      source: 'DGEC, gemiddelde juli tot en met september 2026 (aanname)', date: 'jul tot en met sep 2026', refDate: '2026-09-30', auto: false },
+    pellet:    { value: 0.388,  unit: '€/kg',     source: 'SDES, tweede kwartaal 2026 (aanname)', date: '2e kwartaal 2026', refDate: '2026-06-30', auto: false },
+    wood:      { value: 85,     unit: '€/stère',  source: 'ADEME 2025, geïndexeerd tot en met september 2026 (raming, aanname)', date: 'okt 2025 tot en met sep 2026', refDate: '2026-09-30', auto: false },
+    propaan:   { value: 1.17,   unit: '€/L',      source: 'SDES, juni tot en met augustus 2026 (aanname)', date: 'jun tot en met aug 2026', refDate: '2026-08-31', auto: false },
+    petroleum: { value: 2.00,   unit: '€/L',      source: 'eigen schatting, geen overheidsbron (aanname)', date: '2026', refDate: null, auto: false }
   };
 
   // === ELEKTRICITEIT: live van CRE CSV ===
@@ -43,15 +45,18 @@ export default async function handler(req, res) {
         const maanden = ['', 'jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
         const dateLabel = parts.length === 3 ? maanden[parseInt(parts[1])] + ' ' + parts[2] : latestDate;
         const isoDate = parts.length === 3 ? parts[2] + '-' + parts[1].padStart(2,'0') + '-' + parts[0].padStart(2,'0') : prices.elec.refDate;
-        prices.elec = { value: Math.round(latestElec * 10000) / 10000, unit: '€/kWh', source: 'CRE Open Data TRVE Bleu optie Base 6 kVA TTC', date: dateLabel, refDate: isoDate, auto: true };
+        prices.elec = { value: Math.round(latestElec * 10000) / 10000, unit: '€/kWh', source: 'CRE Open Data TRVE Bleu optie Base 6 kVA TTC', date: dateLabel, refDate: isoDate, regulated: true, auto: true };
       }
     }
   } catch (e) { /* fallback: waarde uit Peil */ }
 
   // === STALENESS CHECK ===
+  // Een marktprijs is verouderd als het einde van de periode waarover hij gemiddeld is meer dan STALE_DAYS dagen terug ligt.
+  // Het gereguleerde stroomtarief geldt tot de volgende wijziging en wordt daarom nooit als verouderd gemarkeerd.
   const staleItems = [];
   for (const [key, p] of Object.entries(prices)) {
     if (key === 'updated') continue;
+    if (p.regulated) { p.stale = false; continue; }
     if (p.refDate) {
       const age = Math.floor((now - new Date(p.refDate)) / 86400000);
       p.ageDays = age;
@@ -63,7 +68,7 @@ export default async function handler(req, res) {
     ? (function(){
         var labels={elec:'Elektriciteit',gas:'Aardgas',fioul:'Stookolie',pellet:'Houtpellets',wood:'Stookhout',propaan:'Propaan',petroleum:'Petroleum'};
         var named=staleItems.map(function(k){return labels[k]||k});
-        return staleItems.length + ' prijs(zen) ouder dan ' + STALE_DAYS + ' dagen: ' + named.join(', ');
+        return 'Let op: de standaardprijs voor ' + named.join(', ').toLowerCase() + ' gaat over een periode die meer dan ' + STALE_DAYS + ' dagen geleden eindigde. Vul bij voorkeur de prijs van uw eigen factuur in.';
       })()
     : null;
 
