@@ -2,7 +2,7 @@
 // Peil is het parameterregister van Communities Abroad (privé). De waarden staan als kopie in peil/waarden.json;
 // tests/peil.test.mjs bewaakt dat de tool daarmee overeenkomt. Bij elke controle alleen PEIL_STAND aanpassen (en peil/waarden.json).
 // PEIL-BLOK-BEGIN
-const PEIL_STAND = "2026-10-24";
+const PEIL_STAND = "2026-10-26";
 // Schakelaar voor het Peil-label (stempel en voettekstalinea). Zolang false toont de tool niets over Peil.
 const PEIL_LABEL_AAN = false; // uit sinds 26-10-2026: vier marktprijzen verlopen (geldig t/m 2025) en zeven bedragen nog niet primair vastgesteld; pas weer aan na ijking in Peil
 const PEIL_UITLEG_URL = "https://infofrankrijk.com/ons-manifest-hoe-wij-werken/";
