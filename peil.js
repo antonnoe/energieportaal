@@ -4,7 +4,7 @@
 // PEIL-BLOK-BEGIN
 const PEIL_STAND = "2026-10-24";
 // Schakelaar voor het Peil-label (stempel en voettekstalinea). Zolang false toont de tool niets over Peil.
-const PEIL_LABEL_AAN = true;
+const PEIL_LABEL_AAN = false; // uit sinds 26-10-2026: vier marktprijzen verlopen (geldig t/m 2025) en zeven bedragen nog niet primair vastgesteld; pas weer aan na ijking in Peil
 const PEIL_UITLEG_URL = "https://infofrankrijk.com/ons-manifest-hoe-wij-werken/";
 // Toolkaart van deze tool; de Peil-stempel linkt hiernaartoe (het manifest blijft de link in de voettekstalinea).
 const PEIL_KAART_URL = "https://communitiesabroad.com/manifest/tool/energieportaal";
