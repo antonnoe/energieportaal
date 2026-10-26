@@ -389,6 +389,8 @@ function buildPriceInputs(){
 function fetchLivePrices(){
   // Alleen de elektriciteitsprijs wordt live van CRE opgehaald; lukt dat niet, dan blijven de standaardwaarden uit Peil staan.
   fetch('/api/prices').then(function(r){return r.json()}).then(function(data){
+    var info=document.getElementById('priceUpdateInfo');
+    if(info&&data&&data.staleWarning)info.textContent=data.staleWarning;
     var p=data&&data.elec;
     if(!p||!p.auto||!p.value)return;
     var inp=document.getElementById('price_elec');
@@ -403,7 +405,7 @@ function fetchLivePrices(){
 /* ═══ TOGGLES ═══ */
 function bindToggles(){
   on('ventType','change',function(v){tog('hrvWrap',v==='hrv')});
-  on('mainType','change',function(v){tog('mainScopWrap',v==='hp');tog('mainEtaWrap','gas fioul pellet wood'.split(' ').indexOf(v)>=0)});
+  on('mainType','change',function(v){tog('mainScopWrap',v==='hp');tog('mainEtaWrap','gas propaan fioul pellet wood'.split(' ').indexOf(v)>=0)});
   on('auxType','change',function(v){tog('auxDetailsWrap',v!=='none');tog('auxScopWrap',v==='inverter');tog('auxEtaWrap','pellet wood petroleum'.split(' ').indexOf(v)>=0)});
   on('auxSharePreset','change',function(v){tog('auxShareCustomWrap',v==='custom')});
   on('dhwType','change',function(v){tog('dhwScopWrap',v==='hp');tog('dhwEtaWrap',v==='gas')});
@@ -420,14 +422,14 @@ function tog(id,show){var e=document.getElementById(id);if(e){if(show)e.classLis
 function gatherState(){
   var pr={};Object.keys(PRICE_DEFAULTS_USER).forEach(function(k){var e=document.getElementById('price_'+k);pr[k]=e?num(e.value,PRICE_DEFAULTS_USER[k]):PRICE_DEFAULTS_USER[k]});
   var ap=DEFAULT_APPLIANCES.map(function(a,i){return{key:a.key,label:a.label,scales:a.scales,on:document.getElementById('appl_on_'+i)?document.getElementById('appl_on_'+i).checked:a.on,kwh:document.getElementById('appl_kwh_'+i)?num(document.getElementById('appl_kwh_'+i).value,a.kwh):a.kwh}});
-  return{zone:v('zone','paris'),setpoint:num(v('setpoint'),20),volume:num(v('volume'),250),woonoppervlak:num(v('woonoppervlak'),100),ach:num(v('ach'),0.5),ventType:v('ventType','natural'),hrvEta:num(v('hrvEta'),0.75),
+  return{zone:v('zone','paris'),boven800m:v('boven800m','false')==='true',setpoint:num(v('setpoint'),20),volume:num(v('volume'),250),woonoppervlak:num(v('woonoppervlak'),100),ach:num(v('ach'),0.5),ventType:v('ventType','natural'),hrvEta:num(v('hrvEta'),0.75),
     wallA:num(v('wallA'),120),wallU:num(v('wallU'),0.5),roofA:num(v('roofA'),100),roofU:num(v('roofU'),0.25),floorA:num(v('floorA'),100),floorU:num(v('floorU'),0.35),winA:num(v('winA'),20),winU:num(v('winU'),1.6),
     presentDaysWinter:Math.min(212,Math.max(0,num(v('presentDaysWinter'),155))),presentDaysSummer:Math.min(153,Math.max(0,num(v('presentDaysSummer'),105))),awaySetpoint:num(v('awaySetpoint'),12),
     mainType:v('mainType','hp'),mainScop:num(v('mainScop'),3.2),mainEta:num(v('mainEta'),0.9),
     auxType:v('auxType','none'),auxSharePreset:v('auxSharePreset','25'),auxShareCustom:num(v('auxShareCustom'),25),auxScop:num(v('auxScop'),3.2),auxEta:num(v('auxEta'),0.85),
     persons:num(v('persons'),2),showersPerPerson:num(v('showersPerPerson'),1),litersPer:num(v('litersPer'),55),
     dhwType:v('dhwType','elec'),dhwScop:num(v('dhwScop'),2.5),dhwEta:num(v('dhwEta'),0.9),
-    pvKwp:num(v('pvKwp'),0),pvSelfUse:num(v('pvSelfUse'),60),pvExportMode:v('pvExportMode','nvt'),pvExportTariff:num(v('pvExportTariff'),0.04),
+    pvKwp:num(v('pvKwp'),0),pvSelfUse:num(v('pvSelfUse'),60),pvExportMode:v('pvExportMode','nvt'),pvExportTariff:num(v('pvExportTariff'),TERUGLEVER_TARIEF),
     acOn:$('#acOn')?$('#acOn').checked:false,seer:num(v('seer'),4.0),appls:ap,
     evKmWeek:num(v('evKmWeek'),0),evKwh100:num(v('evKwh100'),18),evLoss:num(v('evLoss'),10),
     poolHas:$('#poolHas')?$('#poolHas').checked:false,poolVol:num(v('poolVol'),30),poolTargetT:num(v('poolTargetT'),27),
@@ -551,7 +553,9 @@ function renderSavings(s,r){
   }
 
   var items=[];
-  var totalSaving=0;
+  // Het totaal is niet de som van de losse besparingen (die overlappen): het wordt hieronder in één berekening
+  // met alle getoonde maatregelen tegelijk bepaald.
+  var pakket=JSON.parse(JSON.stringify(s));
 
   maatregelen.forEach(function(m){
     var currentU=s[m.uField];
@@ -569,7 +573,7 @@ function renderSavings(s,r){
       from:'U='+currentU, to:'U='+m.targetU,
       saving:saving
     });
-    totalSaving+=saving;
+    pakket[m.uField]=m.targetU;
   });
 
   // Ventilatie
@@ -585,7 +589,7 @@ function renderSavings(s,r){
         from:'ACH='+s.ach, to:'WTW \u03B7=80%',
         saving:saving
       });
-      totalSaving+=saving;
+      pakket.ventType='hrv';pakket.hrvEta=0.8;
     }
   }
 
@@ -602,7 +606,7 @@ function renderSavings(s,r){
         from:s.mainType, to:'WP SCOP 3,5',
         saving:saving
       });
-      totalSaving+=saving;
+      pakket.mainType='hp';pakket.mainScop=3.5;
     }
   }
 
@@ -610,6 +614,8 @@ function renderSavings(s,r){
     card.style.display='none';
     return;
   }
+
+  var totalSaving=Math.max(0,r.totalCost-computeResults(pakket).totalCost);
 
   // Sorteer op hoogste besparing
   items.sort(function(a,b){return b.saving-a.saving});
@@ -630,8 +636,9 @@ function renderSavings(s,r){
     '</div>';
   }).join('');
 
-  totalEl.innerHTML='<span style="color:#009B4D">Totaal potentieel: '+eur(totalSaving)+'/jaar</span>'+
-    '<span style="font-size:.85em;font-weight:400;color:var(--text-light);margin-left:8px">('+eur(totalSaving/12)+'/maand)</span>';
+  totalEl.innerHTML='<span style="color:#009B4D">Totaal potentieel, alle maatregelen samen: '+eur(totalSaving)+'/jaar</span>'+
+    '<span style="font-size:.85em;font-weight:400;color:var(--text-light);margin-left:8px">('+eur(totalSaving/12)+'/maand)</span>'+
+    (items.length>1?'<div style="font-size:.8em;font-weight:400;color:var(--text-light);margin-top:4px">Minder dan de optelsom van de losse bedragen: na de ene maatregel levert de volgende minder op.</div>':'');
 }
 
 /* ═══ DPE MODAL ═══ */
@@ -665,13 +672,15 @@ function renderSubsidies(s,r){
 
   var subs=[];
 
-  // MaPrimeRénov' Geste — altijd beschikbaar voor résidence principale
+  // MaPrimeRénov' Geste en Ampleur: alleen voor een hoofdverblijf (bewoond of verhuurd als hoofdverblijf) en een woning die
+  // minstens 15 jaar af is (décret n° 2020-26, art. 1 I 1° en 3° a, II 1° en 5° a; bij Geste 2 jaar voor een warmtepomp die
+  // een stookolieketel vervangt, art. 1 IV). De tool kent hoofdverblijf en bouwjaar niet, dus de status is voorwaardelijk.
   subs.push({
     icon:'\u{1F3E0}',
     name:'MaPrimeR\u00E9nov\u2019 Geste',
-    desc:'Eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie). Bedrag afhankelijk van inkomen en maatregel.',
-    status:'Beschikbaar',
-    color:'#009B4D'
+    desc:'Eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie). Bedrag afhankelijk van inkomen en maatregel. Alleen voor een hoofdverblijf (zelf bewoond of verhuurd als hoofdverblijf) en een woning die minstens 15 jaar oud is (2 jaar bij een warmtepomp die een stookolieketel vervangt). Een tweede woning komt niet in aanmerking.',
+    status:'Mogelijk, als het uw hoofdverblijf is en de woning ouder is dan 15 jaar',
+    color:'#B26B00'
   });
 
   // MaPrimeRénov' Ampleur — alleen bij DPE E/F/G
@@ -679,9 +688,9 @@ function renderSubsidies(s,r){
     subs.push({
       icon:'\u{1F3D7}\uFE0F',
       name:'MaPrimeR\u00E9nov\u2019 Ampleur',
-      desc:'Combinatierenovatie met \u22652 klassensprongen en \u22652 isolatiemaatregelen. Subsidiabele werken tot \u20AC30.000 (2 klassen) of \u20AC40.000 (3+ klassen); vergoedingspercentage afhankelijk van inkomenscategorie. Verplicht: Mon Accompagnateur R\u00E9nov\u2019 en vooraf een afspraak bij France R\u00E9nov\u2019.',
-      status:'Uw woning komt in aanmerking (DPE '+dpe.letter+')',
-      color:'#009B4D'
+      desc:'Combinatierenovatie met \u22652 klassensprongen en \u22652 isolatiemaatregelen. Subsidiabele werken tot \u20AC30.000 (2 klassen) of \u20AC40.000 (3+ klassen); vergoedingspercentage afhankelijk van inkomenscategorie. Verplicht: Mon Accompagnateur R\u00E9nov\u2019 en vooraf een afspraak bij France R\u00E9nov\u2019. Alleen voor een hoofdverblijf (zelf bewoond of verhuurd als hoofdverblijf) en een woning die minstens 15 jaar oud is; een tweede woning komt niet in aanmerking. Sinds 1 september 2026 geldt in een eengezinswoning bovendien: na de werken mag er geen toestel op fossiele brandstof (gas, stookolie, propaan) voor verwarming of warm water blijven of bijkomen.',
+      status:'Mogelijk (DPE '+dpe.letter+'), als het uw hoofdverblijf is en de woning ouder is dan 15 jaar',
+      color:'#B26B00'
     });
   } else {
     subs.push({
@@ -864,7 +873,7 @@ window.requestAIExplanation=function(){
 
 function buildFallbackExplanation(s,r){
   var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
-  var ht={hp:'warmtepomp',elec:'elektrische verwarming',gas:'gasketel',fioul:'stookolieketel',pellet:'pelletketel',wood:'houtkachel'};
+  var ht={hp:'warmtepomp',elec:'elektrische verwarming',gas:'gasketel',propaan:'propaanketel',fioul:'stookolieketel',pellet:'pelletketel',wood:'houtkachel'};
   var biggest='verwarming';var bigVal=r.costs.verwarming;
   if(r.costs.tapwater>bigVal){biggest='warm water';bigVal=r.costs.tapwater}
   if(r.costs.apparaten>bigVal){biggest='apparaten';bigVal=r.costs.apparaten}
@@ -880,7 +889,7 @@ window.saveToDF=function(){
   var s=window._lastState, r=window._lastResult;
   if(!s||!r){alert('Bereken eerst het resultaat.');return}
   var zn={med:'Middellandse Zee',ouest:'Zuid-West',paris:'Noord/Parijs',centre:'Centraal',est:'Oost',mont:'Bergen'};
-  var ht={hp:'Warmtepomp',elec:'Elektrisch',gas:'Gasketel',fioul:'Stookolie',pellet:'Pelletketel',wood:'Houtkachel'};
+  var ht={hp:'Warmtepomp',elec:'Elektrisch',gas:'Gasketel',propaan:'Propaanketel',fioul:'Stookolie',pellet:'Pelletketel',wood:'Houtkachel'};
 
   // DPE berekenen (conventioneel, dubbele drempel) — terugval op oude schatting.
   var dpeC2=currentDPE(s);
@@ -931,11 +940,9 @@ window.saveToDF=function(){
   }
   var ban4=VERHUURVERBODEN.find(function(v){return v.letter===dpe2.letter});
   if(ban4) inhoud+='\u26A0\uFE0F **Verhuurverbod:** '+ban4.tekst+nl+nl;
-  if(dpe2.index>0){
-    var better=DPE_KLASSEN[dpe2.index-1];
-    inhoud+='Energieklasse '+better.letter+' bereiken: nog '+Math.round(kwhM22-better.max)+' kWh EP/m\u00B2 besparen.'+nl+nl;
-  }
-  inhoud+='> \u26D6\uFE0F Indicatie op basis van conventioneel gebruik (365 dagen, 19 \u00B0C) \u2014 dit is geen offici\u00EBle DPE. In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et R\u00E9silience, Arr\u00EAt\u00E9 du 31 mars 2021).'+nl+nl;
+  var afst2=dpeC2?dpeAfstand(dpeC2):null;
+  if(afst2) inhoud+='Energieklasse '+afst2.doel+' bereiken: '+afst2.tekst+'.'+nl+nl;
+  inhoud+='> \u26D6\uFE0F Indicatie op basis van conventioneel gebruik (365 dagen, 19 \u00B0C) \u2014 dit is geen offici\u00EBle DPE. '+(typeof DPE_BENADERING==='string'?DPE_BENADERING+' ':'')+' In Frankrijk is het wettelijk verboden om een document als DPE te presenteren zonder certificering (Loi Climat et R\u00E9silience, Arr\u00EAt\u00E9 du 31 mars 2021).'+nl+nl;
 
   // Besparingskansen toevoegen aan DF export
   var savingsEl=$('#savingsList');
@@ -947,8 +954,8 @@ window.saveToDF=function(){
 
   // Subsidies
   inhoud+='## Subsidies voor energierenovatie'+nl+nl+
-    '- **MaPrimeR\u00E9nov\u2019 Geste** \u2014 eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie)'+nl+
-    '- **MaPrimeR\u00E9nov\u2019 Ampleur** \u2014 combinatierenovatie, vereist DPE E/F/G'+(dpe2.index>=4?' **(uw woning komt in aanmerking)**':'')+''+nl+
+    '- **MaPrimeR\u00E9nov\u2019 Geste** \u2014 eenmalige renovatiemaatregel (isolatie, verwarming, ventilatie), alleen voor een hoofdverblijf van minstens 15 jaar oud'+nl+
+    '- **MaPrimeR\u00E9nov\u2019 Ampleur** \u2014 combinatierenovatie, vereist DPE E/F/G, een hoofdverblijf van minstens 15 jaar oud en (in een eengezinswoning) geen toestel op fossiele brandstof na de werken'+(dpe2.index>=4?' **(mogelijk voor uw woning, als het uw hoofdverblijf is)**':'')+''+nl+
     '- **CEE** \u2014 premies via uw energieleverancier, cumuleerbaar'+nl+
     '- **\u00C9co-PTZ** \u2014 rentevrije lening tot \u20AC50.000'+nl+
     '- **TVA 5,5%** \u2014 verlaagd btw-tarief op renovatiewerken'+nl+nl+
@@ -989,11 +996,16 @@ var DPE_KLASSEN=[
   {letter:'F',max:420, kleur:'#E95D0F'},
   {letter:'G',max:Infinity,kleur:'#E3001B'}
 ];
+// Art. 6 loi n° 89-462 (versie sinds 1 januari 2025): een woning is niet decent onder klasse F (2025), E (2028) en D (2034);
+// geldt voor verhuur als hoofdverblijf. Volgens service-public (F16096) ook bij verlenging en stilzwijgende verlenging van de huur.
 var VERHUURVERBODEN=[
-  {letter:'G',sinds:'1 januari 2025',tekst:'Woningen met label G mogen sinds 1 januari 2025 niet meer verhuurd worden met een nieuw huurcontract.'},
-  {letter:'F',sinds:'1 januari 2028',tekst:'Woningen met label F mogen vanaf 1 januari 2028 niet meer verhuurd worden met een nieuw huurcontract.'},
-  {letter:'E',sinds:'1 januari 2034',tekst:'Woningen met label E mogen vanaf 1 januari 2034 niet meer verhuurd worden met een nieuw huurcontract.'}
+  {letter:'G',sinds:'1 januari 2025',tekst:'Woningen met label G mogen sinds 1 januari 2025 niet meer als hoofdverblijf verhuurd worden, ook niet bij verlenging van de huur.'},
+  {letter:'F',sinds:'1 januari 2028',tekst:'Woningen met label F mogen vanaf 1 januari 2028 niet meer als hoofdverblijf verhuurd worden, ook niet bij verlenging van de huur.'},
+  {letter:'E',sinds:'1 januari 2034',tekst:'Woningen met label E mogen vanaf 1 januari 2034 niet meer als hoofdverblijf verhuurd worden, ook niet bij verlenging van de huur.'}
 ];
+
+// Afstand tot een betere klasse: engine/dpe.js (dpeAfstand), op beide assen en met de grenzen voor deze woning.
+function dpeAfstand(d){return typeof window.dpeAfstand==='function'?window.dpeAfstand(d):null}
 
 function getDPE(kwhM2){
   for(var i=0;i<DPE_KLASSEN.length;i++){
@@ -1079,7 +1091,8 @@ window.renderDPE=function(){
       var k=DPE_KLASSEN[i];
       var isCurrent=i===dpe.index;
       var w=35+i*9;
-      var maxLabel=k.max===Infinity?'> 420':'\u2264 '+k.max;
+      var gr=dpeFull.details.drempels?dpeFull.details.drempels.ep:null;
+      var maxLabel=k.max===Infinity?'\u2265 '+fmt0(gr?gr[5]:420):'< '+fmt0(gr?gr[i]:k.max);
       html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">'+
         '<div style="height:32px;width:'+w+'%;border-radius:0 8px 8px 0;background:'+k.kleur+';display:flex;align-items:center;padding:0 10px;color:#fff;font-weight:700;font-size:.85em;'+
         (isCurrent?'box-shadow:0 0 0 3px #333,0 0 0 5px rgba(0,0,0,.15);':'opacity:.7;')+'">'+
@@ -1090,23 +1103,23 @@ window.renderDPE=function(){
     scaleEl.innerHTML=html;
   }
 
-  // Distance to next class
+  // Distance to next class: op de eindklasse, voor energie en CO2 apart (dubbele drempel).
   var distEl=$('#dpeDistance');
   var distCard=$('#dpeDistanceCard');
   if(distEl&&distCard){
     var txt='';
-    if(dpe.index>0){
-      var betterClass=DPE_KLASSEN[dpe.index-1];
-      var needed=Math.round(kwhM2-betterClass.max);
-      txt+='<strong>Klasse '+betterClass.letter+' bereiken:</strong> u moet nog <strong>'+needed+' kWh/m²</strong> besparen (dat is '+Math.round(needed*floorA)+' kWh/jaar totaal).';
+    var eind=dpeFull.details.classeIndex;
+    var afst=dpeAfstand(dpeFull);
+    if(afst){
+      txt+='<strong>Klasse '+afst.doel+' bereiken:</strong> '+afst.tekst+'.';
+      if(afst.ep>0) txt+=' Voor de energie is dat '+fmt0(afst.ep*floorA)+' kWh EP per jaar voor de hele woning.';
     }else{
       txt+='Uw woning valt in de beste energieklasse (A). Uitstekend!';
     }
-    if(dpe.index<DPE_KLASSEN.length-1){
-      var worseClass=DPE_KLASSEN[dpe.index];
-      var margin=Math.round(worseClass.max-kwhM2);
-      if(dpe.index>0) txt+='<br><br>';
-      txt+='<strong>Marge tot klasse '+(DPE_KLASSEN[dpe.index+1]?DPE_KLASSEN[dpe.index+1].letter:'')+':</strong> u zit '+margin+' kWh/m² onder de grens van '+worseClass.max+' kWh/m².';
+    if(eind<DPE_KLASSEN.length-1&&dpeFull.details.drempels){
+      var gE=dpeFull.details.drempels.ep[eind],gG=dpeFull.details.drempels.ges[eind];
+      if(eind>0) txt+='<br><br>';
+      txt+='<strong>Marge tot klasse '+DPE_KLASSEN[eind+1].letter+':</strong> u zit '+fmt0(Math.max(0,gE-Math.floor(kwhM2)))+' kWh EP/m² onder de energiegrens van '+fmt0(gE)+' en '+fmt0(Math.max(0,gG-Math.floor(dpeFull.perM2.ges)))+' kg CO₂/m² onder de CO₂-grens van '+fmt0(gG)+'.';
     }
     distEl.innerHTML=txt;
     distCard.style.display='block';
@@ -1119,7 +1132,7 @@ window.renderDPE=function(){
     var ban=VERHUURVERBODEN.find(function(v){return v.letter===dpe.letter});
     if(ban){
       rentalCard.style.display='block';
-      rentalText.innerHTML='<strong>'+ban.tekst+'</strong><br><br>Dit geldt voor de <em>passoires thermiques</em> (energielekken) volgens de Loi Climat et Résilience (2021). Als u uw woning verhuurt of wilt verhuren, is renovatie naar minimaal klasse E (vóór 2034: klasse D) vereist.';
+      rentalText.innerHTML='<strong>'+ban.tekst+'</strong><br><br>Dit geldt voor de <em>passoires thermiques</em> (energielekken) volgens de Loi Climat et Résilience (2021). Als u uw woning als hoofdverblijf verhuurt of wilt verhuren, moet zij minstens klasse F halen, vanaf 1 januari 2028 klasse E en vanaf 1 januari 2034 klasse D.';
     }else if(dpe.letter==='D'||dpe.letter==='E'){
       rentalCard.style.display='block';
       rentalCard.style.background='rgba(245,166,35,0.08)';
@@ -1127,7 +1140,7 @@ window.renderDPE=function(){
       rentalCard.querySelector('h3').style.color='#F5A623';
       rentalCard.querySelector('h3').innerHTML='⚠ Aandachtspunt verhuur';
       rentalText.innerHTML=dpe.letter==='E'?
-        'Woningen met label E mogen vanaf <strong>1 januari 2034</strong> niet meer verhuurd worden met een nieuw huurcontract. U hebt nog tijd om te renoveren, maar plan vooruit.':
+        'Woningen met label E mogen vanaf <strong>1 januari 2034</strong> niet meer als hoofdverblijf verhuurd worden, ook niet bij verlenging van de huur. U hebt nog tijd om te renoveren, maar plan vooruit.':
         'Uw woning valt in klasse D. Momenteel is er geen verhuurverbod, maar de trend is dalend. Overweeg verbeteringen om waardevermindering te voorkomen.';
     }else{
       rentalCard.style.display='none';
@@ -1164,7 +1177,8 @@ window.renderDPE=function(){
     var sh='';
     for(var j=0;j<DPE_KLASSEN.length;j++){
       var kk=DPE_KLASSEN[j];var isCur=j===dpe.index;var ww=35+j*9;
-      var ml=kk.max===Infinity?'> 420':'\u2264 '+kk.max;
+      var gr2=dpeFull.details.drempels?dpeFull.details.drempels.ep:null;
+      var ml=kk.max===Infinity?'\u2265 '+fmt0(gr2?gr2[5]:420):'< '+fmt0(gr2?gr2[j]:kk.max);
       sh+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">'+
         '<div style="height:26px;width:'+ww+'%;border-radius:0 6px 6px 0;background:'+kk.kleur+';display:flex;align-items:center;padding:0 8px;color:#fff;font-weight:700;font-size:.8em;'+(isCur?'outline:3px solid #333;':'opacity:.6;')+'">'+kk.letter+'<span style="margin-left:auto;font-size:.7em;opacity:.9">'+ml+'</span></div>'+
         (isCur?'<span style="font-weight:700;font-size:.85em">\u25C4 '+Math.round(kwhM2)+' kWh/m\u00B2</span>':'')+
