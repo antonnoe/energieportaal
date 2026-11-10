@@ -610,7 +610,7 @@ const TOOL_SPEC = {
       label:    'Petroleumprijs',
       unit:     '€/L',
       type:     'number',
-      default:  2.00,
+      default:  2.65,
       min:      0,
       max:      10,
       validate: (v) => (v >= 0 && v <= 10) || 'Petroleumprijs moet tussen 0 en 10 €/L liggen.'

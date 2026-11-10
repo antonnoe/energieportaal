@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     pellet:    { value: 0.388,  unit: '€/kg',     source: 'SDES, tweede kwartaal 2026 (aanname)', date: '2e kwartaal 2026', refDate: '2026-06-30', auto: false },
     wood:      { value: 85,     unit: '€/stère',  source: 'ADEME 2025, geïndexeerd tot en met september 2026 (raming, aanname)', date: 'okt 2025 tot en met sep 2026', refDate: '2026-09-30', auto: false },
     propaan:   { value: 1.17,   unit: '€/L',      source: 'SDES, juni tot en met augustus 2026 (aanname)', date: 'jun tot en met aug 2026', refDate: '2026-08-31', auto: false },
-    petroleum: { value: 2.00,   unit: '€/L',      source: 'eigen schatting, geen overheidsbron (aanname)', date: '2026', refDate: null, auto: false }
+    petroleum: { value: 2.65,   unit: '€/L',      source: 'Brico Dépôt, bus van 20 liter, opgehaald 10-11-2026 (aanname)', date: 'nov 2026', refDate: null, auto: false }
   };
 
   // === ELEKTRICITEIT: live van CRE CSV ===
