@@ -18,10 +18,10 @@ export default async function handler(req, res) {
     elec:      { value: 0.2001, unit: '€/kWh',   source: 'CRE TRVE Bleu optie Base 6 kVA TTC', date: 'aug 2026', refDate: '2026-08-01', regulated: true, auto: false },
     // refDate = einde van de periode waarover de prijs een gemiddelde is (zie PRIJS_INFO.periodeEinde in engine/engine.js).
     gas:       { value: 0.146,  unit: '€/kWh',    source: 'CRE, prix repère verwarmingsprofiel, september tot en met november 2026 (aanname)', date: 'sep tot en met nov 2026', refDate: '2026-11-30', auto: false },
-    fioul:     { value: 1.72,   unit: '€/L',      source: 'DGEC, gemiddelde juli tot en met september 2026 (aanname)', date: 'jul tot en met sep 2026', refDate: '2026-09-30', auto: false },
+    fioul:     { value: 1.83,   unit: '€/L',      source: 'SDES, gemiddelde augustus tot en met oktober 2026 (aanname)', date: 'aug tot en met okt 2026', refDate: '2026-10-31', auto: false },
     pellet:    { value: 0.388,  unit: '€/kg',     source: 'SDES, tweede kwartaal 2026 (aanname)', date: '2e kwartaal 2026', refDate: '2026-06-30', auto: false },
     wood:      { value: 85,     unit: '€/stère',  source: 'ADEME 2025, geïndexeerd tot en met september 2026 (raming, aanname)', date: 'okt 2025 tot en met sep 2026', refDate: '2026-09-30', auto: false },
-    propaan:   { value: 1.17,   unit: '€/L',      source: 'SDES, juni tot en met augustus 2026 (aanname)', date: 'jun tot en met aug 2026', refDate: '2026-08-31', auto: false },
+    propaan:   { value: 1.17,   unit: '€/L',      source: 'SDES, juli tot en met september 2026 (aanname)', date: 'jul tot en met sep 2026', refDate: '2026-09-30', auto: false },
     petroleum: { value: 2.65,   unit: '€/L',      source: 'Brico Dépôt, bus van 20 liter, opgehaald 10-11-2026 (aanname)', date: 'nov 2026', refDate: null, auto: false }
   };
 

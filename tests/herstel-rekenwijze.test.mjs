@@ -51,7 +51,7 @@ const huis = (o = {}) => Object.assign({
 // 3. Standaardprijzen (keuring 26-10-2026, all_p.json)
 {
   const P = W.PRIJS_INFO, K = W.KWH_CONVERSION;
-  ok(P.gas.waarde === 0.146 && P.fioul.waarde === 1.72, "3 gas 0,146 en fioul 1,72");
+  ok(P.gas.waarde === 0.146 && P.fioul.waarde === 1.83, "3 gas 0,146 en fioul 1,83");
   ok(bijna(P.pellet.waarde / K.pellet, 0.0843, 0.0005), `3 pellets per kWh PCI ${(P.pellet.waarde / K.pellet).toFixed(4)}, verwacht 0,0843`);
   ok(bijna(P.wood.waarde / K.wood, 0.047, 0.0005), `3 hout per kWh PCI ${(P.wood.waarde / K.wood).toFixed(4)}, verwacht 0,047`);
   for (const k of ["gas", "fioul", "pellet", "wood", "propaan"]) ok(P[k].periode && P[k].periodeEinde && /\d{4}/.test(P[k].bron), `3 ${k}: periode en bron ontbreken`);

@@ -570,7 +570,7 @@ const TOOL_SPEC = {
       label:    'Fioulprijs',
       unit:     '€/L',
       type:     'number',
-      default:  1.72,
+      default:  1.83,
       min:      0,
       max:      5,
       validate: (v) => (v >= 0 && v <= 5) || 'Fioulprijs moet tussen 0 en 5 €/L liggen.'
